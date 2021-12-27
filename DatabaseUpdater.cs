@@ -24,11 +24,14 @@ namespace ResearchDashboard
         {
             // Setup settings for the XmlReader
             XmlReaderSettings settings = new XmlReaderSettings();
-            settings.CheckCharacters = false;
-            settings.DtdProcessing = DtdProcessing.Ignore;
+            //settings.CheckCharacters = false;
+            settings.DtdProcessing = DtdProcessing.Parse;
             settings.ValidationType = ValidationType.DTD;
+            settings.XmlResolver = new XmlUrlResolver();
+            settings.ValidationEventHandler += new ValidationEventHandler(OnValidationEvent);
 
-            XmlReader reader = XmlReader.Create(path, settings);
+            FileStream fs = File.Open(path, FileMode.Open);
+            XmlReader reader = XmlReader.Create(fs, settings);
             reader.MoveToContent(); // Moves to the <dblp> node
             reader.Read(); // Read one line to get into the children of the <dblp> node
             
@@ -44,10 +47,15 @@ namespace ResearchDashboard
             }
         }
 
+        private void OnValidationEvent(object sender, ValidationEventArgs e)
+        {
+            Console.WriteLine(e.Message);
+        }
+
         private Article ParseArticle(XmlDocument xml)
         {
             // Check that the date is newer than lastUpdated date
-            if (xml.Attributes.Count > 1)
+            if (xml.Attributes != null && xml.Attributes.Count > 1)
                 currentDate = DateTime.Parse(xml.Attributes[1].InnerText);
 
             // If this date has already been added to the database, don't add it again

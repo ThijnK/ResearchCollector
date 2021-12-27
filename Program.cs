@@ -11,7 +11,7 @@ namespace ResearchDashboard
 
             // Argument of ctor should be the date that the database was last updated, possibly to be stored in a file somewhere
             DblpUpdater dblp = new DblpUpdater(DateTime.MinValue);
-            dblp.ParseXML(""); // Use local path
+            dblp.ParseXML("C:\\Users\\Thijn\\Downloads\\dblp.xml"); // Use local path
             
             Console.ReadLine();
 
