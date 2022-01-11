@@ -38,53 +38,54 @@ namespace ResearchDashboard
             // For every <article> node that can be found
             while (reader.ReadToNextSibling("article"))
             {
-                XmlDocument xml = new XmlDocument();
-                xml.LoadXml(reader.ReadOuterXml());
-
-                Article article = ParseArticle(xml);
+                Article? article = ParseArticle(reader);
                 if (article != null)
                     InsertArticle(article);
             }
         }
 
-        private void OnValidationEvent(object sender, ValidationEventArgs e)
+        private void OnValidationEvent(object? sender, ValidationEventArgs e)
         {
             Console.WriteLine(e.Message);
         }
 
-        private Article ParseArticle(XmlDocument xml)
+        private Article? ParseArticle(XmlReader reader)
         {
-            // Check that the date is newer than lastUpdated date
-            if (xml.Attributes != null && xml.Attributes.Count > 1)
-                currentDate = DateTime.Parse(xml.Attributes[1].InnerText);
-
-            // If this date has already been added to the database, don't add it again
-            if (currentDate == null || currentDate < lastUpdated)
+            // Get the publish date of the article
+            string? date = reader.GetAttribute("mdate");
+            // If no date was found or this date was previously added to the database, don't add it
+            if (date == null || (currentDate = DateTime.Parse(date)) < lastUpdated)
                 return null;
 
-            // Get the title of the article and return null if it's invalid
-            string title = "";
+            XmlDocument xml = new XmlDocument();
+            xml.LoadXml(reader.ReadOuterXml());
+
+            // Get the title
+            string title = "Unknown";
             XmlNodeList t = xml.GetElementsByTagName("title");
             if (t.Count > 0)
             {
-                title = t[0].InnerText;
-                if (title == "" || title == "(was never published)" || title == "(error)")
-                    return null;
+                if (IsValidTitle(t[0].InnerText))
+                    title = t[0].InnerText;
             }
-            else return null;
 
-            // Get the authors of the article
+            // Get the authors
             List<Person> authors = new List<Person>();
             foreach (XmlNode node in xml.GetElementsByTagName("author"))
                 authors.Add(new Person(node.InnerText, ""));
 
-            // Get the doi link of the article
-            string link = "";
+            // Get the doi link
+            string doi = "-";
             t = xml.GetElementsByTagName("ee");
             if (t.Count > 0)
-                link = t[0].InnerText;
+                doi = t[0].InnerText;
 
-            return new Article(title, authors.ToArray(), link);
+            return new Article(title, authors.ToArray(), doi);
+        }
+
+        private bool IsValidTitle(string title)
+        {
+            return title != "" && title != "(was never published)" && title != "(error)";
         }
 
         private void InsertArticle(Article article)
