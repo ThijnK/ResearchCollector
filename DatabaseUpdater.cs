@@ -14,15 +14,21 @@ namespace ResearchDashboard
     {
         private DateTime lastUpdated;
         private DateTime currentDate;
+        private string dbUsername;
+        private string dbPassword;
 
-        public DblpUpdater(DateTime lastUpdated)
+        public DblpUpdater(DateTime lastUpdated, string dbUsername, string dbPassword)
         {
             this.lastUpdated = lastUpdated;
+            this.dbUsername = dbUsername;
+            this.dbPassword = dbPassword;
         }
 
         // Parse a dblp XML file
         public void ParseXML(string path)
         {
+            Console.WriteLine("Parsing xml data set...");
+
             // Setup settings for the XmlReader
             XmlReaderSettings settings = new XmlReaderSettings();
             //settings.CheckCharacters = false;

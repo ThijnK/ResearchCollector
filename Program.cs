@@ -7,11 +7,24 @@ namespace ResearchDashboard
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Console.WriteLine("Enter path to data set:");
+
+            // Get input from user
+            string path = Console.ReadLine();
+            while (!File.Exists(path))
+            {
+                Console.WriteLine("File not found, please try again:");
+                path = Console.ReadLine();
+            }
+
+            Console.WriteLine("Enter username for database:");
+            string username = Console.ReadLine();
+            Console.WriteLine("Enter password for database:");
+            string password = Console.ReadLine();
 
             // Argument of ctor should be the date that the database was last updated, possibly to be stored in a file somewhere
-            DblpUpdater dblp = new DblpUpdater(DateTime.MinValue);
-            dblp.ParseXML("C:\\Users\\Thijn\\Downloads\\dblp.xml"); // Use local path
+            DblpUpdater dblp = new DblpUpdater(DateTime.MinValue, username, password);
+            dblp.ParseXML(path);
             
             Console.ReadLine();
 
