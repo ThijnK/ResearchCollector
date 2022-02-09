@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Xml;
 using System.Xml.Schema;
+using Neo4j.Driver;
 
 namespace ResearchDashboard
 {
     abstract class DatabaseUpdater
     {
-        // Possible superclass to be used in the future
+        // Possible superclass to be used in the 
     }
 
     class DblpUpdater : DatabaseUpdater
@@ -49,6 +50,7 @@ namespace ResearchDashboard
             Console.WriteLine(e.Message);
         }
 
+        // Returns null if the article has an invalid title or link
         private Article? ParseArticle(XmlReader reader)
         {
             // Get the publish date of the article
@@ -61,13 +63,16 @@ namespace ResearchDashboard
             xml.LoadXml(reader.ReadOuterXml());
 
             // Get the title
-            string title = "Unknown";
+            string title = "";
             XmlNodeList t = xml.GetElementsByTagName("title");
             if (t.Count > 0)
             {
                 if (IsValidTitle(t[0].InnerText))
                     title = t[0].InnerText;
+                else
+                    return null;
             }
+            else return null;
 
             // Get the authors
             List<Person> authors = new List<Person>();
@@ -75,10 +80,12 @@ namespace ResearchDashboard
                 authors.Add(new Person(node.InnerText, ""));
 
             // Get the doi link
-            string doi = "-";
+            string doi = "";
             t = xml.GetElementsByTagName("ee");
             if (t.Count > 0)
                 doi = t[0].InnerText;
+            else
+                return null;
 
             return new Article(title, authors.ToArray(), doi);
         }
@@ -88,10 +95,17 @@ namespace ResearchDashboard
             return title != "" && title != "(was never published)" && title != "(error)";
         }
 
-        private void InsertArticle(Article article)
+        private async void InsertArticle(Article article)
         {
             // Insert article into database..
             Console.WriteLine("Inserting article:" + article.title);
+
+            // ==> Replace the below username/password
+            using var driver = GraphDatabase.Driver("bolt://localhost", AuthTokens.Basic("neo4j", "1234"));
+            using var session = driver.AsyncSession();
+            await session.RunAsync($"CREATE (a:Article {{title:'{article.title}', link:'{article.link}'}})");
+            
+            // var result = await session.RunAsync($"MATCH (a:Article) WHERE a.title = '{article.title}' RETURN a.title AS title, a.link AS link");
         }
     }
 
