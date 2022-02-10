@@ -105,13 +105,25 @@ namespace ResearchDashboard
         {
             // Insert article into database..
             Console.WriteLine("Inserting article:" + article.title);
-
-            // ==> Replace the below username/password
-            using var driver = GraphDatabase.Driver("bolt://localhost", AuthTokens.Basic("neo4j", "1234"));
-            using var session = driver.AsyncSession();
-            await session.RunAsync($"CREATE (a:Article {{title:'{article.title}', link:'{article.link}'}})");
+            string art = $"(a:Article {{title:'{Validate(article.title)}', link:'{article.link}'}})";
             
-            // var result = await session.RunAsync($"MATCH (a:Article) WHERE a.title = '{article.title}' RETURN a.title AS title, a.link AS link");
+            // ==> Replace the below username/password
+            using var driver = GraphDatabase.Driver("bolt://localhost", AuthTokens.Basic(dbUsername, dbPassword));
+            using var session = driver.AsyncSession();
+            
+            // Add relationship between this article and each of its authors
+            foreach (Person person in article.authors)
+            {
+                // If either the article or person does not yet exist in the database, it will be created
+                string query = $"MERGE (p:Person {{name:'{Validate(person.name)}',orcid:'{Validate(person.orcid)}'}}) MERGE {art} MERGE (a)-[:WRITTEN_BY]->(p) RETURN NULL";
+                await session.RunAsync(query);
+            }
+        }
+
+        // Validate a string for use in a Cypher query
+        private string Validate(String str)
+        {
+            return str.Replace("'", "\\'");
         }
     }
 

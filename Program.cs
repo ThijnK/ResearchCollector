@@ -9,6 +9,7 @@ namespace ResearchDashboard
         {
             Console.WriteLine("Enter path to data set:");
 
+            
             // Get input from user
             string path = Console.ReadLine();
             while (!File.Exists(path))
