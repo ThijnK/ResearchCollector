@@ -9,7 +9,6 @@ namespace ResearchDashboard
         {
             Console.WriteLine("Enter path to data set:");
 
-            
             // Get input from user
             string path = Console.ReadLine();
             while (!File.Exists(path))
@@ -19,19 +18,49 @@ namespace ResearchDashboard
             }
 
             Console.WriteLine("Enter username for database:");
-            string username = Console.ReadLine();
+            string? username = Console.ReadLine();
             Console.WriteLine("Enter password for database:");
-            string password = Console.ReadLine();
+            string? password = Console.ReadLine();
 
-            // Argument of ctor should be the date that the database was last updated, possibly to be stored in a file somewhere
-            DblpUpdater dblp = new DblpUpdater(DateTime.MinValue, username, password);
-            dblp.ParseXML(path);
+            DblpUpdater dblp = new DblpUpdater(GetMostRecent(), username, password);
+            DateTime newDate = dblp.ParseXML(path);
+            UpdateMostRecent(newDate);
             
             Console.ReadLine();
+        }
 
-            //BibliograhpyAPI api = new DblpAPI();
-            //// As an example, this will fetch the XML of a specific author
-            //api.FetchXML("https://dblp.org/pid/65/9612.xml");
+        // Get the date of the most recent article added to the database from stored file
+        static DateTime GetMostRecent()
+        {
+            try
+            {
+                StreamReader sr = new StreamReader("../../../date.txt");
+                string dateString = sr.ReadToEnd();
+                sr.Close();
+                return DateTime.Parse(dateString);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return DateTime.MinValue;
+            }
+        }
+
+        // Update the date of most recent article added to database
+        static void UpdateMostRecent(DateTime newDate)
+        {
+            try
+            {
+                FileStream fs = File.Create("../../../date.txt");
+                StreamWriter sw = new StreamWriter(fs);
+                sw.Write(newDate.ToString());
+                sw.Close();
+                fs.Close();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
         }
     }
 }

@@ -12,20 +12,20 @@ namespace ResearchDashboard
 
     class DblpUpdater : DatabaseUpdater
     {
-        private DateTime lastUpdated;
-        private DateTime currentDate;
+        private DateTime prevMostRecent;
+        private DateTime currentMostRecent;
         private string dbUsername;
         private string dbPassword;
 
-        public DblpUpdater(DateTime lastUpdated, string dbUsername, string dbPassword)
+        public DblpUpdater(DateTime prevMostRecent, string dbUsername, string dbPassword)
         {
-            this.lastUpdated = lastUpdated;
+            this.prevMostRecent = prevMostRecent;
             this.dbUsername = dbUsername;
             this.dbPassword = dbPassword;
         }
 
-        // Parse a dblp XML file
-        public void ParseXML(string path)
+        // Parse a dblp XML file, returns the most recent date of all added articles
+        public DateTime ParseXML(string path)
         {
             Console.WriteLine("Parsing xml data set...");
 
@@ -49,6 +49,8 @@ namespace ResearchDashboard
                 if (article != null)
                     InsertArticle(article);
             }
+
+            return currentMostRecent;
         }
 
         private void OnValidationEvent(object? sender, ValidationEventArgs e)
@@ -60,9 +62,11 @@ namespace ResearchDashboard
         private Article? ParseArticle(XmlReader reader)
         {
             // Get the publish date of the article
-            string? date = reader.GetAttribute("mdate");
+            string? dateString = reader.GetAttribute("mdate");
+            DateTime date = dateString != null ? DateTime.Parse(dateString) : DateTime.MinValue;
+
             // If no date was found or this date was previously added to the database, don't add it
-            if (date == null || (currentDate = DateTime.Parse(date)) < lastUpdated)
+            if (date <= prevMostRecent)
                 return null;
 
             XmlDocument xml = new XmlDocument();
@@ -92,6 +96,10 @@ namespace ResearchDashboard
                 doi = t[0].InnerText;
             else
                 return null;
+
+            // If this article is going to be added, update the current latest date if necessary
+            if (date > currentMostRecent)
+                currentMostRecent = date;
 
             return new Article(title, authors.ToArray(), doi);
         }
