@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Xml;
 
 namespace ResearchDashboard
@@ -10,17 +11,18 @@ namespace ResearchDashboard
             Console.WriteLine("Enter path to data set:");
 
             // Get input from user
-            string path = Console.ReadLine();
-            while (!File.Exists(path))
-            {
+            string? path;
+            while ((path = Console.ReadLine()) == null || !File.Exists(path))
                 Console.WriteLine("File not found, please try again:");
-                path = Console.ReadLine();
-            }
 
             Console.WriteLine("Enter username for database:");
-            string? username = Console.ReadLine();
+            string? username;
+            while ((username = Console.ReadLine()) == null)
+                Console.WriteLine("Invalid username, please try again:");
             Console.WriteLine("Enter password for database:");
-            string? password = Console.ReadLine();
+            string? password;
+            while ((password = Console.ReadLine()) == null)
+                Console.WriteLine("Invalid password, please try again:");
 
             DblpUpdater dblp = new DblpUpdater(GetMostRecent(), username, password);
             DateTime newDate = dblp.ParseXML(path);
