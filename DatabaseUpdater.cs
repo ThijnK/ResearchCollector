@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.Http;
+using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Schema;
+using HtmlAgilityPack;
 using Neo4j.Driver;
 
 namespace ResearchDashboard
@@ -60,6 +63,26 @@ namespace ResearchDashboard
             Console.WriteLine(e.Message);
         }
 
+        private async Task<List<string>> GetKeyWordsFromLink(string link)
+        {
+            return null;
+        }
+
+        private async Task<string> GetRealLink(string link)
+        {
+            List<string> keyWords = new();
+            HttpClient client = new HttpClient();
+            using (var result = await client.GetAsync(link))
+            {
+                string content = await result.Content.ReadAsStringAsync();
+                HtmlDocument doc = new HtmlDocument();
+                doc.LoadHtml(content);
+                string realLink = doc.DocumentNode.ChildNodes[0].ChildNodes[2].ChildNodes[0].ChildNodes[0].InnerText;
+                return realLink;
+            }
+            return null;
+        }
+
         // Returns null if the article has an invalid title or link
         private Article? ParseArticle(XmlReader reader)
         {
@@ -98,6 +121,12 @@ namespace ResearchDashboard
                 doi = t[0].InnerText;
             else
                 return null;
+
+
+            List<string> keywords;
+            string realLink = GetRealLink(doi).Result;
+            if(realLink != null)
+                keywords = GetKeyWordsFromLink(realLink).Result;
 
             // If this article is going to be added, update the current latest date if necessary
             if (date > currentMostRecent)
