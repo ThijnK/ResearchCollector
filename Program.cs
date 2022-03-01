@@ -27,7 +27,7 @@ namespace ResearchDashboard
             DblpUpdater dblp = new DblpUpdater(GetMostRecent(), username, password);
             DateTime newDate = dblp.ParseXML(path);
             UpdateMostRecent(newDate);
-            
+
             Console.ReadLine();
         }
 

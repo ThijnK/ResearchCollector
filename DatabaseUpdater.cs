@@ -149,12 +149,15 @@ namespace ResearchDashboard
             // ==> Replace the below username/password
             using var driver = GraphDatabase.Driver("bolt://localhost", AuthTokens.Basic(dbUsername, dbPassword));
             using var session = driver.AsyncSession();
-            
+
+            // First, add the article to the database
+            await session.RunAsync($"CREATE {art}");
+
             // Add relationship between this article and each of its authors
             foreach (Person person in article.authors)
             {
-                // If either the article or person does not yet exist in the database, it will be created
-                string query = $"MERGE (p:Person {{name:'{Validate(person.name)}',orcid:'{Validate(person.orcid)}'}}) MERGE {art} MERGE (a)-[:WRITTEN_BY]->(p) RETURN NULL";
+                // Then, add a relation from each person to the created article (and create person if not yet in database)
+                string query = $"MATCH {art} MERGE (p:Person {{name:'{Validate(person.name)}',orcid:'{Validate(person.orcid)}'}}) MERGE (a)-[:WRITTEN_BY]->(p) RETURN NULL";
                 await session.RunAsync(query);
             }
         }
