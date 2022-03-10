@@ -62,15 +62,27 @@ namespace ResearchDashboard
         {
             Console.WriteLine(e.Message);
         }
-
+        List<string> links = new List<string>();
         private async Task<List<string>> GetKeyWordsFromLink(string link)
         {
+            links.Add(link);
+            HttpClient client = new HttpClient();
+            using (var result = await client.GetAsync(link))
+            {
+                string content = await result.Content.ReadAsStringAsync();
+                HtmlDocument doc = new HtmlDocument();
+                doc.LoadHtml(content);
+                var articleAbstract = doc.GetElementbyId("Abs1-content");
+                string theAbstract;
+                if (articleAbstract != null)
+                    theAbstract = articleAbstract.ChildNodes[0].ChildNodes[0].InnerText;
+            }
+            
             return null;
         }
 
         private async Task<string> GetRealLink(string link)
         {
-            List<string> keyWords = new();
             HttpClient client = new HttpClient();
             using (var result = await client.GetAsync(link))
             {
@@ -124,6 +136,7 @@ namespace ResearchDashboard
 
 
             List<string> keywords;
+            //SOMETIMES DIRECTLY REAL LINK GIVEN!!!, LIKE WITH ARTICLE Bringing Semantics to Web Services with OWL-S
             string realLink = GetRealLink(doi).Result;
             if(realLink != null)
                 keywords = GetKeyWordsFromLink(realLink).Result;
