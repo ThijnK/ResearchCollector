@@ -76,6 +76,9 @@ namespace ResearchDashboard
                 string theAbstract;
                 if (articleAbstract != null)
                     theAbstract = articleAbstract.ChildNodes[0].ChildNodes[0].InnerText;
+                //sommige(/misschien erg veel) die hier komen zijn niet van het type die extractbaar zijn met de methode hierboven
+                //omdat het andere type links zijn, zoals gelijk al de pdf.
+                //dus hier moet nog flink wat check gebeuren op wat voor content het is
             }
             
             return null;
@@ -87,6 +90,8 @@ namespace ResearchDashboard
             using (var result = await client.GetAsync(link))
             {
                 string content = await result.Content.ReadAsStringAsync();
+                if (content.Length > 500) //als hij om de een of andere reden al de juiste link returnt
+                    return link;
                 HtmlDocument doc = new HtmlDocument();
                 doc.LoadHtml(content);
                 string realLink = doc.DocumentNode.ChildNodes[0].ChildNodes[2].ChildNodes[0].ChildNodes[0].InnerText;
@@ -140,7 +145,6 @@ namespace ResearchDashboard
             string realLink = GetRealLink(doi).Result;
             if(realLink != null)
                 keywords = GetKeyWordsFromLink(realLink).Result;
-
             // If this article is going to be added, update the current latest date if necessary
             if (date > currentMostRecent)
                 currentMostRecent = date;
