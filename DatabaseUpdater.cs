@@ -50,9 +50,9 @@ namespace ResearchDashboard
             // For every <article> node that can be found
             while (reader.ReadToNextSibling("article"))
             {
-                Article? article = ParseArticle(reader);
-                if (article != null)
-                    InsertArticle(article);
+                Publication? pub = ParsePublication(reader);
+                if (pub != null)
+                    InsertPublication(pub);
             }
 
             return currentMostRecent;
@@ -101,7 +101,7 @@ namespace ResearchDashboard
         }
 
         // Returns null if the article has an invalid title or link
-        private Article? ParseArticle(XmlReader reader)
+        private Publication? ParsePublication(XmlReader reader)
         {
             // Get the publish date of the article
             string? dateString = reader.GetAttribute("mdate");
@@ -129,7 +129,15 @@ namespace ResearchDashboard
             // Get the authors
             List<Person> authors = new List<Person>();
             foreach (XmlNode node in xml.GetElementsByTagName("author"))
-                authors.Add(new Person(node.InnerText, ""));
+            {
+                // Try to get the orcid from the attributes if it exists
+                string orcid = "";
+                if (node.Attributes != null)
+                    if (node.Attributes.Count > 0)
+                        if (node.Attributes[0].Name == "orcid")
+                            orcid = node.Attributes[0].Value;
+                authors.Add(new Person(node.InnerText, orcid));
+            }
 
             // Get the doi link
             string doi = "";
@@ -138,7 +146,6 @@ namespace ResearchDashboard
                 doi = t[0].InnerText;
             else
                 return null;
-
 
             List<string> keywords;
             //SOMETIMES DIRECTLY REAL LINK GIVEN!!!, LIKE WITH ARTICLE Bringing Semantics to Web Services with OWL-S
@@ -149,7 +156,24 @@ namespace ResearchDashboard
             if (date > currentMostRecent)
                 currentMostRecent = date;
 
-            return new Article(title, authors.ToArray(), doi);
+            // Get name of journal or conference
+            string partof = "";
+            if (xml.Name == "article")
+            {
+                t = xml.GetElementsByTagName("journal");
+                if (t.Count > 0)
+                    partof = t[0].InnerText;
+
+                return new Article(title, authors.ToArray(), doi, partof);
+            }
+            else //if (xml.Name == "inproceeding")
+            {
+                t = xml.GetElementsByTagName("booktitle");
+                if (t.Count > 0)
+                    partof = t[0].InnerText;
+
+                return new Inproceeding(title, authors.ToArray(), doi, partof);
+            }
         }
 
         private bool IsValidTitle(string title)
@@ -157,13 +181,22 @@ namespace ResearchDashboard
             return title != "" && title != "(was never published)" && title != "(error)";
         }
 
-        private async void InsertArticle(Article article)
+        private async void InsertPublication(Publication pub)
         {
             // Insert article into database..
-            Console.WriteLine("Inserting article:" + article.title);
-            string art = $"(a:Article {{title:'{Validate(article.title)}', link:'{article.link}'}})";
+            Console.WriteLine("Inserting article:" + pub.title);
+            string art = "";
+            if (pub.GetType() == typeof(Article))
+            {
+                Article article = (Article)pub;
+                art = $"(a:Article {{title:'{Validate(pub.title)}', link:'{pub.link}', journal:'{article.journal}'}})";
+            }
+            else
+            {
+                Inproceeding inp = (Inproceeding)pub;
+                art = $"(a:Inproceeding {{title:'{Validate(pub.title)}', link:'{pub.link}', conference:'{inp.conf}'}})";
+            }
             
-            // ==> Replace the below username/password
             using var driver = GraphDatabase.Driver("bolt://localhost", AuthTokens.Basic(dbUsername, dbPassword));
             using var session = driver.AsyncSession();
 
@@ -171,7 +204,7 @@ namespace ResearchDashboard
             await session.RunAsync($"CREATE {art}");
 
             // Add relationship between this article and each of its authors
-            foreach (Person person in article.authors)
+            foreach (Person person in pub.authors)
             {
                 // Then, add a relation from each person to the created article (and create person if not yet in database)
                 string query = $"MATCH {art} MERGE (p:Person {{name:'{Validate(person.name)}',orcid:'{Validate(person.orcid)}'}}) MERGE (a)-[:WRITTEN_BY]->(p) RETURN NULL";
@@ -198,17 +231,37 @@ namespace ResearchDashboard
         }
     }
 
-    class Article
+    abstract class Publication
     {
         public string title;
         public Person[] authors;
         public string link;
 
-        public Article(string title, Person[] authors, string link)
+        public Publication(string title, Person[] authors, string link)
         {
             this.title = title;
             this.authors = authors;
             this.link = link;
+        }
+    }
+
+    class Article : Publication
+    {
+        public string journal;
+
+        public Article(string title, Person[] authors, string link, string journal) : base(title, authors, link)
+        {
+            this.journal = journal;
+        }
+    }
+
+    class Inproceeding : Publication
+    {
+        public string conf;
+
+        public Inproceeding(string title, Person[] authors, string link, string conf) : base(title, authors, link)
+        {
+            this.conf = conf;
         }
     }
 }
