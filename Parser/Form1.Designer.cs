@@ -39,13 +39,14 @@
             this.inputLabel = new System.Windows.Forms.Label();
             this.outputPanel = new System.Windows.Forms.Panel();
             this.outputLabel = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
             this.inputPanel.SuspendLayout();
             this.outputPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // parseBtn
             // 
-            this.parseBtn.Location = new System.Drawing.Point(12, 184);
+            this.parseBtn.Location = new System.Drawing.Point(12, 175);
             this.parseBtn.Name = "parseBtn";
             this.parseBtn.Size = new System.Drawing.Size(174, 37);
             this.parseBtn.TabIndex = 0;
@@ -60,15 +61,16 @@
             this.typeComboBox.Items.AddRange(new object[] {
             "DBLP",
             "PubMed"});
-            this.typeComboBox.Location = new System.Drawing.Point(12, 94);
+            this.typeComboBox.Location = new System.Drawing.Point(12, 148);
             this.typeComboBox.Name = "typeComboBox";
             this.typeComboBox.Size = new System.Drawing.Size(174, 21);
             this.typeComboBox.TabIndex = 1;
+            this.typeComboBox.SelectedIndex = 0;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(12, 78);
+            this.label1.Location = new System.Drawing.Point(12, 132);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(87, 13);
             this.label1.TabIndex = 2;
@@ -97,14 +99,14 @@
             this.label3.AutoSize = true;
             this.label3.Location = new System.Drawing.Point(12, 25);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(50, 13);
+            this.label3.Size = new System.Drawing.Size(54, 13);
             this.label3.TabIndex = 7;
-            this.label3.Text = "Input file:";
+            this.label3.Text = "Input file*:";
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(12, 127);
+            this.label4.Location = new System.Drawing.Point(12, 69);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(82, 13);
             this.label4.TabIndex = 9;
@@ -135,7 +137,7 @@
             this.outputPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.outputPanel.Controls.Add(this.outputLabel);
             this.outputPanel.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.outputPanel.Location = new System.Drawing.Point(12, 143);
+            this.outputPanel.Location = new System.Drawing.Point(12, 85);
             this.outputPanel.Name = "outputPanel";
             this.outputPanel.Size = new System.Drawing.Size(174, 20);
             this.outputPanel.TabIndex = 12;
@@ -150,11 +152,23 @@
             this.outputLabel.TabIndex = 0;
             this.outputLabel.Text = "No folder selected";
             // 
+            // label5
+            // 
+            this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.75F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label5.Location = new System.Drawing.Point(9, 227);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(177, 84);
+            this.label5.TabIndex = 13;
+            this.label5.Text = "* If the data set requires a DTD file for validation (DBLP), this DTD file is ass" +
+    "umed to be located in the same directory as the input file, as well as to have t" +
+    "he same name as the input file.";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.label5);
             this.Controls.Add(this.outputPanel);
             this.Controls.Add(this.inputPanel);
             this.Controls.Add(this.label4);
@@ -188,6 +202,7 @@
         private System.Windows.Forms.Label inputLabel;
         private System.Windows.Forms.Panel outputPanel;
         private System.Windows.Forms.Label outputLabel;
+        private System.Windows.Forms.Label label5;
     }
 }
 

@@ -25,7 +25,13 @@ namespace Parser
 
         public override bool ParseFile(string inputPath, string outputPath)
         {
-            // TO DO: get DTD file from given location
+            // Create copy of DTD file in working directory
+            // DTD file is assumed to be located in the same directory and have the same name as XML file
+            string fileName = Path.GetFileNameWithoutExtension(inputPath);
+            string dtdPath = $"{Path.GetDirectoryName(inputPath)}\\{fileName}.dtd";
+            if (!File.Exists(dtdPath))
+                throw new Exception("Unable to find .dtd file");
+            File.Copy(dtdPath, $"./{fileName}.dtd", true);
 
             // Setup settings for the XmlReader
             XmlReaderSettings settings = new XmlReaderSettings();

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -12,6 +13,18 @@ namespace Parser
         public Form1()
         {
             InitializeComponent();
+
+            // Use presets if provided
+            if (File.Exists("../../config.txt"))
+            {
+                using (StreamReader sr = new StreamReader("../../config.txt"))
+                {
+                    inputPath = sr.ReadLine();
+                    outputPath = sr.ReadLine();
+                    inputLabel.Text = inputPath;
+                    outputLabel.Text = outputPath;
+                }
+            }
         }
 
         private void InputPanel_Click(object sender, EventArgs e)
@@ -67,6 +80,7 @@ namespace Parser
                     parser = new DblpParser();
                     break;
             }
+            parser.ItemParsed += ItemParsed;
 
             // Check if input file is the expected data set
             if (!parser.CheckFile(inputPath))
@@ -90,7 +104,7 @@ namespace Parser
 
         private void ItemParsed(object sender, ItemParsedEventArgs e)
         {
-            Log($"Parsing item: {e.title}");
+            Log($"Item parsed: {e.title}");
         }
 
         // Log a msg to the log
