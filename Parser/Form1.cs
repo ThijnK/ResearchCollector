@@ -77,6 +77,7 @@ namespace Parser
 
             try
             {
+                Log($"Parsing {typeComboBox.SelectedItem} data set...");
                 bool success = parser.ParseFile(inputPath, outputPath);
                 if (success)
                     Log("Parsing finished!");
