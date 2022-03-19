@@ -51,12 +51,12 @@ namespace Parser
 
         private void ParseBtn_Click(object sender, EventArgs e)
         {
-            if (inputPath == "" || inputPath == null)
+            if (string.IsNullOrEmpty(inputPath))
             {
                 Error("No input file selected");
                 return;
             }
-            else if (outputPath == "" || outputPath == null)
+            else if (string.IsNullOrEmpty(outputPath))
             {
                 Error("No output folder selected");
                 return;
@@ -89,12 +89,12 @@ namespace Parser
                 return;
             }
 
-            try
-            {
                 Log($"Parsing {typeComboBox.SelectedItem} data set...");
-                bool success = parser.ParseFile(inputPath, outputPath);
+                bool success = parser.Run(inputPath, outputPath);
                 if (success)
                     Log("Parsing finished!");
+            try
+            {
             }
             catch (Exception ex)
             {
@@ -110,7 +110,7 @@ namespace Parser
         // Log a msg to the log
         private void Log(string msg)
         {
-            logBox.AppendText($"{msg}{Environment.NewLine}");
+            logBox.AppendText($"[{DateTime.Now.ToString("h:mm:ss")}] {msg}{Environment.NewLine}");
         }
 
         // Display an error in a message box

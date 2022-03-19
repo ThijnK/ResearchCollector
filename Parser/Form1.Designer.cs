@@ -65,7 +65,6 @@
             this.typeComboBox.Name = "typeComboBox";
             this.typeComboBox.Size = new System.Drawing.Size(174, 21);
             this.typeComboBox.TabIndex = 1;
-            this.typeComboBox.SelectedIndex = 0;
             // 
             // label1
             // 
@@ -179,7 +178,7 @@
             this.Controls.Add(this.typeComboBox);
             this.Controls.Add(this.parseBtn);
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "Data set parser";
             this.inputPanel.ResumeLayout(false);
             this.inputPanel.PerformLayout();
             this.outputPanel.ResumeLayout(false);

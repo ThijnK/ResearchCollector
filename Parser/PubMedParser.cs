@@ -8,12 +8,17 @@ namespace Parser
 {
     class PubMedParser : Parser
     {
+        public override string GetTypeName()
+        {
+            return "pubmed";
+        }
+
         public override bool CheckFile(string path)
         {
             throw new NotImplementedException();
         }
 
-        public override bool ParseFile(string inputPath, string outputPath)
+        public override bool ParseFile(string inputPath)
         {
             throw new NotImplementedException();
         }

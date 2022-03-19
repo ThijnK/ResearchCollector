@@ -10,6 +10,11 @@ namespace Parser
 {
     class DblpParser : Parser
     {
+        public override string GetTypeName()
+        {
+            return "dblp";
+        }
+
         public override bool CheckFile(string path)
         {
             using (StreamReader sr = new StreamReader(path))
@@ -23,12 +28,12 @@ namespace Parser
             return false;
         }
 
-        public override bool ParseFile(string inputPath, string outputPath)
+        public override bool ParseFile(string inputPath)
         {
             // Create copy of DTD file in working directory
             // DTD file is assumed to be located in the same directory and have the same name as XML file
             string fileName = Path.GetFileNameWithoutExtension(inputPath);
-            string dtdPath = $"{Path.GetDirectoryName(inputPath)}\\{fileName}.dtd";
+            string dtdPath = Path.Combine(Path.GetDirectoryName(inputPath), fileName + ".dtd");
             if (!File.Exists(dtdPath))
                 throw new Exception("Unable to find .dtd file");
             File.Copy(dtdPath, $"./{fileName}.dtd", true);
@@ -39,16 +44,17 @@ namespace Parser
             settings.ValidationType = ValidationType.DTD;
             settings.XmlResolver = new XmlUrlResolver();
 
-            FileStream fs = File.Open(inputPath, FileMode.Open);
-            FindNodes("article", XmlReader.Create(fs, settings), outputPath);
-            FindNodes("inproceedings", XmlReader.Create(fs, settings), outputPath);
+            FileStream fs = File.OpenRead(inputPath);
+            FindNodes("article", XmlReader.Create(fs, settings));
+            fs.Close(); fs = File.OpenRead(inputPath);
+            FindNodes("inproceedings", XmlReader.Create(fs, settings));
             fs.Close();
 
             return true;
         }
 
         // TO DO: make this asynchronous? ↓
-        private void FindNodes(string nodeName, XmlReader reader, string outputPath)
+        private void FindNodes(string nodeName, XmlReader reader)
         {
             reader.MoveToContent(); // Moves to the <dblp> node
             reader.Read(); // Read one line to get into the children of the <dblp> node
@@ -58,7 +64,7 @@ namespace Parser
             {
                 Publication pub = ParsePublication(reader);
                 if (pub != null)
-                    WriteToFile(pub, outputPath);
+                    WriteToOutput(pub);
             }
         }
 
@@ -110,7 +116,7 @@ namespace Parser
 
             // Journal/Conference
             string partof = "";
-            if (xml.Name == "article")
+            if (xml.FirstChild.Name == "article")
             {
                 t = xml.GetElementsByTagName("journal");
                 if (t.Count > 0)
@@ -118,7 +124,7 @@ namespace Parser
 
                 return new Article(title, year, doi, authors.ToArray(), partof);
             }
-            else //if (xml.Name == "inproceedings")
+            else
             {
                 t = xml.GetElementsByTagName("booktitle");
                 if (t.Count > 0)
