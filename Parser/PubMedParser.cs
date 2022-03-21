@@ -1,21 +1,25 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
 
 namespace Parser
 {
     class PubMedParser : Parser
     {
-        public override string GetTypeName()
+        public override string ToString()
         {
             return "pubmed";
         }
 
         public override bool CheckFile(string path)
         {
-            throw new NotImplementedException();
+            using (StreamReader sr = new StreamReader(path))
+            {
+                sr.ReadLine();
+                if (sr.ReadLine().StartsWith("<!DOCTYPE PubmedArticleSet"))
+                    return true;
+            }
+
+            return false;
         }
 
         public override bool ParseFile(string inputPath)

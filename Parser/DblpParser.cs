@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 
 namespace Parser
 {
     class DblpParser : Parser
     {
-        public override string GetTypeName()
+        public override string ToString()
         {
             return "dblp";
         }
@@ -20,8 +17,7 @@ namespace Parser
             using (StreamReader sr = new StreamReader(path))
             {
                 sr.ReadLine();
-                sr.ReadLine();
-                if (sr.ReadLine() == "<dblp>")
+                if (sr.ReadLine().StartsWith("<!DOCTYPE dblp"))
                     return true;
             }
 

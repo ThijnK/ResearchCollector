@@ -89,12 +89,12 @@ namespace Parser
                 return;
             }
 
+            try
+            {
                 Log($"Parsing {typeComboBox.SelectedItem} data set...");
                 bool success = parser.Run(inputPath, outputPath);
                 if (success)
                     Log("Parsing finished!");
-            try
-            {
             }
             catch (Exception ex)
             {
@@ -104,18 +104,19 @@ namespace Parser
 
         private void ItemParsed(object sender, ItemParsedEventArgs e)
         {
-            Log($"Item parsed: {e.title}");
+            Log($"Item parsed: '{e.title}'");
         }
 
         // Log a msg to the log
         private void Log(string msg)
         {
-            logBox.AppendText($"[{DateTime.Now.ToString("h:mm:ss")}] {msg}{Environment.NewLine}");
+            logBox.AppendText($"[{DateTime.Now.ToString("H:mm:ss")}] {msg}{Environment.NewLine}");
         }
 
         // Display an error in a message box
         private void Error(string msg)
         {
+            Log($"Encountered error: '{msg}'");
             MessageBox.Show(msg, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }

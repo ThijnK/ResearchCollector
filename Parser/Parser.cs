@@ -10,7 +10,7 @@ namespace Parser
         private bool arrayStarted;
 
         // Get the type of the parser (i.e. DBLP, PubMed etc.)
-        public abstract string GetTypeName();
+        public abstract string ToString();
         // Checks if given file corresponds to the correct type of data set
         public abstract bool CheckFile(string path);
         // Parses a file and writes the result to the given output location
@@ -22,7 +22,7 @@ namespace Parser
             // Set up JSON output file using the same name as the input file
             string name = Path.GetFileNameWithoutExtension(inputPath);
             path = Path.Combine(outputPath, name + ".json");
-            File.WriteAllText(path, $"{{\n\t\"{GetTypeName()}\": [");
+            File.WriteAllText(path, $"{{\n\t\"{ToString()}\": [");
 
             // Parse input and write results to output file
             bool success = ParseFile(inputPath);
