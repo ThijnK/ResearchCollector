@@ -63,14 +63,14 @@ namespace Parser
         public string type { get; set; }
         public string title { get; set; }
         public int year { get; set; }
-        public string link { get; set; }
+        public string doi { get; set; }
         public Person[] authors { get; set; }
 
-        public Publication(string title, int year, string link, Person[] authors)
+        public Publication(string title, int year, string doi, Person[] authors)
         {
             this.title = title;
             this.year = year;
-            this.link = link;
+            this.doi = doi;
             this.authors = authors;
         }
     }

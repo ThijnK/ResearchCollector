@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
@@ -30,6 +31,9 @@ namespace Parser
                     outputLabel.Text = outputPath;
                 }
             }
+
+            byte[] bytes = Encoding.ASCII.GetBytes("<?xml version=\"1.0\" encoding=\"utf - 8\"?>< !DOCTYPE PubmedArticleSet SYSTEM \"http://dtd.nlm.nih.gov/ncbi/pubmed/out/pubmed_190101.dtd\" > ");
+            long t = bytes.Length;
         }
 
         private void InputPanel_Click(object sender, EventArgs e)
@@ -127,55 +131,70 @@ namespace Parser
 
         private void pubmedDownloadBtn_Click(object sender, EventArgs e)
         {
-            downloadPath = @"C:\Users\Thijn Kroon\Downloads\pubmed.xml.gz";
+            downloadPath = $"{Path.GetDirectoryName(inputPath)}\\pubmed.xml.gz";
+            FileStream fs;
             if (!File.Exists(downloadPath))
             {
-                FileStream fs = File.Create(downloadPath);
+                fs = File.Create(downloadPath);
                 fs.Close();
-
             }
 
+            // Clear the file where we'll write all of our data to
+            fs = File.Create(inputPath);
+            fs.Close();
+            // Path for temporary storage of intermediate results
+            string tempPath = $"{Path.GetDirectoryName(inputPath)}\\temp.xml";
+
             // Go through each of the files making up the data set
-            for (int i = 1; i <= 2; i++) //1114
+            for (int i = 1; i <= 1114; i++) //1114
             {
                 string nr = i.ToString("0000");
-                Uri url = new Uri($"https://ftp.ncbi.nlm.nih.gov/pubmed/baseline/pubmed22n{nr}.xml.gz");
+                string fileName = $"pubmed22n{nr}";
+                Uri url = new Uri($"https://ftp.ncbi.nlm.nih.gov/pubmed/baseline/{fileName}.xml.gz");
 
                 using (WebClient client = new WebClient())
                 {
                     client.DownloadFile(url, downloadPath);
-                    AppendXml();
-                    //XmlDocument xml = new XmlDocument();
-                    //xml.LoadXml(data);
-                    //XmlNodeList t = xml.GetElementsByTagName("PubmedArticleSet");
-                    //if (t.Count > 0)
-                    //{
-                    //    GZipStream gs = new GZipStream(data, CompressionMode.Decompress);
-                    //}
+                    AppendXml(i == 1, fileName, tempPath);
                 }
             }
 
+            File.Delete(tempPath);
         }
 
-        private void AppendXml()
+        // Append xml of pubmed file to the combined file
+        private void AppendXml(bool first, string fileName, string tempPath)
         {
-            // Append to file
-            Log("File downloaded!");
             
-
             using (FileStream originalFileStream = File.OpenRead(downloadPath))
             {
                 string currentFileName = Path.GetFileName(downloadPath);
-                string newFileName = currentFileName.Remove(currentFileName.Length - Path.GetExtension(downloadPath).Length);
+                string newFileName = inputPath;
 
-                using (FileStream decompressedFileStream = File.Create(newFileName))
+                using (FileStream targetStream = File.OpenWrite(inputPath))
                 {
                     using (GZipStream decompressionStream = new GZipStream(originalFileStream, CompressionMode.Decompress))
                     {
-                        decompressionStream.CopyTo(File.OpenWrite(inputPath));
+                        // Position stream at the end of the file
+                        targetStream.Position = targetStream.Length;
+                        // Write data to temp file
+                        using (FileStream tempStream = File.Create(tempPath))
+                        {
+                            decompressionStream.CopyTo(tempStream);
+                        }
+                        // Open temp file and write data except first two lines to target file
+                        using (FileStream tempStream = File.OpenRead(tempPath))
+                        {
+                            if (!first)
+                                tempStream.Position = 133;
+                            tempStream.CopyTo(targetStream);
+                        }
                     }
                 }
             }
+
+
+            Log($"Downloaded file: {fileName}");
         }
     }
 }
