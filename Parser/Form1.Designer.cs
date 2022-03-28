@@ -40,6 +40,7 @@
             this.outputPanel = new System.Windows.Forms.Panel();
             this.outputLabel = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
+            this.pubmedDownloadBtn = new System.Windows.Forms.Button();
             this.inputPanel.SuspendLayout();
             this.outputPanel.SuspendLayout();
             this.SuspendLayout();
@@ -162,11 +163,22 @@
     "umed to be located in the same directory as the input file, as well as to have t" +
     "he same name as the input file.";
             // 
+            // pubmedDownloadBtn
+            // 
+            this.pubmedDownloadBtn.Location = new System.Drawing.Point(15, 402);
+            this.pubmedDownloadBtn.Name = "pubmedDownloadBtn";
+            this.pubmedDownloadBtn.Size = new System.Drawing.Size(174, 25);
+            this.pubmedDownloadBtn.TabIndex = 14;
+            this.pubmedDownloadBtn.Text = "Download PubMed data";
+            this.pubmedDownloadBtn.UseVisualStyleBackColor = true;
+            this.pubmedDownloadBtn.Click += new System.EventHandler(this.pubmedDownloadBtn_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.pubmedDownloadBtn);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.outputPanel);
             this.Controls.Add(this.inputPanel);
@@ -202,6 +214,7 @@
         private System.Windows.Forms.Panel outputPanel;
         private System.Windows.Forms.Label outputLabel;
         private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Button pubmedDownloadBtn;
     }
 }
 

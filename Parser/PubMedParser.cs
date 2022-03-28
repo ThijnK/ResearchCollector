@@ -24,7 +24,10 @@ namespace Parser
 
         public override bool ParseFile(string inputPath)
         {
+            // Ignore inputPath, as we get necessary files from the web
             throw new NotImplementedException();
+
+
         }
     }
 }
