@@ -39,7 +39,8 @@ namespace Parser
             settings.XmlResolver = new XmlUrlResolver();
 
             // Go through each of the files making up the data set
-            for (int i = 1; i <= 1114; i++) //1114
+            int fileCount = 1114;
+            for (int i = 1; i <= fileCount; i++)
             {
                 string nr = i.ToString("0000");
                 string fileName = $"pubmed22n{nr}";
@@ -49,10 +50,12 @@ namespace Parser
                 {
                     string compressedPath = $"{tempPath}.gz";
                     client.DownloadFile(url, compressedPath);
-                    FileDownloadNotification(fileName);
+                    FileDownloadEvent(fileName);
                     DecompressFile(compressedPath);
                     ParseXml(tempPath, settings, "PubmedArticle");
                 }
+
+                ProgressEvent((int)((double)i / (double)fileCount * 100));
             }
 
             return true;

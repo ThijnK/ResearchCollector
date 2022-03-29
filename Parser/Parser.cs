@@ -20,6 +20,7 @@ namespace Parser
 
         public event EventHandler<CustomEventArgs> ItemParsed;
         public event EventHandler<CustomEventArgs> FileDownloaded;
+        public event EventHandler<ProgressEventArgs> ProgressChanged;
 
         public bool Run(string inputPath, string outputPath)
         {
@@ -48,11 +49,16 @@ namespace Parser
             if (pub != null)
                 WriteToOutput(pub);
             // Go through every node with the given name that can be found
+            int i = 200000;
             while (reader.ReadToNextSibling(nodeName))
             {
                 pub = ParsePublicationXml(reader);
                 if (pub != null)
                     WriteToOutput(pub);
+
+                // Estimate progress
+                //int progress = (int)(Math.Max(1.0, (double)(i++) / 926000.0) * 100);
+                //ProgressChanged(this, new ProgressEventArgs(progress));
             }
             fs.Close();
         }
@@ -70,9 +76,14 @@ namespace Parser
             File.AppendAllText(path, $"{prepend}\n\t\t{JsonSerializer.Serialize(pub)}");
         }
 
-        public void FileDownloadNotification(string name)
+        public void FileDownloadEvent(string name)
         {
             FileDownloaded(this, new CustomEventArgs(name));
+        }
+
+        protected void ProgressEvent(int progress)
+        {
+            ProgressChanged(this, new ProgressEventArgs(progress));
         }
     }
 
@@ -83,6 +94,16 @@ namespace Parser
         public CustomEventArgs(string msg)
         {
             this.msg = msg;
+        }
+    }
+
+    public class ProgressEventArgs : EventArgs
+    {
+        public int progress;
+
+        public ProgressEventArgs(int progress)
+        {
+            this.progress = progress;
         }
     }
 
