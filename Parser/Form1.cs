@@ -1,10 +1,8 @@
 ﻿using System;
-using System.ComponentModel;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
 
@@ -31,9 +29,6 @@ namespace Parser
                     outputLabel.Text = outputPath;
                 }
             }
-
-            byte[] bytes = Encoding.ASCII.GetBytes("<?xml version=\"1.0\" encoding=\"utf - 8\"?>< !DOCTYPE PubmedArticleSet SYSTEM \"http://dtd.nlm.nih.gov/ncbi/pubmed/out/pubmed_190101.dtd\" > ");
-            long t = bytes.Length;
         }
 
         private void InputPanel_Click(object sender, EventArgs e)
@@ -60,7 +55,7 @@ namespace Parser
 
         private void ParseBtn_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(inputPath))
+            if (string.IsNullOrEmpty(inputPath) && typeComboBox.SelectedIndex != 1)
             {
                 Error("No input file selected");
                 return;
@@ -89,10 +84,11 @@ namespace Parser
                     parser = new DblpParser();
                     break;
             }
-            parser.ItemParsed += ItemParsed;
+            parser.ItemParsed += (object s, CustomEventArgs ce) => { Log($"Item parsed: '{ce.msg}'"); };
+            parser.FileDownloaded += (object s, CustomEventArgs ce) => { Log($"File downloaded: '{ce.msg}'"); };
 
             // Check if input file is the expected data set
-            if (!parser.CheckFile(inputPath))
+            if (typeComboBox.SelectedIndex != 1 && !parser.CheckFile(inputPath))
             {
                 Error("Selected input file is not valid");
                 return;
@@ -109,11 +105,6 @@ namespace Parser
             {
                 Error(ex.Message);
             }
-        }
-
-        private void ItemParsed(object sender, ItemParsedEventArgs e)
-        {
-            Log($"Item parsed: '{e.title}'");
         }
 
         // Log a msg to the log
@@ -165,7 +156,6 @@ namespace Parser
         // Append xml of pubmed file to the combined file
         private void AppendXml(bool first, string fileName, string tempPath)
         {
-            
             using (FileStream originalFileStream = File.OpenRead(downloadPath))
             {
                 string currentFileName = Path.GetFileName(downloadPath);
@@ -192,7 +182,6 @@ namespace Parser
                     }
                 }
             }
-
 
             Log($"Downloaded file: {fileName}");
         }

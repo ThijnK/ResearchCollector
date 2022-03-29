@@ -1,12 +1,13 @@
 ﻿using System;
 using System.IO;
 using System.Text.Json;
+using System.Xml;
 
 namespace Parser
 {
     abstract class Parser
     {
-        private string path;
+        protected string path;
         private bool arrayStarted;
 
         // Get the type of the parser (i.e. DBLP, PubMed etc.)
@@ -14,8 +15,11 @@ namespace Parser
         // Checks if given file corresponds to the correct type of data set
         public abstract bool CheckFile(string path);
         // Parses a file and writes the result to the given output location
-        public abstract bool ParseFile(string inputPath);
-        public event EventHandler<ItemParsedEventArgs> ItemParsed;
+        public abstract bool ParseData(string inputPath);
+        public abstract Publication ParsePublicationXml(XmlReader reader);
+
+        public event EventHandler<CustomEventArgs> ItemParsed;
+        public event EventHandler<CustomEventArgs> FileDownloaded;
 
         public bool Run(string inputPath, string outputPath)
         {
@@ -25,7 +29,7 @@ namespace Parser
             File.WriteAllText(path, $"{{\n\t\"{ToString()}\": [");
 
             // Parse input and write results to output file
-            bool success = ParseFile(inputPath);
+            bool success = ParseData(inputPath);
 
             // Close off JSON output file
             File.AppendAllText(path, "\n\t]\n}");
@@ -33,9 +37,29 @@ namespace Parser
             return success;
         }
 
+        protected void ParseXml(string path, XmlReaderSettings settings, string nodeName)
+        {
+            FileStream fs = File.OpenRead(path);
+            XmlReader reader = XmlReader.Create(fs, settings);
+            reader.MoveToContent();
+            reader.ReadToDescendant(nodeName);
+
+            Publication pub = ParsePublicationXml(reader);
+            if (pub != null)
+                WriteToOutput(pub);
+            // Go through every node with the given name that can be found
+            while (reader.ReadToNextSibling(nodeName))
+            {
+                pub = ParsePublicationXml(reader);
+                if (pub != null)
+                    WriteToOutput(pub);
+            }
+            fs.Close();
+        }
+
         public void WriteToOutput(Publication pub)
         {
-            ItemParsed(this, new ItemParsedEventArgs(pub.title));
+            ItemParsed(this, new CustomEventArgs(pub.title));
 
             string prepend = ",";
             if (!arrayStarted)
@@ -45,15 +69,20 @@ namespace Parser
             }
             File.AppendAllText(path, $"{prepend}\n\t\t{JsonSerializer.Serialize(pub)}");
         }
+
+        public void FileDownloadNotification(string name)
+        {
+            FileDownloaded(this, new CustomEventArgs(name));
+        }
     }
 
-    public class ItemParsedEventArgs : EventArgs
+    public class CustomEventArgs : EventArgs
     {
-        public string title;
+        public string msg;
 
-        public ItemParsedEventArgs(string title)
+        public CustomEventArgs(string msg)
         {
-            this.title = title;
+            this.msg = msg;
         }
     }
 
@@ -63,6 +92,7 @@ namespace Parser
         public string type { get; set; }
         public string title { get; set; }
         public int year { get; set; }
+        public string partof { get; set; }
         public string doi { get; set; }
         public Person[] authors { get; set; }
 
@@ -79,9 +109,9 @@ namespace Parser
     {
         public string journal { get; set; }
 
-        public Article(string title, int year, string link, Person[] authors, string journal) : base(title, year, link, authors)
+        public Article(string title, int year, string doi, Person[] authors, string journal) : base(title, year, doi, authors)
         {
-            this.journal = journal;
+            this.partof = journal;
             this.type = "article";
         }
     }
@@ -90,9 +120,9 @@ namespace Parser
     {
         public string conf { get; set; }
 
-        public Inproceedings(string title, int year, string link, Person[] authors, string conf) : base(title, year, link, authors)
+        public Inproceedings(string title, int year, string doi, Person[] authors, string conf) : base(title, year, doi, authors)
         {
-            this.conf = conf;
+            this.partof = conf;
             this.type = "inproceedings";
         }
     }

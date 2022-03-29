@@ -24,7 +24,7 @@ namespace Parser
             return false;
         }
 
-        public override bool ParseFile(string inputPath)
+        public override bool ParseData(string inputPath)
         {
             // Create copy of DTD file in working directory
             // DTD file is assumed to be located in the same directory and have the same name as XML file
@@ -40,31 +40,13 @@ namespace Parser
             settings.ValidationType = ValidationType.DTD;
             settings.XmlResolver = new XmlUrlResolver();
 
-            FileStream fs = File.OpenRead(inputPath);
-            FindNodes("article", XmlReader.Create(fs, settings));
-            fs.Close(); fs = File.OpenRead(inputPath);
-            FindNodes("inproceedings", XmlReader.Create(fs, settings));
-            fs.Close();
+            ParseXml(inputPath, settings, "article");
+            ParseXml(inputPath, settings, "inproceedings");
 
             return true;
         }
 
-        // TO DO: make this asynchronous? ↓
-        private void FindNodes(string nodeName, XmlReader reader)
-        {
-            reader.MoveToContent(); // Moves to the <dblp> node
-            reader.Read(); // Read one line to get into the children of the <dblp> node
-
-            // Go through every node with the given name that can be found
-            while (reader.ReadToNextSibling(nodeName))
-            {
-                Publication pub = ParsePublication(reader);
-                if (pub != null)
-                    WriteToOutput(pub);
-            }
-        }
-
-        private Publication ParsePublication(XmlReader reader)
+        public override Publication ParsePublicationXml(XmlReader reader)
         {
             // Publish year
             int year = 0;
