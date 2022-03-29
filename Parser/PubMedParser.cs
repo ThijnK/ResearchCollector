@@ -79,56 +79,91 @@ namespace Parser
         public override Publication ParsePublicationXml(XmlReader reader)
         {
             // Publish year
-            reader.ReadToDescendant("DateCompleted");
-            reader.ReadToDescendant("Year");
-            int year = reader.ReadElementContentAsInt();
+            reader.ReadToDescendant("PubDate");
+            int year = 0;
+            reader.Read(); reader.Read();
+            if (reader.Name == "Year")
+                year = reader.ReadElementContentAsInt();
+            else
+            {
+                string content = reader.ReadElementContentAsString();
+                // Check if we can parse the year from this date
+                if (!int.TryParse(content.Split(' ')[0], out year))
+                    return null;
+            }
 
             // Title of journal and article
-            reader.ReadToFollowing("Journal");
-            reader.ReadToDescendant("Title");
+            reader.ReadToFollowing("Title");
             string journal = reader.ReadElementContentAsString();
             reader.ReadToFollowing("ArticleTitle");
             string title = reader.ReadElementContentAsString();
-
-            // Can get abstract if needed
-            //reader.ReadToFollowing("AbstractText");
-            //string abs = reader.ReadElementContentAsString();
+            while (reader.Name != "Journal")
+                reader.Read();
 
             // Authors
             List<Person> authors = new List<Person>();
-            reader.ReadToFollowing("Author");
-            ParseAuthor(authors, reader);
-            while (reader.ReadToNextSibling("Author"))
-                ParseAuthor(authors, reader);
-
-            // Doi
-            reader.ReadToFollowing("ArticleIdList");
-            reader.ReadToDescendant("ArticleId");
-            string t = reader.GetAttribute("IdType");
-            while (reader.GetAttribute("IdType") != "doi" && reader.Name != "ArticleIdList")
-                for (int i = 0; i < 4; i++)
-                    reader.Read();
-
-            // Check if no doi link was given, if so, ignore this article
-            if (reader.Name == "ArticleIdList")
-                return null;
-            string doi = reader.ReadElementContentAsString();
-
-            // Move to end tag of this PubmedArticle node
-            while (reader.Name != "PubmedArticle")
+            if (reader.ReadToNextSibling("AuthorList"))
+            {
+                if (reader.ReadToDescendant("Author"))
+                {
+                    ParseAuthor(authors, reader);
+                    while (reader.ReadToNextSibling("Author"))
+                        ParseAuthor(authors, reader);
+                }
+            }
+            while (reader.Name != "MedlineCitation")
                 reader.Read();
 
+            // Doi
+            if (!reader.ReadToNextSibling("PubmedData"))
+            {
+                MoveToNextPublication(reader);
+                return null;
+            }
+
+            string doi = "";
+            if (reader.ReadToDescendant("ArticleIdList"))
+            {
+                reader.ReadToDescendant("ArticleId");
+                while (reader.GetAttribute("IdType") != "doi" && reader.Name != "ArticleIdList")
+                    for (int i = 0; i < 4; i++)
+                        reader.Read();
+
+                // Check if no doi link was given, if so, ignore this article
+                if (reader.Name == "ArticleIdList")
+                {
+                    MoveToNextPublication(reader);
+                    return null;
+                }
+                doi = reader.ReadElementContentAsString();
+            }
+            else
+            {
+                MoveToNextPublication(reader);
+                return null;
+            }
+
+            MoveToNextPublication(reader);
             return new Article(title, year, doi, authors.ToArray(), journal);
+        }
+
+        // Move to end tag of the current publication XML node
+        private void MoveToNextPublication(XmlReader reader)
+        {
+            while (reader.Name != "PubmedArticle")
+                reader.Read();
         }
 
         private void ParseAuthor(List<Person> authors, XmlReader reader)
         {
-            reader.ReadToDescendant("LastName");
-            string lname = reader.ReadElementContentAsString();
-            reader.ReadToNextSibling("ForeName");
-            string fname = reader.ReadElementContentAsString();
-            authors.Add(new Person($"{fname} {lname}", ""));
-            for (int i = 0; i < 5; i++)
+            reader.Read(); reader.Read();
+            string name = reader.ReadElementContentAsString();
+            reader.Read();
+            if (reader.Name == "ForeName")
+                name = $"{reader.ReadElementContentAsString()} {name}";
+            authors.Add(new Person(name, ""));
+
+            while (reader.Name != "Author")
                 reader.Read();
         }
     }
