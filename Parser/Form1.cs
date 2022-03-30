@@ -62,8 +62,7 @@ namespace Parser
         {
             progressLabel.Text = $"{e.ProgressPercentage}%";
             progressBar.Value = e.ProgressPercentage;
-            if (logCheckBox.Checked)
-                Log((string)e.UserState);
+            Log((string)e.UserState);
         }
 
         private void InputPanel_Click(object sender, EventArgs e)
@@ -142,6 +141,7 @@ namespace Parser
                 return;
             }
 
+            parser.reportProgress = logCheckBox.Checked;
             runBtn.Enabled = false;
             try
             {
@@ -165,6 +165,12 @@ namespace Parser
         {
             Log($"Encountered error: '{msg}'");
             MessageBox.Show(msg, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        private void logCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (parser != null)
+                parser.reportProgress = logCheckBox.Checked;
         }
     }
 }

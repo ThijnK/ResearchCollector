@@ -11,6 +11,8 @@ namespace Parser
         protected string path;
         private bool arrayStarted;
         protected BackgroundWorker worker;
+        public bool reportProgress;
+        protected Publication item;
 
         // Get the type of the parser (i.e. DBLP, PubMed etc.)
         public override abstract string ToString();
@@ -18,7 +20,7 @@ namespace Parser
         public abstract bool CheckFile(string path);
         // Parses a file and writes the result to the given output location
         public abstract void ParseData(string inputPath);
-        public abstract Publication ParsePublicationXml(XmlReader reader);
+        public abstract bool ParsePublicationXml(XmlReader reader);
 
         public void Run(string inputPath, string outputPath, BackgroundWorker worker)
         {
@@ -43,20 +45,18 @@ namespace Parser
             reader.MoveToContent();
             reader.ReadToDescendant(nodeName);
 
-            Publication pub = ParsePublicationXml(reader);
-            if (pub != null)
-                WriteToOutput(pub);
+            if (ParsePublicationXml(reader))
+                WriteToOutput();
             // Go through every node with the given name that can be found
             while (reader.ReadToNextSibling(nodeName))
             {
-                pub = ParsePublicationXml(reader);
-                if (pub != null)
-                    WriteToOutput(pub);
+                if (ParsePublicationXml(reader))
+                    WriteToOutput();
             }
             fs.Close();
         }
 
-        public void WriteToOutput(Publication pub)
+        public void WriteToOutput()
         {
             string prepend = ",";
             if (!arrayStarted)
@@ -64,32 +64,12 @@ namespace Parser
                 prepend = "";
                 arrayStarted = true;
             }
-            File.AppendAllText(path, $"{prepend}\n\t\t{JsonSerializer.Serialize(pub)}");
-        }
-    }
-
-    public class CustomEventArgs : EventArgs
-    {
-        public string msg;
-
-        public CustomEventArgs(string msg)
-        {
-            this.msg = msg;
-        }
-    }
-
-    public class ProgressEventArgs : EventArgs
-    {
-        public int progress;
-
-        public ProgressEventArgs(int progress)
-        {
-            this.progress = progress;
+            File.AppendAllText(path, $"{prepend}\n\t\t{JsonSerializer.Serialize(item)}");
         }
     }
 
     #region Data types for JSON serialization
-    abstract class Publication
+    struct Publication
     {
         public string type { get; set; }
         public string title { get; set; }
@@ -98,36 +78,38 @@ namespace Parser
         public string doi { get; set; }
         public Person[] authors { get; set; }
 
-        public Publication(string title, int year, string doi, Person[] authors)
+        public Publication(string type, string title, int year, string partof, string doi, Person[] authors)
         {
+            this.type = type;
             this.title = title;
             this.year = year;
             this.doi = doi;
+            this.partof = partof;
             this.authors = authors;
         }
     }
 
-    class Article : Publication
-    {
-        public string journal { get; set; }
+    //class Article : Publication
+    //{
+    //    public string journal { get; set; }
 
-        public Article(string title, int year, string doi, Person[] authors, string journal) : base(title, year, doi, authors)
-        {
-            this.partof = journal;
-            this.type = "article";
-        }
-    }
+    //    public Article(string title, int year, string doi, Person[] authors, string journal) : base(title, year, doi, authors)
+    //    {
+    //        this.partof = journal;
+    //        this.type = "article";
+    //    }
+    //}
 
-    class Inproceedings : Publication
-    {
-        public string conf { get; set; }
+    //class Inproceedings : Publication
+    //{
+    //    public string conf { get; set; }
 
-        public Inproceedings(string title, int year, string doi, Person[] authors, string conf) : base(title, year, doi, authors)
-        {
-            this.partof = conf;
-            this.type = "inproceedings";
-        }
-    }
+    //    public Inproceedings(string title, int year, string doi, Person[] authors, string conf) : base(title, year, doi, authors)
+    //    {
+    //        this.partof = conf;
+    //        this.type = "inproceedings";
+    //    }
+    //}
 
     struct Person
     {

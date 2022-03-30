@@ -43,79 +43,72 @@ namespace Parser
             settings.ValidationType = ValidationType.DTD;
             settings.XmlResolver = new XmlUrlResolver();
 
-            ParseXml(inputPath, settings, "article");
-            ParseXml(inputPath, settings, "inproceedings");
+            item.type = "article";
+            ParseXml(inputPath, settings, item.type);
+            item.type = "inproceedings";
+            ParseXml(inputPath, settings, item.type);
         }
 
-        public override Publication ParsePublicationXml(XmlReader reader)
+        public override bool ParsePublicationXml(XmlReader reader)
         {
-            // Publish year
-            int year = 0;
-            string date = reader.GetAttribute("mdate");
-            if (date != null)
-                year = DateTime.Parse(date).Year;
-            else
-                return null;
-
-            XmlDocument xml = new XmlDocument();
-            xml.LoadXml(reader.ReadOuterXml());
+            // Authors
+            reader.Read(); reader.Read();
+            List<Person> authors = new List<Person>();
+            while (reader.Name == "author")
+                ParseAuthor(authors, reader);
+            item.authors = authors.ToArray();
 
             // Title
-            string title = "";
-            XmlNodeList t = xml.GetElementsByTagName("title");
-            if (t.Count > 0)
+            item.title = reader.ReadInnerXml();
+            if (!IsValidTitle(item.title))
             {
-                if (IsValidTitle(t[0].InnerText))
-                    title = t[0].InnerText;
-                else
-                    return null;
+                while (reader.Name != item.type)
+                    reader.Read();
+                return false;
             }
-            else return null;
+            reader.Read();
 
-            // Authors
-            List<Person> authors = new List<Person>();
-            foreach (XmlNode node in xml.GetElementsByTagName("author"))
-            {
-                // Try to get the orcid from the attributes if it exists
-                string orcid = "";
-                if (node.Attributes != null)
-                    if (node.Attributes.Count > 0)
-                        if (node.Attributes[0].Name == "orcid")
-                            orcid = node.Attributes[0].Value;
-                authors.Add(new Person(node.InnerText, orcid));
-            }
+            // Publish year
+            while (reader.Name != "year" && reader.Name != item.type)
+                reader.Read();
+            // Couldn't find publish year
+            if (reader.Name == item.type)
+                return false;
+            item.year = reader.ReadElementContentAsInt();
 
-            // Doi link
-            string doi = "";
-            t = xml.GetElementsByTagName("ee");
-            if (t.Count > 0)
-                doi = t[0].InnerText;
-            else
-                return null;
+            // Journal/conference
+            while (reader.Name != "journal" && reader.Name != "booktitle" && reader.Name != item.type)
+                reader.Read();
+            if (reader.Name == item.type)
+                return false;
+            item.partof = reader.ReadElementContentAsString();
+
+            // Doi
+            while (reader.Name != "ee" && reader.Name != item.type)
+                reader.Read();
+            if (reader.Name == item.type)
+                return false;
+            item.doi = reader.ReadElementContentAsString();
+
+            // Move to end of article/inproceedings node
+            while (reader.Name != item.type)
+                reader.Read();
 
             // Estimate progress
             int progress = (int)(Math.Min(1.0, ++pubCount / 926000.0) * 100);
+            if (reportProgress)
+                worker.ReportProgress(progress, $"Item parsed: '{item.title}'");
 
-            // Journal/Conference
-            string partof = "";
-            if (xml.FirstChild.Name == "article")
-            {
-                t = xml.GetElementsByTagName("journal");
-                if (t.Count > 0)
-                    partof = t[0].InnerText;
+            return true;
+        }
 
-                worker.ReportProgress(progress, $"Article parsed: '{title}'");
-                return new Article(title, year, doi, authors.ToArray(), partof);
-            }
-            else
-            {
-                t = xml.GetElementsByTagName("booktitle");
-                if (t.Count > 0)
-                    partof = t[0].InnerText;
-
-                worker.ReportProgress(progress, $"Inproceedings parsed: '{title}'");
-                return new Inproceedings(title, year, doi, authors.ToArray(), partof);
-            }
+        private void ParseAuthor(List<Person> authors, XmlReader reader)
+        {
+            string orcid = reader.GetAttribute("orcid");
+            if (orcid == null)
+                orcid = "";
+            authors.Add(new Person(reader.ReadElementContentAsString(), orcid));
+            reader.Read();
         }
 
         private bool IsValidTitle(string title)

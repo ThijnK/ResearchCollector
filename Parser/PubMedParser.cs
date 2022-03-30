@@ -79,27 +79,27 @@ namespace Parser
             File.Create(compressedPath).Close();
         }
 
-        public override Publication ParsePublicationXml(XmlReader reader)
+        public override bool ParsePublicationXml(XmlReader reader)
         {
             // Publish year
             reader.ReadToDescendant("PubDate");
-            int year = 0;
             reader.Read(); reader.Read();
             if (reader.Name == "Year")
-                year = reader.ReadElementContentAsInt();
+                item.year = reader.ReadElementContentAsInt();
             else
             {
                 string content = reader.ReadElementContentAsString();
                 // Check if we can parse the year from this date
-                if (!int.TryParse(content.Split(' ')[0], out year))
-                    return null;
+                if (!int.TryParse(content.Split(' ')[0], out int year))
+                    return false;
+                item.year = year;
             }
 
             // Title of journal and article
             reader.ReadToFollowing("Title");
-            string journal = reader.ReadElementContentAsString();
+            item.partof = reader.ReadElementContentAsString();
             reader.ReadToFollowing("ArticleTitle");
-            string title = reader.ReadElementContentAsString();
+            item.title = reader.ReadElementContentAsString();
             while (reader.Name != "Journal")
                 reader.Read();
 
@@ -114,6 +114,8 @@ namespace Parser
                         ParseAuthor(authors, reader);
                 }
             }
+            item.authors = authors.ToArray();
+
             while (reader.Name != "MedlineCitation")
                 reader.Read();
 
@@ -121,10 +123,9 @@ namespace Parser
             if (!reader.ReadToNextSibling("PubmedData"))
             {
                 MoveToNextPublication(reader);
-                return null;
+                return false;
             }
 
-            string doi = "";
             if (reader.ReadToDescendant("ArticleIdList"))
             {
                 reader.ReadToDescendant("ArticleId");
@@ -136,19 +137,21 @@ namespace Parser
                 if (reader.Name == "ArticleIdList")
                 {
                     MoveToNextPublication(reader);
-                    return null;
+                    return false;
                 }
-                doi = reader.ReadElementContentAsString();
+                item.doi = reader.ReadElementContentAsString();
             }
             else
             {
                 MoveToNextPublication(reader);
-                return null;
+                return false;
             }
 
+            item.type = "article";
             MoveToNextPublication(reader);
-            worker.ReportProgress(progress, $"Article parsed: '{title}'");
-            return new Article(title, year, doi, authors.ToArray(), journal);
+            if (reportProgress)
+                worker.ReportProgress(progress, $"Item parsed: '{item.title}'");
+            return true;
         }
 
         // Move to end tag of the current publication XML node
