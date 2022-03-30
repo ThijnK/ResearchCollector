@@ -41,6 +41,8 @@
             this.outputLocation = new System.Windows.Forms.Label();
             this.outputPanel = new System.Windows.Forms.Panel();
             this.progressBar = new System.Windows.Forms.ProgressBar();
+            this.progressLabel = new System.Windows.Forms.Label();
+            this.logCheckBox = new System.Windows.Forms.CheckBox();
             this.inputPanel.SuspendLayout();
             this.outputPanel.SuspendLayout();
             this.SuspendLayout();
@@ -98,7 +100,7 @@
             // inputLabel
             // 
             this.inputLabel.AutoSize = true;
-            this.inputLabel.Location = new System.Drawing.Point(9, 150);
+            this.inputLabel.Location = new System.Drawing.Point(9, 184);
             this.inputLabel.Name = "inputLabel";
             this.inputLabel.Size = new System.Drawing.Size(54, 13);
             this.inputLabel.TabIndex = 7;
@@ -110,7 +112,7 @@
             this.inputPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.inputPanel.Controls.Add(this.inputLocation);
             this.inputPanel.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.inputPanel.Location = new System.Drawing.Point(9, 166);
+            this.inputPanel.Location = new System.Drawing.Point(9, 200);
             this.inputPanel.Name = "inputPanel";
             this.inputPanel.Size = new System.Drawing.Size(174, 20);
             this.inputPanel.TabIndex = 11;
@@ -129,7 +131,7 @@
             // dtdLabel
             // 
             this.dtdLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.75F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.dtdLabel.Location = new System.Drawing.Point(9, 189);
+            this.dtdLabel.Location = new System.Drawing.Point(9, 223);
             this.dtdLabel.Name = "dtdLabel";
             this.dtdLabel.Size = new System.Drawing.Size(177, 56);
             this.dtdLabel.TabIndex = 13;
@@ -140,7 +142,7 @@
             // outputLabel
             // 
             this.outputLabel.AutoSize = true;
-            this.outputLabel.Location = new System.Drawing.Point(9, 252);
+            this.outputLabel.Location = new System.Drawing.Point(9, 286);
             this.outputLabel.Name = "outputLabel";
             this.outputLabel.Size = new System.Drawing.Size(88, 13);
             this.outputLabel.TabIndex = 9;
@@ -161,7 +163,7 @@
             this.outputPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.outputPanel.Controls.Add(this.outputLocation);
             this.outputPanel.Cursor = System.Windows.Forms.Cursors.Default;
-            this.outputPanel.Location = new System.Drawing.Point(9, 268);
+            this.outputPanel.Location = new System.Drawing.Point(9, 302);
             this.outputPanel.Name = "outputPanel";
             this.outputPanel.Size = new System.Drawing.Size(174, 20);
             this.outputPanel.TabIndex = 12;
@@ -169,16 +171,38 @@
             // 
             // progressBar
             // 
-            this.progressBar.Location = new System.Drawing.Point(9, 109);
+            this.progressBar.Location = new System.Drawing.Point(9, 122);
             this.progressBar.Name = "progressBar";
             this.progressBar.Size = new System.Drawing.Size(174, 23);
             this.progressBar.TabIndex = 14;
+            // 
+            // progressLabel
+            // 
+            this.progressLabel.Location = new System.Drawing.Point(9, 106);
+            this.progressLabel.Name = "progressLabel";
+            this.progressLabel.Size = new System.Drawing.Size(174, 13);
+            this.progressLabel.TabIndex = 15;
+            this.progressLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // logCheckBox
+            // 
+            this.logCheckBox.AutoSize = true;
+            this.logCheckBox.Checked = true;
+            this.logCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.logCheckBox.Location = new System.Drawing.Point(9, 152);
+            this.logCheckBox.Name = "logCheckBox";
+            this.logCheckBox.Size = new System.Drawing.Size(81, 17);
+            this.logCheckBox.TabIndex = 16;
+            this.logCheckBox.Text = "Log actions";
+            this.logCheckBox.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.logCheckBox);
+            this.Controls.Add(this.progressLabel);
             this.Controls.Add(this.progressBar);
             this.Controls.Add(this.dtdLabel);
             this.Controls.Add(this.outputPanel);
@@ -216,6 +240,8 @@
         private System.Windows.Forms.Label outputLocation;
         private System.Windows.Forms.Panel outputPanel;
         private System.Windows.Forms.ProgressBar progressBar;
+        private System.Windows.Forms.Label progressLabel;
+        private System.Windows.Forms.CheckBox logCheckBox;
     }
 }
 

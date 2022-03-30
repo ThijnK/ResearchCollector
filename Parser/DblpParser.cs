@@ -7,6 +7,8 @@ namespace Parser
 {
     class DblpParser : Parser
     {
+        private double pubCount;
+
         public override string ToString()
         {
             return "dblp";
@@ -24,8 +26,9 @@ namespace Parser
             return false;
         }
 
-        public override bool ParseData(string inputPath)
+        public override void ParseData(string inputPath)
         {
+            pubCount = 0;
             // Create copy of DTD file in working directory
             // DTD file is assumed to be located in the same directory and have the same name as XML file
             string fileName = Path.GetFileNameWithoutExtension(inputPath);
@@ -42,8 +45,6 @@ namespace Parser
 
             ParseXml(inputPath, settings, "article");
             ParseXml(inputPath, settings, "inproceedings");
-
-            return true;
         }
 
         public override Publication ParsePublicationXml(XmlReader reader)
@@ -92,6 +93,9 @@ namespace Parser
             else
                 return null;
 
+            // Estimate progress
+            int progress = (int)(Math.Min(1.0, ++pubCount / 926000.0) * 100);
+
             // Journal/Conference
             string partof = "";
             if (xml.FirstChild.Name == "article")
@@ -100,6 +104,7 @@ namespace Parser
                 if (t.Count > 0)
                     partof = t[0].InnerText;
 
+                worker.ReportProgress(progress, $"Article parsed: '{title}'");
                 return new Article(title, year, doi, authors.ToArray(), partof);
             }
             else
@@ -108,6 +113,7 @@ namespace Parser
                 if (t.Count > 0)
                     partof = t[0].InnerText;
 
+                worker.ReportProgress(progress, $"Inproceedings parsed: '{title}'");
                 return new Inproceedings(title, year, doi, authors.ToArray(), partof);
             }
         }

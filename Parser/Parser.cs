@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.IO;
 using System.Text.Json;
 using System.Xml;
@@ -9,33 +10,30 @@ namespace Parser
     {
         protected string path;
         private bool arrayStarted;
+        protected BackgroundWorker worker;
 
         // Get the type of the parser (i.e. DBLP, PubMed etc.)
         public override abstract string ToString();
         // Checks if given file corresponds to the correct type of data set
         public abstract bool CheckFile(string path);
         // Parses a file and writes the result to the given output location
-        public abstract bool ParseData(string inputPath);
+        public abstract void ParseData(string inputPath);
         public abstract Publication ParsePublicationXml(XmlReader reader);
 
-        public event EventHandler<CustomEventArgs> ItemParsed;
-        public event EventHandler<CustomEventArgs> FileDownloaded;
-        public event EventHandler<ProgressEventArgs> ProgressChanged;
-
-        public bool Run(string inputPath, string outputPath)
+        public void Run(string inputPath, string outputPath, BackgroundWorker worker)
         {
+            this.worker = worker;
+
             // Set up JSON output file
             string name = ToString();
             path = Path.Combine(outputPath, name + ".json");
             File.WriteAllText(path, $"{{\n\t\"{ToString()}\": [");
 
             // Parse input and write results to output file
-            bool success = ParseData(inputPath);
+            ParseData(inputPath);
 
             // Close off JSON output file
             File.AppendAllText(path, "\n\t]\n}");
-            
-            return success;
         }
 
         protected void ParseXml(string path, XmlReaderSettings settings, string nodeName)
@@ -49,24 +47,17 @@ namespace Parser
             if (pub != null)
                 WriteToOutput(pub);
             // Go through every node with the given name that can be found
-            int i = 200000;
             while (reader.ReadToNextSibling(nodeName))
             {
                 pub = ParsePublicationXml(reader);
                 if (pub != null)
                     WriteToOutput(pub);
-
-                // Estimate progress
-                //int progress = (int)(Math.Max(1.0, (double)(i++) / 926000.0) * 100);
-                //ProgressChanged(this, new ProgressEventArgs(progress));
             }
             fs.Close();
         }
 
         public void WriteToOutput(Publication pub)
         {
-            ItemParsed(this, new CustomEventArgs(pub.title));
-
             string prepend = ",";
             if (!arrayStarted)
             {
@@ -74,16 +65,6 @@ namespace Parser
                 arrayStarted = true;
             }
             File.AppendAllText(path, $"{prepend}\n\t\t{JsonSerializer.Serialize(pub)}");
-        }
-
-        public void FileDownloadEvent(string name)
-        {
-            FileDownloaded(this, new CustomEventArgs(name));
-        }
-
-        protected void ProgressEvent(int progress)
-        {
-            ProgressChanged(this, new ProgressEventArgs(progress));
         }
     }
 

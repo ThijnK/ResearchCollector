@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Diagnostics;
+using System.ComponentModel;
 using System.IO;
 using System.Windows.Forms;
 
@@ -9,10 +9,17 @@ namespace Parser
     {
         private string inputPath;
         private string outputPath;
+        private BackgroundWorker worker;
+        private Parser parser;
 
         public Form1()
         {
             InitializeComponent();
+            worker = new BackgroundWorker();
+            worker.WorkerReportsProgress = true;
+            worker.ProgressChanged += worker_ProgressChanged;
+            worker.DoWork += worker_DoWork;
+            worker.RunWorkerCompleted += worker_RunWorkerCompleted;
 
             // Use presets if provided
             if (File.Exists("../../config.txt"))
@@ -29,9 +36,38 @@ namespace Parser
             }
         }
 
+        private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            runBtn.Enabled = true;
+            if (e.Cancelled || e.Error != null)
+            {
+                Log("Parsing interrupted");
+                progressLabel.Text = "";
+                progressBar.Value = 0;
+            }
+            else
+            {
+                Log("Parsing finished!");
+                progressLabel.Text = "100%";
+                progressBar.Value = 100;
+            }
+        }
+
+        private void worker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            parser.Run(inputPath, outputPath, worker);
+        }
+
+        private void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            progressLabel.Text = $"{e.ProgressPercentage}%";
+            progressBar.Value = e.ProgressPercentage;
+            if (logCheckBox.Checked)
+                Log((string)e.UserState);
+        }
+
         private void InputPanel_Click(object sender, EventArgs e)
         {
-            Debug.WriteLine("ehlo");
             OpenFileDialog dialog = new OpenFileDialog();
             DialogResult result = dialog.ShowDialog();
             if (result == DialogResult.OK)
@@ -86,7 +122,6 @@ namespace Parser
 
         private void RunParser()
         {
-            Parser parser;
             switch (typeComboBox.SelectedIndex)
             {
                 case 0:
@@ -99,9 +134,6 @@ namespace Parser
                     parser = new DblpParser();
                     break;
             }
-            parser.ItemParsed += (object s, CustomEventArgs ce) => { Log($"Item parsed: '{ce.msg}'"); };
-            parser.FileDownloaded += (object s, CustomEventArgs ce) => { Log($"File downloaded: '{ce.msg}'"); };
-            parser.ProgressChanged += (object s, ProgressEventArgs pe) => { progressBar.Value = pe.progress; };
 
             // Check if input file is the expected data set
             if (typeComboBox.SelectedIndex != 1 && !parser.CheckFile(inputPath))
@@ -110,14 +142,11 @@ namespace Parser
                 return;
             }
 
+            runBtn.Enabled = false;
             try
             {
                 Log($"Parsing {typeComboBox.SelectedItem} data set...");
-                bool success = parser.Run(inputPath, outputPath);
-                if (success)
-                    Log("Parsing finished!");
-                else
-                    Log("Parsing interrupted");
+                worker.RunWorkerAsync();
             }
             catch (Exception ex)
             {

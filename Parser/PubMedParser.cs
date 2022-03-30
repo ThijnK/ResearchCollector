@@ -10,6 +10,9 @@ namespace Parser
     class PubMedParser : Parser
     {
         private string tempPath;
+        private int currentFile;
+        private int fileCount;
+        private int progress;
 
         public override string ToString()
         {
@@ -28,7 +31,7 @@ namespace Parser
             return false;
         }
 
-        public override bool ParseData(string inputPath)
+        public override void ParseData(string inputPath)
         {
             tempPath = $"{Path.GetDirectoryName(path)}\\temp.xml";
 
@@ -39,10 +42,10 @@ namespace Parser
             settings.XmlResolver = new XmlUrlResolver();
 
             // Go through each of the files making up the data set
-            int fileCount = 1114;
-            for (int i = 1; i <= fileCount; i++)
+            fileCount = 1114;
+            for (currentFile = 1; currentFile <= fileCount; currentFile++)
             {
-                string nr = i.ToString("0000");
+                string nr = currentFile.ToString("0000");
                 string fileName = $"pubmed22n{nr}";
                 Uri url = new Uri($"https://ftp.ncbi.nlm.nih.gov/pubmed/baseline/{fileName}.xml.gz");
 
@@ -50,15 +53,12 @@ namespace Parser
                 {
                     string compressedPath = $"{tempPath}.gz";
                     client.DownloadFile(url, compressedPath);
-                    FileDownloadEvent(fileName);
+                    worker.ReportProgress(progress, $"File downloaded: '{fileName}'");
                     DecompressFile(compressedPath);
                     ParseXml(tempPath, settings, "PubmedArticle");
                 }
-
-                ProgressEvent((int)((double)i / (double)fileCount * 100));
+                progress = (int)((double)currentFile / (double)fileCount * 100);
             }
-
-            return true;
         }
 
         // Decompress a file and write the result to tempPath
@@ -147,6 +147,7 @@ namespace Parser
             }
 
             MoveToNextPublication(reader);
+            worker.ReportProgress(progress, $"Article parsed: '{title}'");
             return new Article(title, year, doi, authors.ToArray(), journal);
         }
 
