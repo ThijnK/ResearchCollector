@@ -11,7 +11,7 @@ namespace Parser
     {
         public DblpParser(SynchronizationContext context) : base(context) 
         {
-            progressIncrement = 0.0001;
+            progressIncrement = 1.0 / 53831.75;
         }
 
         public override string ToString()
