@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
+using System.Threading;
 using System.Xml;
 
 namespace Parser
@@ -12,7 +14,12 @@ namespace Parser
         private string tempPath;
         private int currentFile;
         private int fileCount;
-        private int progress;
+
+        public PubMedParser(SynchronizationContext context) : base(context) 
+        {
+            fileCount = 1114;
+            progressIncrement = 1.0 / (double)fileCount * 100.0;
+        }
 
         public override string ToString()
         {
@@ -42,7 +49,6 @@ namespace Parser
             settings.XmlResolver = new XmlUrlResolver();
 
             // Go through each of the files making up the data set
-            fileCount = 1114;
             for (currentFile = 1; currentFile <= fileCount; currentFile++)
             {
                 string nr = currentFile.ToString("0000");
@@ -53,11 +59,11 @@ namespace Parser
                 {
                     string compressedPath = $"{tempPath}.gz";
                     client.DownloadFile(url, compressedPath);
-                    worker.ReportProgress(progress, $"File downloaded: '{fileName}'");
+                    ReportAction($"File downloaded: '{fileName}'");
                     DecompressFile(compressedPath);
                     ParseXml(tempPath, settings, "PubmedArticle");
                 }
-                progress = (int)((double)currentFile / (double)fileCount * 100);
+                UpdateProgress();
             }
         }
 
@@ -149,8 +155,7 @@ namespace Parser
 
             item.type = "article";
             MoveToNextPublication(reader);
-            if (reportProgress)
-                worker.ReportProgress(progress, $"Item parsed: '{item.title}'");
+            ReportAction($"Item parsed: '{item.title}'");
             return true;
         }
 

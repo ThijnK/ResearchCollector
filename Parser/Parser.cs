@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.IO;
 using System.Text.Json;
+using System.Threading;
 using System.Xml;
 
 namespace Parser
@@ -11,8 +12,13 @@ namespace Parser
         protected string path;
         private bool arrayStarted;
         protected BackgroundWorker worker;
-        public bool reportProgress;
+        public bool logActions;
         protected Publication item;
+
+        // Progress variables
+        protected double progress;
+        protected double progressIncrement;
+        protected int prevProgress;
 
         // Get the type of the parser (i.e. DBLP, PubMed etc.)
         public override abstract string ToString();
@@ -21,6 +27,14 @@ namespace Parser
         // Parses a file and writes the result to the given output location
         public abstract void ParseData(string inputPath);
         public abstract bool ParsePublicationXml(XmlReader reader);
+
+        public event EventHandler<ActionCompletedEventArgs> ActionCompleted;
+        private readonly SynchronizationContext context;
+
+        public Parser(SynchronizationContext context)
+        {
+            this.context = context;
+        }
 
         public void Run(string inputPath, string outputPath, BackgroundWorker worker)
         {
@@ -56,6 +70,7 @@ namespace Parser
             fs.Close();
         }
 
+        // Write item to output JSON
         public void WriteToOutput()
         {
             string prepend = ",";
@@ -65,6 +80,39 @@ namespace Parser
                 arrayStarted = true;
             }
             File.AppendAllText(path, $"{prepend}\n\t\t{JsonSerializer.Serialize(item)}");
+        }
+
+        // Increment progress and update if necessary
+        protected void UpdateProgress()
+        {
+            progress = Math.Min(100, progress + progressIncrement);
+            if ((int)progress > prevProgress)
+            {
+                prevProgress = (int)progress;
+                worker.ReportProgress(prevProgress);
+            }
+        }
+
+        // Report item being parsed
+        protected void ReportAction(string description)
+        {
+            if (logActions)
+                context.Post(new SendOrPostCallback(RaiseActionEvent), description);
+        }
+
+        private void RaiseActionEvent(object state)
+        {
+            ActionCompleted(this, new ActionCompletedEventArgs((string)state));
+        }
+    }
+
+    public class ActionCompletedEventArgs : EventArgs
+    {
+        public string description;
+
+        public ActionCompletedEventArgs(string description)
+        {
+            this.description = description;
         }
     }
 
@@ -88,28 +136,6 @@ namespace Parser
             this.authors = authors;
         }
     }
-
-    //class Article : Publication
-    //{
-    //    public string journal { get; set; }
-
-    //    public Article(string title, int year, string doi, Person[] authors, string journal) : base(title, year, doi, authors)
-    //    {
-    //        this.partof = journal;
-    //        this.type = "article";
-    //    }
-    //}
-
-    //class Inproceedings : Publication
-    //{
-    //    public string conf { get; set; }
-
-    //    public Inproceedings(string title, int year, string doi, Person[] authors, string conf) : base(title, year, doi, authors)
-    //    {
-    //        this.partof = conf;
-    //        this.type = "inproceedings";
-    //    }
-    //}
 
     struct Person
     {

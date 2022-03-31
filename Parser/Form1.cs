@@ -12,6 +12,9 @@ namespace Parser
         private BackgroundWorker worker;
         private Parser parser;
 
+        // Context used to access UI thread from BackgroundWorker
+        private readonly System.Threading.SynchronizationContext context;
+
         public Form1()
         {
             InitializeComponent();
@@ -20,6 +23,8 @@ namespace Parser
             worker.ProgressChanged += worker_ProgressChanged;
             worker.DoWork += worker_DoWork;
             worker.RunWorkerCompleted += worker_RunWorkerCompleted;
+
+            this.context = WindowsFormsSynchronizationContext.Current;
 
             // Use presets if provided
             if (File.Exists("../../config.txt"))
@@ -62,7 +67,6 @@ namespace Parser
         {
             progressLabel.Text = $"{e.ProgressPercentage}%";
             progressBar.Value = e.ProgressPercentage;
-            Log((string)e.UserState);
         }
 
         private void InputPanel_Click(object sender, EventArgs e)
@@ -90,6 +94,12 @@ namespace Parser
                 dtdLabel.Visible = false;
                 inputPanel.Visible = false;
             }
+        }
+
+        private void logCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (parser != null)
+                parser.logActions = logCheckBox.Checked;
         }
 
         private void RunBtn_Click(object sender, EventArgs e)
@@ -124,13 +134,13 @@ namespace Parser
             switch (typeComboBox.SelectedIndex)
             {
                 case 0:
-                    parser = new DblpParser();
+                    parser = new DblpParser(context);
                     break;
                 case 1:
-                    parser = new PubMedParser();
+                    parser = new PubMedParser(context);
                     break;
                 default:
-                    parser = new DblpParser();
+                    parser = new DblpParser(context);
                     break;
             }
 
@@ -141,8 +151,11 @@ namespace Parser
                 return;
             }
 
-            parser.reportProgress = logCheckBox.Checked;
+            parser.logActions = logCheckBox.Checked;
+            parser.ActionCompleted += (object sender, ActionCompletedEventArgs ace) => { Log(ace.description); };
             runBtn.Enabled = false;
+            progressBar.Value = 0;
+            progressLabel.Text = "0%";
             try
             {
                 Log($"Parsing {typeComboBox.SelectedItem} data set...");
@@ -165,12 +178,6 @@ namespace Parser
         {
             Log($"Encountered error: '{msg}'");
             MessageBox.Show(msg, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
-
-        private void logCheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-            if (parser != null)
-                parser.reportProgress = logCheckBox.Checked;
         }
     }
 }

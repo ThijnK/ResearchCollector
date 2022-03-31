@@ -1,13 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Xml;
 
 namespace Parser
 {
     class DblpParser : Parser
     {
-        private double pubCount;
+        public DblpParser(SynchronizationContext context) : base(context) 
+        {
+            progressIncrement = 0.0001;
+        }
 
         public override string ToString()
         {
@@ -28,7 +33,6 @@ namespace Parser
 
         public override void ParseData(string inputPath)
         {
-            pubCount = 0;
             // Create copy of DTD file in working directory
             // DTD file is assumed to be located in the same directory and have the same name as XML file
             string fileName = Path.GetFileNameWithoutExtension(inputPath);
@@ -43,6 +47,7 @@ namespace Parser
             settings.ValidationType = ValidationType.DTD;
             settings.XmlResolver = new XmlUrlResolver();
 
+            progress = 0;
             item.type = "article";
             ParseXml(inputPath, settings, item.type);
             item.type = "inproceedings";
@@ -94,10 +99,8 @@ namespace Parser
             while (reader.Name != item.type)
                 reader.Read();
 
-            // Estimate progress
-            int progress = (int)(Math.Min(1.0, ++pubCount / 926000.0) * 100);
-            if (reportProgress)
-                worker.ReportProgress(progress, $"Item parsed: '{item.title}'");
+            UpdateProgress();
+            ReportAction($"Item parsed: '{item.title}'");
 
             return true;
         }
