@@ -10,6 +10,7 @@ namespace Parser
         private string inputPath;
         private string outputPath;
         private BackgroundWorker worker;
+        private bool workerInterrupted;
         private Parser parser;
 
         // Context used to access UI thread from BackgroundWorker
@@ -44,11 +45,12 @@ namespace Parser
         private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             runBtn.Enabled = true;
-            if (e.Cancelled || e.Error != null)
+            if (e.Cancelled || e.Error != null || workerInterrupted)
             {
                 Log("Parsing interrupted");
                 progressLabel.Text = "";
                 progressBar.Value = 0;
+                workerInterrupted = false;
             }
             else
             {
@@ -60,11 +62,21 @@ namespace Parser
 
         private void worker_DoWork(object sender, DoWorkEventArgs e)
         {
-            parser.Run(inputPath, outputPath, worker);
+            try
+            {
+                parser.Run(inputPath, outputPath, worker);
+            }
+            catch (Exception ex)
+            {
+                worker.ReportProgress(progressBar.Value, ex.Message);
+                workerInterrupted = true;
+            }
         }
 
         private void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
+            if (e.UserState.ToString() != "")
+                Error(e.UserState.ToString());
             progressLabel.Text = $"{e.ProgressPercentage}%";
             progressBar.Value = e.ProgressPercentage;
         }
