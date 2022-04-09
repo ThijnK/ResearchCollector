@@ -49,6 +49,7 @@
             // 
             // runBtn
             // 
+            this.runBtn.Cursor = System.Windows.Forms.Cursors.Hand;
             this.runBtn.Location = new System.Drawing.Point(9, 66);
             this.runBtn.Name = "runBtn";
             this.runBtn.Size = new System.Drawing.Size(174, 37);
@@ -59,6 +60,7 @@
             // 
             // typeComboBox
             // 
+            this.typeComboBox.Cursor = System.Windows.Forms.Cursors.Hand;
             this.typeComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.typeComboBox.FormattingEnabled = true;
             this.typeComboBox.Items.AddRange(new object[] {

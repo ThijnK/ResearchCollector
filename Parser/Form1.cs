@@ -168,15 +168,8 @@ namespace Parser
             runBtn.Enabled = false;
             progressBar.Value = 0;
             progressLabel.Text = "0%";
-            try
-            {
-                Log($"Parsing {typeComboBox.SelectedItem} data set...");
-                worker.RunWorkerAsync();
-            }
-            catch (Exception ex)
-            {
-                Error(ex.Message);
-            }
+            Log($"Parsing {typeComboBox.SelectedItem} data set...");
+            worker.RunWorkerAsync();
         }
 
         // Log a msg to the log

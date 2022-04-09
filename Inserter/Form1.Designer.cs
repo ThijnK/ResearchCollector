@@ -37,15 +37,18 @@
             this.passwordInput = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.usernameInput = new System.Windows.Forms.TextBox();
+            this.progressBar = new System.Windows.Forms.ProgressBar();
+            this.progressLabel = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.inputPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // runBtn
             // 
+            this.runBtn.Cursor = System.Windows.Forms.Cursors.Hand;
             this.runBtn.Location = new System.Drawing.Point(3, 124);
             this.runBtn.Name = "runBtn";
-            this.runBtn.Size = new System.Drawing.Size(192, 31);
+            this.runBtn.Size = new System.Drawing.Size(240, 31);
             this.runBtn.TabIndex = 0;
             this.runBtn.Text = "Run";
             this.runBtn.UseVisualStyleBackColor = true;
@@ -63,7 +66,7 @@
             this.panel1.Controls.Add(this.runBtn);
             this.panel1.Location = new System.Drawing.Point(12, 12);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(200, 160);
+            this.panel1.Size = new System.Drawing.Size(248, 160);
             this.panel1.TabIndex = 1;
             // 
             // inputPanel
@@ -73,7 +76,7 @@
             this.inputPanel.Cursor = System.Windows.Forms.Cursors.Hand;
             this.inputPanel.Location = new System.Drawing.Point(3, 21);
             this.inputPanel.Name = "inputPanel";
-            this.inputPanel.Size = new System.Drawing.Size(192, 20);
+            this.inputPanel.Size = new System.Drawing.Size(240, 20);
             this.inputPanel.TabIndex = 13;
             this.inputPanel.Click += new System.EventHandler(this.inputPanel_Click);
             // 
@@ -107,10 +110,10 @@
             // passwordInput
             // 
             this.passwordInput.Location = new System.Drawing.Point(3, 99);
-            this.passwordInput.MaximumSize = new System.Drawing.Size(192, 20);
+            this.passwordInput.MaximumSize = new System.Drawing.Size(240, 20);
             this.passwordInput.Name = "passwordInput";
             this.passwordInput.PasswordChar = '*';
-            this.passwordInput.Size = new System.Drawing.Size(192, 20);
+            this.passwordInput.Size = new System.Drawing.Size(240, 20);
             this.passwordInput.TabIndex = 3;
             // 
             // label1
@@ -125,16 +128,34 @@
             // usernameInput
             // 
             this.usernameInput.Location = new System.Drawing.Point(3, 60);
-            this.usernameInput.MaximumSize = new System.Drawing.Size(192, 20);
+            this.usernameInput.MaximumSize = new System.Drawing.Size(240, 20);
             this.usernameInput.Name = "usernameInput";
-            this.usernameInput.Size = new System.Drawing.Size(192, 20);
+            this.usernameInput.Size = new System.Drawing.Size(240, 20);
             this.usernameInput.TabIndex = 1;
+            // 
+            // progressBar
+            // 
+            this.progressBar.Location = new System.Drawing.Point(12, 178);
+            this.progressBar.Name = "progressBar";
+            this.progressBar.Size = new System.Drawing.Size(248, 23);
+            this.progressBar.TabIndex = 2;
+            // 
+            // progressLabel
+            // 
+            this.progressLabel.Location = new System.Drawing.Point(12, 204);
+            this.progressLabel.Name = "progressLabel";
+            this.progressLabel.Size = new System.Drawing.Size(248, 16);
+            this.progressLabel.TabIndex = 3;
+            this.progressLabel.Text = "0%";
+            this.progressLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.progressLabel);
+            this.Controls.Add(this.progressBar);
             this.Controls.Add(this.panel1);
             this.Name = "Form1";
             this.Text = "Inserter";
@@ -157,6 +178,8 @@
         private System.Windows.Forms.Panel inputPanel;
         private System.Windows.Forms.Label inputLocation;
         private System.Windows.Forms.Label inputLabel;
+        private System.Windows.Forms.ProgressBar progressBar;
+        private System.Windows.Forms.Label progressLabel;
     }
 }
 

@@ -1,12 +1,20 @@
 ﻿using Neo4j.Driver;
 using System;
+using System.ComponentModel;
+using System.IO;
+using System.Net;
+using System.Text.Json;
 
 namespace Inserter
 {
     class Inserter
     {
-        private string username;
-        private string password;
+        private BackgroundWorker worker;
+        public string username;
+        public string password;
+
+        private Publication pub;
+        private int pubCount;
 
         public Inserter(string username, string password)
         {
@@ -15,9 +23,40 @@ namespace Inserter
         }
 
         // Insert content from given JSON file into database
-        public void Run(string path)
+        public void Run(string path, BackgroundWorker worker)
         {
+            this.worker = worker;
+            using (StreamReader sr = new StreamReader(path))
+            {
+                sr.ReadLine();
+                sr.ReadLine();
+                string line = "";
+                string json = "";
+                while ((line = sr.ReadLine()) != null)
+                {
+                    json = line.Remove(line.Length - 1, 1);
+                    pub = JsonSerializer.Deserialize<Publication>(json);
+                    HandlePublication();
+                }
+            }
+        }
+
+        private void HandlePublication()
+        {
+            //worker.ReportProgress(pubCount++ / ..);
+            string text = GetText();
+        }
+
+        private string GetText()
+        {
+            HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(pub.doi);
+            req.Method = "GET"; // Possibly make this GET to get the content immediately
+            req.AllowAutoRedirect = true;
+            HttpWebResponse resp = (HttpWebResponse)req.GetResponse();
+
             // ...
+
+            return "";
         }
 
         /*
@@ -44,7 +83,7 @@ namespace Inserter
         }
         */
 
-        private async void InsertPublication(Publication pub)
+        private async void InsertPublication()
         {
             // Insert article into database..
             Console.WriteLine("Inserting article:" + pub.title);
@@ -84,6 +123,11 @@ namespace Inserter
     }
 
     #region Data types used for JSON deserialization
+    struct Data
+    {
+        public Publication[] dblp { get; set; }
+    }
+
     struct Publication
     {
         public string type { get; set; }
