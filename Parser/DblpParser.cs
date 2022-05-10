@@ -11,6 +11,7 @@ namespace Parser
     {
         public DblpParser(SynchronizationContext context) : base(context) 
         {
+            // Since there are roughly 5,383,175 publications in the dblp data set
             progressIncrement = 1.0 / 53831.75;
         }
 
@@ -48,14 +49,19 @@ namespace Parser
             settings.XmlResolver = new XmlUrlResolver();
 
             progress = 0;
-            item.type = "article";
-            ParseXml(inputPath, settings, item.type);
-            item.type = "inproceedings";
-            ParseXml(inputPath, settings, item.type);
+            string[] nodeNames = new string[2] { "article", "inproceedings" };
+            ParseXml(inputPath, settings, nodeNames);
+            //item.type = "article";
+            //ParseXml(inputPath, settings, item.type);
+            //item.type = "inproceedings";
+            //ParseXml(inputPath, settings, item.type);
         }
 
         public override bool ParsePublicationXml(XmlReader reader)
         {
+            // Publication type
+            item.type = reader.Name;
+
             // Authors
             reader.Read(); reader.Read();
             List<Person> authors = new List<Person>();
@@ -100,7 +106,7 @@ namespace Parser
                 reader.Read();
 
             UpdateProgress();
-            ReportAction($"Item parsed: '{item.title}'");
+            ReportAction($"{item.type} parsed: '{item.title}'");
 
             return true;
         }

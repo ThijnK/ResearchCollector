@@ -61,7 +61,8 @@ namespace Parser
                     client.DownloadFile(url, compressedPath);
                     ReportAction($"File downloaded: '{fileName}'");
                     DecompressFile(compressedPath);
-                    ParseXml(tempPath, settings, "PubmedArticle");
+                    string[] nodeNames = new string[1] { "PubmedArticle" };
+                    ParseXml(tempPath, settings, nodeNames);
                 }
                 UpdateProgress();
             }
@@ -87,6 +88,9 @@ namespace Parser
 
         public override bool ParsePublicationXml(XmlReader reader)
         {
+            // Publication type
+            item.type = "article";
+
             // Publish year
             reader.ReadToDescendant("PubDate");
             reader.Read(); reader.Read();
@@ -153,7 +157,6 @@ namespace Parser
                 return false;
             }
 
-            item.type = "article";
             MoveToNextPublication(reader);
             ReportAction($"Item parsed: '{item.title}'");
             return true;

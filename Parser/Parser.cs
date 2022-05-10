@@ -52,21 +52,35 @@ namespace Parser
             File.AppendAllText(path, "\n\t]\n}");
         }
 
-        protected void ParseXml(string path, XmlReaderSettings settings, string nodeName)
+        protected void ParseXml(string path, XmlReaderSettings settings, string[] nodeNames)
         {
             FileStream fs = File.OpenRead(path);
             XmlReader reader = XmlReader.Create(fs, settings);
             reader.MoveToContent();
-            reader.ReadToDescendant(nodeName);
 
-            if (ParsePublicationXml(reader))
-                WriteToOutput();
-            // Go through every node with the given name that can be found
-            while (reader.ReadToNextSibling(nodeName))
+            // Read through entire document, parsing any publication with one of specified nodeNames
+            while (reader.Read())
             {
-                if (ParsePublicationXml(reader))
-                    WriteToOutput();
+                if (reader.IsStartElement())
+                {
+                    Array.ForEach<string>(nodeNames, (string nodeName) =>
+                    {
+                        if (nodeName == reader.Name)
+                            if (ParsePublicationXml(reader))
+                                WriteToOutput();
+                    });
+                }
             }
+            //reader.ReadToDescendant(nodeName);
+
+            //if (ParsePublicationXml(reader))
+            //    WriteToOutput();
+            //// Go through every node with the given name that can be found
+            //while (reader.ReadToNextSibling(nodeName))
+            //{
+            //    if (ParsePublicationXml(reader))
+            //        WriteToOutput();
+            //}
             fs.Close();
         }
 

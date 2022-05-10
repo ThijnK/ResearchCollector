@@ -34,17 +34,13 @@
             this.logBox = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.inputLabel = new System.Windows.Forms.Label();
-            this.inputPanel = new System.Windows.Forms.Panel();
             this.inputLocation = new System.Windows.Forms.Label();
             this.dtdLabel = new System.Windows.Forms.Label();
             this.outputLabel = new System.Windows.Forms.Label();
             this.outputLocation = new System.Windows.Forms.Label();
-            this.outputPanel = new System.Windows.Forms.Panel();
             this.progressBar = new System.Windows.Forms.ProgressBar();
             this.progressLabel = new System.Windows.Forms.Label();
             this.logCheckBox = new System.Windows.Forms.CheckBox();
-            this.inputPanel.SuspendLayout();
-            this.outputPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // runBtn
@@ -109,26 +105,18 @@
             this.inputLabel.Text = "Input file*:";
             this.inputLabel.Visible = false;
             // 
-            // inputPanel
-            // 
-            this.inputPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.inputPanel.Controls.Add(this.inputLocation);
-            this.inputPanel.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.inputPanel.Location = new System.Drawing.Point(9, 200);
-            this.inputPanel.Name = "inputPanel";
-            this.inputPanel.Size = new System.Drawing.Size(174, 20);
-            this.inputPanel.TabIndex = 11;
-            this.inputPanel.Visible = false;
-            this.inputPanel.Click += new System.EventHandler(this.InputPanel_Click);
-            // 
             // inputLocation
             // 
-            this.inputLocation.AutoSize = true;
-            this.inputLocation.Location = new System.Drawing.Point(3, 2);
+            this.inputLocation.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.inputLocation.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.inputLocation.Location = new System.Drawing.Point(9, 201);
             this.inputLocation.Name = "inputLocation";
-            this.inputLocation.Size = new System.Drawing.Size(80, 13);
+            this.inputLocation.Size = new System.Drawing.Size(174, 20);
             this.inputLocation.TabIndex = 0;
             this.inputLocation.Text = "No file selected";
+            this.inputLocation.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.inputLocation.Visible = false;
+            this.inputLocation.Click += new System.EventHandler(this.inputLocation_Click);
             // 
             // dtdLabel
             // 
@@ -149,27 +137,18 @@
             this.outputLabel.Size = new System.Drawing.Size(88, 13);
             this.outputLabel.TabIndex = 9;
             this.outputLabel.Text = "Saving output to:";
-            this.outputLabel.Visible = false;
             // 
             // outputLocation
             // 
-            this.outputLocation.AutoSize = true;
-            this.outputLocation.Location = new System.Drawing.Point(3, 2);
+            this.outputLocation.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.outputLocation.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.outputLocation.Location = new System.Drawing.Point(9, 303);
             this.outputLocation.Name = "outputLocation";
-            this.outputLocation.Size = new System.Drawing.Size(93, 13);
+            this.outputLocation.Size = new System.Drawing.Size(174, 20);
             this.outputLocation.TabIndex = 0;
             this.outputLocation.Text = "No folder selected";
-            // 
-            // outputPanel
-            // 
-            this.outputPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.outputPanel.Controls.Add(this.outputLocation);
-            this.outputPanel.Cursor = System.Windows.Forms.Cursors.Default;
-            this.outputPanel.Location = new System.Drawing.Point(9, 302);
-            this.outputPanel.Name = "outputPanel";
-            this.outputPanel.Size = new System.Drawing.Size(174, 20);
-            this.outputPanel.TabIndex = 12;
-            this.outputPanel.Visible = false;
+            this.outputLocation.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.outputLocation.Click += new System.EventHandler(this.outputLocation_Click);
             // 
             // progressBar
             // 
@@ -204,12 +183,12 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.outputLocation);
+            this.Controls.Add(this.inputLocation);
             this.Controls.Add(this.logCheckBox);
             this.Controls.Add(this.progressLabel);
             this.Controls.Add(this.progressBar);
             this.Controls.Add(this.dtdLabel);
-            this.Controls.Add(this.outputPanel);
-            this.Controls.Add(this.inputPanel);
             this.Controls.Add(this.outputLabel);
             this.Controls.Add(this.inputLabel);
             this.Controls.Add(this.label2);
@@ -219,10 +198,6 @@
             this.Controls.Add(this.runBtn);
             this.Name = "Form1";
             this.Text = "Data set parser";
-            this.inputPanel.ResumeLayout(false);
-            this.inputPanel.PerformLayout();
-            this.outputPanel.ResumeLayout(false);
-            this.outputPanel.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -236,12 +211,10 @@
         private System.Windows.Forms.TextBox logBox;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label inputLabel;
-        private System.Windows.Forms.Panel inputPanel;
         private System.Windows.Forms.Label inputLocation;
         private System.Windows.Forms.Label dtdLabel;
         private System.Windows.Forms.Label outputLabel;
         private System.Windows.Forms.Label outputLocation;
-        private System.Windows.Forms.Panel outputPanel;
         private System.Windows.Forms.ProgressBar progressBar;
         private System.Windows.Forms.Label progressLabel;
         private System.Windows.Forms.CheckBox logCheckBox;

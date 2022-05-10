@@ -37,7 +37,7 @@ namespace Parser
                     inputLocation.Text = inputPath;
                     outputLocation.Text = outputPath;
                     outputLabel.Visible = true;
-                    outputPanel.Visible = true;
+                    outputLocation.Visible = true;
                 }
             }
         }
@@ -75,13 +75,14 @@ namespace Parser
 
         private void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            if (e.UserState.ToString() != "")
-                Error(e.UserState.ToString());
+            if (e.UserState != null)
+                if (!string.IsNullOrEmpty(e.UserState.ToString()))
+                    Error(e.UserState.ToString());
             progressLabel.Text = $"{e.ProgressPercentage}%";
             progressBar.Value = e.ProgressPercentage;
         }
 
-        private void InputPanel_Click(object sender, EventArgs e)
+        private void inputLocation_Click(object sender, EventArgs e)
         {
             OpenFileDialog dialog = new OpenFileDialog();
             DialogResult result = dialog.ShowDialog();
@@ -92,19 +93,39 @@ namespace Parser
             }
         }
 
+        private void outputLocation_Click(object sender, EventArgs e)
+        {
+            AskForOutputLocation();
+        }
+
+        private bool AskForOutputLocation()
+        {
+            FolderBrowserDialog dialog = new FolderBrowserDialog();
+            dialog.Description = "Select a folder to write the output to.";
+            DialogResult result = dialog.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+                outputPath = dialog.SelectedPath;
+                outputLocation.Text = outputPath;
+                return true;
+            }
+
+            return false;
+        }
+
         private void typeComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (typeComboBox.SelectedIndex == 0)
             {
                 inputLabel.Visible = true;
                 dtdLabel.Visible = true;
-                inputPanel.Visible = true;
+                inputLocation.Visible = true;
             }
             else
             {
                 inputLabel.Visible = false;
                 dtdLabel.Visible = false;
-                inputPanel.Visible = false;
+                inputLocation.Visible = false;
             }
         }
 
@@ -127,18 +148,12 @@ namespace Parser
                 return;
             }
 
+            // Ask for output location if not provided in config file
             if (string.IsNullOrEmpty(outputPath))
-            {
-                FolderBrowserDialog dialog = new FolderBrowserDialog();
-                DialogResult result = dialog.ShowDialog();
-                if (result == DialogResult.OK)
-                {
-                    outputPath = dialog.SelectedPath;
-                    RunParser();
-                }
-            }
-            else
-                RunParser();
+                if (!AskForOutputLocation())
+                    return;
+
+            RunParser();
         }
 
         private void RunParser()
