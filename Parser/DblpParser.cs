@@ -116,7 +116,7 @@ namespace Parser
             string orcid = reader.GetAttribute("orcid");
             if (orcid == null)
                 orcid = "";
-            authors.Add(new Person(reader.ReadElementContentAsString(), orcid));
+            authors.Add(new Person(reader.ReadElementContentAsString(), orcid, ""));
             reader.Read();
         }
 

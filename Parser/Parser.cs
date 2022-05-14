@@ -71,16 +71,7 @@ namespace Parser
                     });
                 }
             }
-            //reader.ReadToDescendant(nodeName);
 
-            //if (ParsePublicationXml(reader))
-            //    WriteToOutput();
-            //// Go through every node with the given name that can be found
-            //while (reader.ReadToNextSibling(nodeName))
-            //{
-            //    if (ParsePublicationXml(reader))
-            //        WriteToOutput();
-            //}
             fs.Close();
         }
 
@@ -99,7 +90,7 @@ namespace Parser
         // Increment progress and update if necessary
         protected void UpdateProgress()
         {
-            progress = Math.Min(100, progress + progressIncrement);
+            progress = Math.Min(100.0, progress + progressIncrement);
             if ((int)progress > prevProgress)
             {
                 prevProgress = (int)progress;
@@ -155,11 +146,13 @@ namespace Parser
     {
         public string name { get; set; }
         public string orcid { get; set; }
+        public string affiliation { get; set; }
 
-        public Person(string name, string orcid)
+        public Person(string name, string orcid, string affiliation)
         {
             this.name = name;
             this.orcid = orcid;
+            this.affiliation = affiliation;
         }
     }
     #endregion

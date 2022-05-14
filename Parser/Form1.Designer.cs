@@ -168,8 +168,6 @@
             // logCheckBox
             // 
             this.logCheckBox.AutoSize = true;
-            this.logCheckBox.Checked = true;
-            this.logCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
             this.logCheckBox.Location = new System.Drawing.Point(9, 152);
             this.logCheckBox.Name = "logCheckBox";
             this.logCheckBox.Size = new System.Drawing.Size(81, 17);

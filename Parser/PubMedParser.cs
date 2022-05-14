@@ -41,6 +41,7 @@ namespace Parser
         public override void ParseData(string inputPath)
         {
             tempPath = $"{Path.GetDirectoryName(path)}\\temp.xml";
+            string compressedPath = $"{tempPath}.gz";
 
             // Setup settings for the XmlReader
             XmlReaderSettings settings = new XmlReaderSettings();
@@ -57,8 +58,17 @@ namespace Parser
 
                 using (WebClient client = new WebClient())
                 {
-                    string compressedPath = $"{tempPath}.gz";
-                    client.DownloadFile(url, compressedPath);
+                    try
+                    {
+                        client.DownloadFile(url, compressedPath);
+                    }
+                    catch (WebException ex)
+                    {
+                        // If request gets timed out, try again after 5s
+                        Thread.Sleep(5000);
+                        if (ex.Message == "The operation has timed out")
+                            currentFile--;
+                    }
                     ReportAction($"File downloaded: '{fileName}'");
                     DecompressFile(compressedPath);
                     string[] nodeNames = new string[1] { "PubmedArticle" };
@@ -106,12 +116,17 @@ namespace Parser
             }
 
             // Title of journal and article
-            reader.ReadToFollowing("Title");
-            item.partof = reader.ReadElementContentAsString();
-            reader.ReadToFollowing("ArticleTitle");
-            item.title = reader.ReadElementContentAsString();
-            while (reader.Name != "Journal")
+            while (reader.Name != "JournalIssue")
                 reader.Read();
+            if (!reader.ReadToNextSibling("Title"))
+            {
+                MoveToNextPublication(reader);
+                return false;
+            }
+            item.partof = reader.ReadElementContentAsString();
+
+            reader.ReadToFollowing("ArticleTitle");
+            item.title = reader.ReadInnerXml();
 
             // Authors
             List<Person> authors = new List<Person>();
@@ -132,30 +147,24 @@ namespace Parser
             // Doi
             if (!reader.ReadToNextSibling("PubmedData"))
             {
+                // Cannot find doi, ignore this publication
                 MoveToNextPublication(reader);
                 return false;
             }
 
-            if (reader.ReadToDescendant("ArticleIdList"))
-            {
-                reader.ReadToDescendant("ArticleId");
-                while (reader.GetAttribute("IdType") != "doi" && reader.Name != "ArticleIdList")
-                    for (int i = 0; i < 4; i++)
-                        reader.Read();
+            reader.ReadToDescendant("ArticleIdList");
+            reader.ReadToDescendant("ArticleId");
+            while (reader.GetAttribute("IdType") != "doi" && reader.Name != "ArticleIdList")
+                for (int i = 0; i < 4; i++)
+                    reader.Read();
 
-                // Check if no doi link was given, if so, ignore this article
-                if (reader.Name == "ArticleIdList")
-                {
-                    MoveToNextPublication(reader);
-                    return false;
-                }
-                item.doi = reader.ReadElementContentAsString();
-            }
-            else
+            // Check if no doi link was given, if so, ignore this article
+            if (reader.Name == "ArticleIdList")
             {
                 MoveToNextPublication(reader);
                 return false;
             }
+            item.doi = reader.ReadElementContentAsString();
 
             MoveToNextPublication(reader);
             ReportAction($"Item parsed: '{item.title}'");
@@ -171,15 +180,42 @@ namespace Parser
 
         private void ParseAuthor(List<Person> authors, XmlReader reader)
         {
+            int depth = reader.Depth;
             reader.Read(); reader.Read();
             string name = reader.ReadElementContentAsString();
             reader.Read();
             if (reader.Name == "ForeName")
                 name = $"{reader.ReadElementContentAsString()} {name}";
-            authors.Add(new Person(name, ""));
 
-            while (reader.Name != "Author")
+            // Move to AffilitionInfo node if present
+            string affiliation = "";
+            string orcid = "";
+            while (reader.Depth > depth)
+            {
+                if (reader.IsStartElement() && reader.Name == "AffiliationInfo")
+                {
+                    reader.Read(); reader.Read();
+                    affiliation = reader.ReadElementContentAsString();
+                }
+                else if (reader.IsStartElement() && reader.Name == "Identifier")
+                {
+                    if (reader.GetAttribute(0) == "ORCID")
+                        orcid = ParseOrcid(reader);
+                }
                 reader.Read();
+            }
+
+            authors.Add(new Person(name, orcid, affiliation));
+        }
+
+        // Parse Orcid from Identifier element
+        private string ParseOrcid(XmlReader reader)
+        {
+            string content = reader.ReadElementContentAsString();
+            if (content.StartsWith("http://orcid.org/"))
+                return content.Split('/')[1];
+
+            return content;
         }
     }
 }

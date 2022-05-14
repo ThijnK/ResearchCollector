@@ -62,9 +62,9 @@ namespace Parser
 
         private void worker_DoWork(object sender, DoWorkEventArgs e)
         {
+                parser.Run(inputPath, outputPath, worker);
             try
             {
-                parser.Run(inputPath, outputPath, worker);
             }
             catch (Exception ex)
             {
