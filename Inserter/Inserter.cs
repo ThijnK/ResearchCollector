@@ -1,6 +1,7 @@
 ﻿using Neo4j.Driver;
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Text.Json;
@@ -43,21 +44,25 @@ namespace Inserter
 
         private void HandlePublication()
         {
+            pubCount++;
             //worker.ReportProgress(pubCount++ / ..);
+            
+            // Get text from pdf
             string text = GetText();
         }
 
         private string GetText()
         {
-            HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(pub.doi);
-            req.Method = "GET"; // Possibly make this GET to get the content immediately
-            req.AllowAutoRedirect = true;
-            HttpWebResponse resp = (HttpWebResponse)req.GetResponse();
+            // Doi can be accessed as pub.doi
 
-            // ...
+            // (1) Get pdf by searching Google
+            // (2) Extract text from that
 
             return "";
         }
+
+        
+        // Old code that may or may not be of use:
 
         /*
         List<string> links = new List<string>();
