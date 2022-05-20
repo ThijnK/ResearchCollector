@@ -7,15 +7,15 @@ using System.Net;
 using System.Threading;
 using System.Xml;
 
-namespace Parser
+namespace Converter
 {
-    class PubMedParser : Parser
+    class PubMedConverter : Converter
     {
         private string tempPath;
         private int currentFile;
         private int fileCount;
 
-        public PubMedParser(SynchronizationContext context) : base(context) 
+        public PubMedConverter(SynchronizationContext context) : base(context) 
         {
             fileCount = 1114;
             progressIncrement = 1.0 / (double)fileCount * 100.0;

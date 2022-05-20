@@ -3,17 +3,15 @@ using System.ComponentModel;
 using System.IO;
 using System.Windows.Forms;
 
-namespace Inserter
+namespace Importer
 {
     public partial class Form1 : Form
     {
         private string inputPath;
-        private string username;
-        private string password;
 
         private BackgroundWorker worker;
         private bool workerInterrupted;
-        private Inserter inserter;
+        private Importer importer;
 
         public Form1()
         {
@@ -30,14 +28,10 @@ namespace Inserter
                 using (StreamReader sr = new StreamReader("../../config.txt"))
                 {
                     inputPath = sr.ReadLine();
-                    username = sr.ReadLine();
-                    password = sr.ReadLine();
                     inputLocation.Text = inputPath;
-                    usernameInput.Text = username;
-                    passwordInput.Text = password;
                 }
             }
-            inserter = new Inserter(username, password);
+            importer = new Importer();
         }
 
         private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -59,7 +53,7 @@ namespace Inserter
 
         private void worker_DoWork(object sender, DoWorkEventArgs e)
         {
-                inserter.Run(inputPath, worker);
+                importer.Run(inputPath, worker);
             try
             {
             }
@@ -96,22 +90,6 @@ namespace Inserter
             {
                 Error("No input file given");
                 return;
-            }
-            else if (string.IsNullOrEmpty(username))
-            {
-                Error("No username given");
-                return;
-            }
-            else if (string.IsNullOrEmpty(password))
-            {
-                Error("No password given");
-                return;
-            }
-
-            if (string.IsNullOrEmpty(inserter.username) || string.IsNullOrEmpty(inserter.password))
-            {
-                inserter.username = username;
-                inserter.password = password;
             }
 
             runBtn.Enabled = false;

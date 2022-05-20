@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Windows.Forms;
 
-namespace Parser
+namespace Converter
 {
     public partial class Form1 : Form
     {
@@ -11,7 +11,7 @@ namespace Parser
         private string outputPath;
         private BackgroundWorker worker;
         private bool workerInterrupted;
-        private Parser parser;
+        private Converter converter;
 
         // Context used to access UI thread from BackgroundWorker
         private readonly System.Threading.SynchronizationContext context;
@@ -62,7 +62,7 @@ namespace Parser
 
         private void worker_DoWork(object sender, DoWorkEventArgs e)
         {
-                parser.Run(inputPath, outputPath, worker);
+                converter.Run(inputPath, outputPath, worker);
             try
             {
             }
@@ -131,8 +131,8 @@ namespace Parser
 
         private void logCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            if (parser != null)
-                parser.logActions = logCheckBox.Checked;
+            if (converter != null)
+                converter.logActions = logCheckBox.Checked;
         }
 
         private void RunBtn_Click(object sender, EventArgs e)
@@ -161,25 +161,25 @@ namespace Parser
             switch (typeComboBox.SelectedIndex)
             {
                 case 0:
-                    parser = new DblpParser(context);
+                    converter = new DblpConverter(context);
                     break;
                 case 1:
-                    parser = new PubMedParser(context);
+                    converter = new PubMedConverter(context);
                     break;
                 default:
-                    parser = new DblpParser(context);
+                    converter = new DblpConverter(context);
                     break;
             }
 
             // Check if input file is the expected data set
-            if (typeComboBox.SelectedIndex != 1 && !parser.CheckFile(inputPath))
+            if (typeComboBox.SelectedIndex != 1 && !converter.CheckFile(inputPath))
             {
                 Error("Selected input file is not valid");
                 return;
             }
 
-            parser.logActions = logCheckBox.Checked;
-            parser.ActionCompleted += (object sender, ActionCompletedEventArgs ace) => { Log(ace.description); };
+            converter.logActions = logCheckBox.Checked;
+            converter.ActionCompleted += (object sender, ActionCompletedEventArgs ace) => { Log(ace.description); };
             runBtn.Enabled = false;
             progressBar.Value = 0;
             progressLabel.Text = "0%";

@@ -5,11 +5,11 @@ using System.IO;
 using System.Threading;
 using System.Xml;
 
-namespace Parser
+namespace Converter
 {
-    class DblpParser : Parser
+    class DblpConverter : Converter
     {
-        public DblpParser(SynchronizationContext context) : base(context) 
+        public DblpConverter(SynchronizationContext context) : base(context) 
         {
             // Since there are roughly 5,383,175 publications in the dblp data set
             progressIncrement = 1.0 / 53831.75;

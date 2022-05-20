@@ -1,4 +1,4 @@
-﻿namespace Inserter
+﻿namespace Importer
 {
     partial class Form1
     {
@@ -33,10 +33,6 @@
             this.inputPanel = new System.Windows.Forms.Panel();
             this.inputLocation = new System.Windows.Forms.Label();
             this.inputLabel = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.passwordInput = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.usernameInput = new System.Windows.Forms.TextBox();
             this.progressBar = new System.Windows.Forms.ProgressBar();
             this.progressLabel = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
@@ -59,10 +55,6 @@
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panel1.Controls.Add(this.inputPanel);
             this.panel1.Controls.Add(this.inputLabel);
-            this.panel1.Controls.Add(this.label2);
-            this.panel1.Controls.Add(this.passwordInput);
-            this.panel1.Controls.Add(this.label1);
-            this.panel1.Controls.Add(this.usernameInput);
             this.panel1.Controls.Add(this.runBtn);
             this.panel1.Location = new System.Drawing.Point(12, 12);
             this.panel1.Name = "panel1";
@@ -97,41 +89,6 @@
             this.inputLabel.Size = new System.Drawing.Size(50, 13);
             this.inputLabel.TabIndex = 12;
             this.inputLabel.Text = "Input file:";
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(3, 83);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(73, 13);
-            this.label2.TabIndex = 4;
-            this.label2.Text = "DB password:";
-            // 
-            // passwordInput
-            // 
-            this.passwordInput.Location = new System.Drawing.Point(3, 99);
-            this.passwordInput.MaximumSize = new System.Drawing.Size(240, 20);
-            this.passwordInput.Name = "passwordInput";
-            this.passwordInput.PasswordChar = '*';
-            this.passwordInput.Size = new System.Drawing.Size(240, 20);
-            this.passwordInput.TabIndex = 3;
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(3, 44);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(74, 13);
-            this.label1.TabIndex = 2;
-            this.label1.Text = "DB username:";
-            // 
-            // usernameInput
-            // 
-            this.usernameInput.Location = new System.Drawing.Point(3, 60);
-            this.usernameInput.MaximumSize = new System.Drawing.Size(240, 20);
-            this.usernameInput.Name = "usernameInput";
-            this.usernameInput.Size = new System.Drawing.Size(240, 20);
-            this.usernameInput.TabIndex = 1;
             // 
             // progressBar
             // 
@@ -171,10 +128,6 @@
 
         private System.Windows.Forms.Button runBtn;
         private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.TextBox passwordInput;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox usernameInput;
         private System.Windows.Forms.Panel inputPanel;
         private System.Windows.Forms.Label inputLocation;
         private System.Windows.Forms.Label inputLabel;

@@ -5,9 +5,9 @@ using System.Text.Json;
 using System.Threading;
 using System.Xml;
 
-namespace Parser
+namespace Converter
 {
-    abstract class Parser
+    abstract class Converter
     {
         protected string path;
         private bool arrayStarted;
@@ -31,7 +31,7 @@ namespace Parser
         public event EventHandler<ActionCompletedEventArgs> ActionCompleted;
         private readonly SynchronizationContext context;
 
-        public Parser(SynchronizationContext context)
+        public Converter(SynchronizationContext context)
         {
             this.context = context;
         }

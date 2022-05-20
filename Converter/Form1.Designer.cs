@@ -1,4 +1,4 @@
-﻿namespace Parser
+﻿namespace Converter
 {
     partial class Form1
     {
@@ -195,7 +195,7 @@
             this.Controls.Add(this.typeComboBox);
             this.Controls.Add(this.runBtn);
             this.Name = "Form1";
-            this.Text = "Data set parser";
+            this.Text = "Data set converter";
             this.ResumeLayout(false);
             this.PerformLayout();
 
