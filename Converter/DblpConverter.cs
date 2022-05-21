@@ -49,12 +49,7 @@ namespace Converter
             settings.XmlResolver = new XmlUrlResolver();
 
             progress = 0;
-            string[] nodeNames = new string[2] { "article", "inproceedings" };
-            ParseXml(inputPath, settings, nodeNames);
-            //item.type = "article";
-            //ParseXml(inputPath, settings, item.type);
-            //item.type = "inproceedings";
-            //ParseXml(inputPath, settings, item.type);
+            ParseXml(inputPath, settings, "articles", "inproceedings");
         }
 
         public override bool ParsePublicationXml(XmlReader reader)

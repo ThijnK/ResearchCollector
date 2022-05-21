@@ -1,6 +1,8 @@
 ﻿using System;
 using System.ComponentModel;
 using System.IO;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Xml;
@@ -9,23 +11,41 @@ namespace Converter
 {
     abstract class Converter
     {
+        /// <summary>
+        /// Path of the file to write the output to
+        /// </summary>
         protected string path;
         private bool arrayStarted;
         protected BackgroundWorker worker;
         public bool logActions;
         protected Publication item;
 
-        // Progress variables
+        /// <summary>
+        /// Current progress
+        /// </summary>
         protected double progress;
+        /// <summary>
+        /// How much the progress is incremented with each publication that is parsed
+        /// </summary>
         protected double progressIncrement;
+        /// <summary>
+        /// Previous progress 
+        /// </summary>
         protected int prevProgress;
 
-        // Get the type of the parser (i.e. DBLP, PubMed etc.)
+        /// <returns>The type of the data set being converted, e.g. "dblp" or "pubmed"</returns>
         public override abstract string ToString();
-        // Checks if given file corresponds to the correct type of data set
+        /// <returns>True if the file at the provided path can be parsed, false otherwise</returns>
         public abstract bool CheckFile(string path);
-        // Parses a file and writes the result to the given output location
+        /// <summary>
+        /// Parses the data found in the file at the given path and writes results to a json file
+        /// </summary>
         public abstract void ParseData(string inputPath);
+        /// <summary>
+        /// Parse an xml node representing an article
+        /// </summary>
+        /// <param name="reader">XmlReader to parse the publication from, positioned at the start of the node to parse</param>
+        /// <returns>True if the publication was parsed successfully, false otherwise</returns>
         public abstract bool ParsePublicationXml(XmlReader reader);
 
         public event EventHandler<ActionCompletedEventArgs> ActionCompleted;
@@ -52,7 +72,7 @@ namespace Converter
             File.AppendAllText(path, "\n\t]\n}");
         }
 
-        protected void ParseXml(string path, XmlReaderSettings settings, string[] nodeNames)
+        protected void ParseXml(string path, XmlReaderSettings settings, params string[] nodeNames)
         {
             FileStream fs = File.OpenRead(path);
             XmlReader reader = XmlReader.Create(fs, settings);
@@ -66,8 +86,13 @@ namespace Converter
                     Array.ForEach<string>(nodeNames, (string nodeName) =>
                     {
                         if (nodeName == reader.Name)
+                        {
                             if (ParsePublicationXml(reader))
+                            {
+                                ComputeHash();
                                 WriteToOutput();
+                            }
+                        }
                     });
                 }
             }
@@ -78,13 +103,30 @@ namespace Converter
         // Write item to output JSON
         public void WriteToOutput()
         {
-            string prepend = ",";
+            StringBuilder sb = new StringBuilder();
             if (!arrayStarted)
-            {
-                prepend = "";
                 arrayStarted = true;
+            else
+                sb.Append(",");
+            sb.Append("\n\t\t");
+            sb.Append(JsonSerializer.Serialize(item));
+            File.AppendAllText(path, sb.ToString());
+        }
+
+        // Compute SHA256 hash of current item to use as its id
+        private string ComputeHash()
+        {
+            using (SHA256 sha256Hash = SHA256.Create())
+            {
+                byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(item.title));
+
+                // Convert byte array to a string   
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < bytes.Length; i++)
+                    sb.Append(bytes[i].ToString("x2"));
+                item.id = sb.ToString();
+                return item.id;
             }
-            File.AppendAllText(path, $"{prepend}\n\t\t{JsonSerializer.Serialize(item)}");
         }
 
         // Increment progress and update if necessary
@@ -124,6 +166,7 @@ namespace Converter
     #region Data types for JSON serialization
     struct Publication
     {
+        public string id { get; set; }
         public string type { get; set; }
         public string title { get; set; }
         public int year { get; set; }
@@ -131,8 +174,9 @@ namespace Converter
         public string doi { get; set; }
         public Person[] authors { get; set; }
 
-        public Publication(string type, string title, int year, string partof, string doi, Person[] authors)
+        public Publication(string id, string type, string title, int year, string partof, string doi, Person[] authors)
         {
+            this.id = id;
             this.type = type;
             this.title = title;
             this.year = year;

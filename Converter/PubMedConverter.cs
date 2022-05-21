@@ -71,8 +71,7 @@ namespace Converter
                     }
                     ReportAction($"File downloaded: '{fileName}'");
                     DecompressFile(compressedPath);
-                    string[] nodeNames = new string[1] { "PubmedArticle" };
-                    ParseXml(tempPath, settings, nodeNames);
+                    ParseXml(tempPath, settings, "PubmedArticle");
                 }
                 UpdateProgress();
             }
