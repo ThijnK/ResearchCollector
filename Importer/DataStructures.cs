@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Device.Location;
 
 namespace Importer
 {
@@ -44,14 +40,12 @@ namespace Importer
     #endregion
 
     #region Data types for storage in memory
-    // Just a setup for now, may be subject to change
     class Data
     {
         public Dictionary<string, Publication> publications;
         public Dictionary<string, Author> authors;
         public Dictionary<string, Person> people;
-        public Dictionary<string, Journal> journals;
-        public Dictionary<string, Proceedings> proceedings;
+        public Dictionary<string, PublicationVolume> volumes;
         public Dictionary<string, Organization> organizations;
 
         public Data()
@@ -59,30 +53,29 @@ namespace Importer
             publications = new Dictionary<string, Publication>();
             authors = new Dictionary<string, Author>();
             people = new Dictionary<string, Person>();
-            journals = new Dictionary<string, Journal>();
-            proceedings = new Dictionary<string, Proceedings>();
+            volumes = new Dictionary<string, PublicationVolume>();
             organizations = new Dictionary<string, Organization>();
         }
     }
 
     class Publication
     {
-        // May have to contain the text extracted from pdf
-
         public string id;
         public string title;
         public int year;
         public string doi;
+        public string[] topics;
 
         public List<Author> authors;
 
-        public Publication(string id, string title, int year, string doi)
+        public Publication(string id, string title, int year, string doi, string[] topics)
         {
             authors = new List<Author>();
             this.id = id;
             this.title = title;
             this.year = year;
             this.doi = doi;
+            this.topics = topics;
         }
 
         public void AddAuthor(Author author)
@@ -115,7 +108,7 @@ namespace Importer
     class Author
     {
         public Person person;
-        public Organization organization;
+        public Organization affiliation;
         public string email;
         public string name;
         public List<Publication> publications;
@@ -123,11 +116,11 @@ namespace Importer
         // This will ensure that the list cannot be altered with Add or Remove and such outside of this class
         //public IReadOnlyCollection<Publication> Publications => publications.AsReadOnly();
 
-        public Author(Person person, Organization organization, string email, string name)
+        public Author(Person person, Organization affiliation, string email, string name)
         {
             publications = new List<Publication>();
             this.person = person;
-            this.organization = organization;
+            this.affiliation = affiliation;
             this.email = email;
             this.name = name;
             person.authored.Add(this);
@@ -144,6 +137,7 @@ namespace Importer
         {
             this.orcid = orcid;
             this.name = name;
+            authored = new List<Author>();
         }
     }
 
@@ -181,11 +175,14 @@ namespace Importer
 
     class Organization
     {
+        GeoCoordinate location;
         string name;
 
         public Organization(string name)
         {
             this.name = name;
+            // Retrieve location from wikipedia (or somewhere else)
+            this.location = new GeoCoordinate(-90.0, -180.0);
         }
     }
     #endregion

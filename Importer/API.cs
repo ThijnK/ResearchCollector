@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Importer
 {
-    class API
+    abstract class API
     {
         private Data data;
 
