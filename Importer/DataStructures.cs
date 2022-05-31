@@ -89,7 +89,7 @@ namespace Importer
     {
         public Journal journal;
 
-        public Article(Journal journal, string id, string title, int year, string doi) : base(id, title, year, doi)
+        public Article(Journal journal, string id, string title, int year, string doi, string[] topics) : base(id, title, year, doi, topics)
         {
             this.journal = journal;
         }
@@ -99,7 +99,7 @@ namespace Importer
     {
         public Proceedings proceedings;
 
-        public Inproceedings(Proceedings proceedings, string id, string title, int year, string doi) : base(id, title, year, doi)
+        public Inproceedings(Proceedings proceedings, string id, string title, int year, string doi, string[] topics) : base(id, title, year, doi, topics)
         {
             this.proceedings = proceedings;
         }

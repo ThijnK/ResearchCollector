@@ -61,7 +61,8 @@
             this.typeComboBox.FormattingEnabled = true;
             this.typeComboBox.Items.AddRange(new object[] {
             "DBLP",
-            "PubMed"});
+            "PubMed",
+            "PURE"});
             this.typeComboBox.Location = new System.Drawing.Point(9, 39);
             this.typeComboBox.Name = "typeComboBox";
             this.typeComboBox.Size = new System.Drawing.Size(174, 21);

@@ -40,7 +40,7 @@ namespace Converter
 
         public override void ParseData(string inputPath)
         {
-            tempPath = $"{Path.GetDirectoryName(path)}\\temp.xml";
+            tempPath = $"{Path.GetDirectoryName(outputPath)}\\temp.xml";
             string compressedPath = $"{tempPath}.gz";
 
             // Setup settings for the XmlReader

@@ -13,7 +13,9 @@ namespace Converter
         private bool workerInterrupted;
         private Converter converter;
 
-        // Context used to access UI thread from BackgroundWorker
+        /// <summary>
+        /// Context used to access UI thread from BackgroundWorker
+        /// </summary>
         private readonly System.Threading.SynchronizationContext context;
 
         public Form1()
@@ -118,6 +120,14 @@ namespace Converter
             if (typeComboBox.SelectedIndex == 0)
             {
                 inputLabel.Visible = true;
+                dtdLabel.Text = "* DTD file is assumed to be located in the same directory as the input file, as well as to have the same name as the input file.";
+                dtdLabel.Visible = true;
+                inputLocation.Visible = true;
+            }
+            else if (typeComboBox.SelectedIndex == 2)
+            {
+                inputLabel.Visible = true;
+                dtdLabel.Text = "* Select the first of the downloaded files. The download date of all files (in the name) is assumed to be the same as this first one.";
                 dtdLabel.Visible = true;
                 inputLocation.Visible = true;
             }
@@ -153,10 +163,13 @@ namespace Converter
                 if (!AskForOutputLocation())
                     return;
 
-            RunParser();
+            RunConverter();
         }
 
-        private void RunParser()
+        /// <summary>
+        /// Runs the converter on the currently selected data set
+        /// </summary>
+        private void RunConverter()
         {
             switch (typeComboBox.SelectedIndex)
             {
@@ -165,6 +178,9 @@ namespace Converter
                     break;
                 case 1:
                     converter = new PubMedConverter(context);
+                    break;
+                case 2:
+                    converter = new PureConverter(context);
                     break;
                 default:
                     converter = new DblpConverter(context);
@@ -187,13 +203,19 @@ namespace Converter
             worker.RunWorkerAsync();
         }
 
-        // Log a msg to the log
+        /// <summary>
+        /// Log a msg to the UI
+        /// </summary>
+        /// <param name="msg">Message to log</param>
         private void Log(string msg)
         {
             logBox.AppendText($"[{DateTime.Now.ToString("H:mm:ss")}] {msg}{Environment.NewLine}");
         }
 
-        // Display an error in a message box
+        /// <summary>
+        /// Display an error in a message box
+        /// </summary>
+        /// <param name="msg">Message to display</param>
         private void Error(string msg)
         {
             Log($"Encountered error: '{msg}'");

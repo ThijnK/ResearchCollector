@@ -14,10 +14,20 @@ namespace Converter
         /// <summary>
         /// Path of the file to write the output to
         /// </summary>
-        protected string path;
+        protected string outputPath;
+        /// <summary>
+        /// Whether or not the publications array in the output JSON was started
+        /// </summary>
         private bool arrayStarted;
+        /// <summary>
+        /// Reference to the background worker this is being run on to report progress
+        /// </summary>
         protected BackgroundWorker worker;
         public bool logActions;
+        /// <summary>
+        /// Stores the info of the publication currently being parsed.
+        /// Same object is reused for every publication.
+        /// </summary>
         protected Publication item;
 
         /// <summary>
@@ -48,7 +58,13 @@ namespace Converter
         /// <returns>True if the publication was parsed successfully, false otherwise</returns>
         public abstract bool ParsePublicationXml(XmlReader reader);
 
+        /// <summary>
+        /// Event that is raised when an action was completed (like a publication being parsed and added to the output)
+        /// </summary>
         public event EventHandler<ActionCompletedEventArgs> ActionCompleted;
+        /// <summary>
+        /// Context used for posting messages to the UI (since <see cref="Run(string, string, BackgroundWorker)"/> will be run an a separate background thread)
+        /// </summary>
         private readonly SynchronizationContext context;
 
         public Converter(SynchronizationContext context)
@@ -56,22 +72,32 @@ namespace Converter
             this.context = context;
         }
 
+        /// <summary>
+        /// Convert the given input file to the JSON format <see cref="Publication"/>
+        /// </summary>
+        /// <param name="worker">Background worker that this method is being run on</param>
         public void Run(string inputPath, string outputPath, BackgroundWorker worker)
         {
             this.worker = worker;
 
             // Set up JSON output file
             string name = ToString();
-            path = Path.Combine(outputPath, name + ".json");
-            File.WriteAllText(path, $"{{\n\t\"{ToString()}\": [");
+            this.outputPath = Path.Combine(outputPath, name + ".json");
+            File.WriteAllText(this.outputPath, $"{{\n\t\"{ToString()}\": [");
 
             // Parse input and write results to output file
             ParseData(inputPath);
 
             // Close off JSON output file
-            File.AppendAllText(path, "\n\t]\n}");
+            File.AppendAllText(this.outputPath, "\n\t]\n}");
         }
 
+        /// <summary>
+        /// Go through an XML file and call the <see cref="ParsePublicationXml(XmlReader)"/> method for each node that has one of the specified node names
+        /// </summary>
+        /// <param name="path">Path to the XML file to parse</param>
+        /// <param name="settings">Settings for the <see cref="XmlReader"/></param>
+        /// <param name="nodeNames">Names of the XML nodes to include in the output</param>
         protected void ParseXml(string path, XmlReaderSettings settings, params string[] nodeNames)
         {
             FileStream fs = File.OpenRead(path);
@@ -96,11 +122,13 @@ namespace Converter
                     });
                 }
             }
-
+            
             fs.Close();
         }
 
-        // Write item to output JSON
+        /// <summary>
+        /// Write current publication to the output JSON file
+        /// </summary>
         public void WriteToOutput()
         {
             StringBuilder sb = new StringBuilder();
@@ -110,10 +138,12 @@ namespace Converter
                 sb.Append(",");
             sb.Append("\n\t\t");
             sb.Append(JsonSerializer.Serialize(item));
-            File.AppendAllText(path, sb.ToString());
+            File.AppendAllText(outputPath, sb.ToString());
         }
 
-        // Compute SHA256 hash of current item to use as its id
+        /// <summary>
+        /// Compute SHA256 hash of current item to use as its id
+        /// </summary>
         private string ComputeHash()
         {
             using (SHA256 sha256Hash = SHA256.Create())
@@ -129,7 +159,9 @@ namespace Converter
             }
         }
 
-        // Increment progress and update if necessary
+        /// <summary>
+        /// Increment progress and inform the UI if progress has been made beyond a few decimals
+        /// </summary>
         protected void UpdateProgress()
         {
             progress = Math.Min(100.0, progress + progressIncrement);
@@ -140,13 +172,19 @@ namespace Converter
             }
         }
 
-        // Report item being parsed
+        /// <summary>
+        /// Report to the UI a description of what is being done right now
+        /// </summary>
         protected void ReportAction(string description)
         {
             if (logActions)
                 context.Post(new SendOrPostCallback(RaiseActionEvent), description);
         }
 
+        /// <summary>
+        /// Event to be raised from within the context of the UI
+        /// </summary>
+        /// <param name="state"></param>
         private void RaiseActionEvent(object state)
         {
             ActionCompleted(this, new ActionCompletedEventArgs((string)state));
