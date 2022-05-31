@@ -111,7 +111,7 @@ namespace Converter
                 {
                     Array.ForEach<string>(nodeNames, (string nodeName) =>
                     {
-                        if (nodeName == reader.Name)
+                        if (nodeName == reader.Name && reader.IsStartElement())
                         {
                             if (ParsePublicationXml(reader))
                             {
@@ -210,18 +210,8 @@ namespace Converter
         public int year { get; set; }
         public string partof { get; set; }
         public string doi { get; set; }
+        public string file { get; set; }
         public Person[] authors { get; set; }
-
-        public Publication(string id, string type, string title, int year, string partof, string doi, Person[] authors)
-        {
-            this.id = id;
-            this.type = type;
-            this.title = title;
-            this.year = year;
-            this.doi = doi;
-            this.partof = partof;
-            this.authors = authors;
-        }
     }
 
     struct Person

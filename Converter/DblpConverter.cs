@@ -102,7 +102,6 @@ namespace Converter
 
             UpdateProgress();
             ReportAction($"{item.type} parsed: '{item.title}'");
-
             return true;
         }
 

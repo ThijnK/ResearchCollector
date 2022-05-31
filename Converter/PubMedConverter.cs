@@ -166,6 +166,7 @@ namespace Converter
             item.doi = reader.ReadElementContentAsString();
 
             MoveToNextPublication(reader);
+            item.file = "";
             ReportAction($"Item parsed: '{item.title}'");
             return true;
         }
