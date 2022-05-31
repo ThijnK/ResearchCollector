@@ -19,11 +19,10 @@ namespace Converter
 
         private int currentFile;
         private int fileCount;
-        int count = 0;
 
         public PureConverter(SynchronizationContext context) : base(context)
         {
-            fileCount = 1;
+            fileCount = 80;
             // Increment the progress based on the portion of files that have been processed so far
             progressIncrement = 1.0 / (double)fileCount * 100;
         }
@@ -57,7 +56,7 @@ namespace Converter
             string filePrepend = Path.GetFileName(inputPath).Substring(0, 26);
 
             // Go through each of the files making up the data set
-            for (currentFile = 0; currentFile <= fileCount; currentFile += 200)
+            for (currentFile = 0; currentFile <= fileCount * 2000; currentFile += 2000)
             {
                 string nr = currentFile.ToString("000000");
                 string currentPath = Path.Combine(directory, $"{filePrepend}{nr}.xml");
@@ -69,7 +68,6 @@ namespace Converter
 
         public override bool ParsePublicationXml(XmlReader reader)
         {
-            count++;
             // Type (article/inproceedings)
             string nodeType = reader.Name;
             if (nodeType == "contributionToJournal")
@@ -88,37 +86,43 @@ namespace Converter
             // Don't include this item if we cannot find the year of publication
             if (!reader.ReadToNextSibling("publicationStatuses"))
                 return false;
+            int depth = reader.Depth;
             if (!reader.ReadToDescendant("year"))
                 return false;
             item.year = reader.ReadElementContentAsInt();
-            MoveToNextNode(reader, "publicationStatuses");
+            MoveToNextNode(reader, depth);
 
             // Authors
             string partofNode = item.type == "article" ? "journalAssociation" : "event";
-            MoveToAny(reader, "electronicVersions", partofNode, "personAssociations");
+            if (!MoveToSibling(reader, "electronicVersions", "personAssociations"))
+                return false;
             if (reader.Name == "personAssociations")
             {
                 List<Person> authors = new List<Person>();
                 if (reader.ReadToDescendant("personAssociation"))
                 {
+                    depth = reader.Depth;
                     ParseAuthor(reader, authors);
                     while (reader.Name == "personAssociation")
                         ParseAuthor(reader, authors);
                     item.authors = authors.ToArray();
-                    MoveToNextNode(reader, "personAssociations");
+                    MoveToNextNode(reader, depth);
                 }
             }
             else
                 item.authors = new Person[0];
 
             // Doi (not always present)
-            // Move to to electronicVersions if it exists, or the part of node otherwise
-            MoveToAny(reader, "electronicVersions", partofNode);
+            // Move to to electronicVersions if it exists, if not, skip this publication (no doi or file)
+            if (!reader.ReadToNextSibling("electronicVersions"))
+                return false;
             item.doi = ""; item.file = "";
             if (reader.Name == "electronicVersions")
             {
+                depth = reader.Depth;
                 // Try to a find the doi and the file url
-                MoveToAny(reader, "doi", "file");
+                if (!MoveToSibling(reader, "doi", "file"))
+                    return false;
                 if (reader.Name == "file")
                 {
                     if (reader.ReadToDescendant("fileURL"))
@@ -130,12 +134,8 @@ namespace Converter
                 else if (reader.ReadToNextSibling("doi"))
                     item.doi = reader.ReadElementContentAsString();
                 
-                MoveToNextNode(reader, "electronicVersions");
+                MoveToNextNode(reader, depth);
             }
-
-            // If neither the doi, nor the a url to the pdf was found, skip this publication
-            if (item.doi == "" && item.file == "")
-                return false;
 
             // Part of (journal/proceedings)
             if (item.type == "article")
@@ -165,23 +165,30 @@ namespace Converter
         }
 
         /// <summary>
-        /// Moves the reader to the start element that comes right after an end element of the given name
+        /// Moves the reader to the start element that comes right after the end element of the current depth
         /// </summary>
-        /// <param name="nodeName">Name of the node for which to find the end element. The reader will be positioned at the start element after this node</param>
-        private void MoveToNextNode(XmlReader reader, string nodeName)
+        /// 
+        private void MoveToNextNode(XmlReader reader, int targetDepth)
         {
-            while (reader.Name != nodeName)
+            int depth = reader.Depth;
+            while (reader.Depth > targetDepth)
                 reader.Read();
             reader.Read();
         }
 
         /// <summary>
-        /// Moves the reader to the first node with one of the given names that can be found
+        /// Moves the reader to the first sibling node with one of the given names that can be found.
+        /// If no such sibling exists, the reader is positioned at the end of the end element of the current parent element.
         /// </summary>
-        private void MoveToAny(XmlReader reader, params string[] nodeNames)
+        /// <returns><c>true</c> if a matching sibling was found, <c>false</c> otherwise.</returns>
+        private bool MoveToSibling(XmlReader reader, params string[] nodeNames)
         {
-            while (!nodeNames.Contains(reader.Name))
+            int depth = reader.Depth;
+            while (reader.Depth >= depth && !nodeNames.Contains(reader.Name))
                 reader.Read();
+            if (reader.Depth < depth)
+                return false;
+            return true;
         }
         
         private void ParseAuthor(XmlReader reader, List<Person> authors)
@@ -191,9 +198,10 @@ namespace Converter
                 name = reader.ReadElementContentAsString();
             if (name == "" && !reader.ReadToNextSibling("lastName"))
                 return;
+            int depth = reader.Depth;
             name += " " + reader.ReadElementContentAsString();
-
-            MoveToNextNode(reader, "name");
+            
+            MoveToNextNode(reader, depth - 1);
 
             // Role of the person (we only include authors)
             if (reader.Name != "personRole" && !reader.ReadToNextSibling("personRole"))
