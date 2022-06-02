@@ -1,35 +1,85 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using PDFParser.PDFFinders;
 using PDFParser.Exceptions;
+using System.IO;
+using System.Net;
 
 namespace PDFParser
 {
     /// <summary>
-    /// Find the right pdf and gets all the needed info from it
+    /// Tries to find and donwload the PDF and convert it to a text file
     /// </summary>
     class PDFInfoFinder
     {
-
-        public void FindInfo(string doi)
+        /// <summary>
+        /// If the DOI is given, it starts with trying to find a link to the PDF
+        /// With the link to the PDF, either as input or via finding it, it downloads it and converts it into text. It then delets the PDF file again. It saves the txt file with the given ID
+        /// </summary>
+        /// <param name="link">either the doi link or the direct PDF link</param>
+        /// <param name="id">the ID of the article</param>
+        /// <param name="doiOrDirect">wether the link is a doi or a direct link</param>
+        public async void FindInfo(string link, int id, bool doiOrDirect)
         {
-            //If possible, get the real link by redicrecting
             try
             {
-                string realLink = (new RealLinkFinder(doi)).GetActualLink();
+                string pdflink;
+                if (doiOrDirect) //if the link is a doi link
+                {
+                    //if the link does not start with doi.org (PubMed links do not), add it to the start
+                    if (!link.StartsWith("https://doi.org"))
+                        link = "https://doi.org" + link;
 
-                //If possible, get PDF
-                PDFFinder finder = (new PDFFinderFactory(realLink)).correctPDFFinder();
-                finder.FindPDF(doi);
+                    //If possible, get the real link to the document by redicrecting
+                    string realLink = (new RealLinkFinder(link)).GetActualLink();
 
-                //Parse info from PDF
+                    //If possible, get the link to the PDF
+                    PDFFinder finder = (new PDFFinderFactory(realLink)).correctPDFFinder();
+                    pdflink = finder.FindPDF(realLink);
+                }
+                else
+                {
+                    pdflink = link;
+                }
+
+                DownloadPDF(pdflink, id);
+
+                string[] textOfPDF = { GetTextFromPDF(id) };
+                
+                File.Delete($"{id}.pdf");
+
+                //write the text from the PDF to a txt file
+                await File.WriteAllLinesAsync($"{id}.txt", textOfPDF);       
             }
-            catch (RedirectingException) { }
-            catch (DOiProviderNotKnownExpection) { }
-            catch (Exception) { }
+            catch (RedirectingException e) { }
+            catch (DOiProviderNotKnownExpection e) { }
+            catch (Exception e) { }
         }
 
+        /// <summary>
+        /// Downloads the PDF file via the link
+        /// </summary>
+        /// <param name="pdflink">the link to the PDF</param>
+        /// <param name="id">The ID from the article</param>
+        void DownloadPDF(string pdflink, int id)
+        {
+            using (var client = new WebClient())
+            {
+                client.DownloadFile(pdflink /*"https://dspace.library.uu.nl/bitstream/handle/1874/22547/simons-creating%2520strategic%2520value.pdf?sequence=2"*/, $"{id}.pdf");
+            }
+        }
+
+        /// <summary>
+        /// Get the text corresponding with the PDF file
+        /// </summary>
+        /// <param name="id">The ID from the article</param>
+        /// <returns></returns>
+        string GetTextFromPDF(int id)
+        {
+            IFilterTextReader.FilterReader fileReader = new IFilterTextReader.FilterReader($"{id}.pdf");
+            string textOfPDF = fileReader.ReadToEnd();
+            fileReader.Close();
+            return textOfPDF;
+        }
         
     }
 }

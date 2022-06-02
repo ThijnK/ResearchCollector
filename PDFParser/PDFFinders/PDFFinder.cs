@@ -9,6 +9,6 @@ namespace PDFParser.PDFFinders
         /// <summary>
         /// If Possible, finds the PDF from the website
         /// </summary>
-        public abstract void FindPDF(string doi);
+        public abstract string FindPDF(string link);
     }
 }

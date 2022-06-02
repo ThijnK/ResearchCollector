@@ -7,7 +7,7 @@ namespace PDFParser
         static void Main(string[] args)
         {
             PDFInfoFinder infoFinder = new PDFInfoFinder();
-            infoFinder.FindInfo(Console.ReadLine());
+            infoFinder.FindInfo(Console.ReadLine(), int.Parse(Console.ReadLine()), false);
         }
     }
 }

@@ -7,6 +7,9 @@ using PDFParser.Exceptions;
 
 namespace PDFParser
 {
+    /// <summary>
+    /// Starts redirecting from a doi link and tries to end up at the real website
+    /// </summary>
     class RealLinkFinder
     {
         string doi;
@@ -19,15 +22,12 @@ namespace PDFParser
         {
             try
             {
-
-                // Link.springer seems to be infinitely redirecting to the same web page??
-                // Possibly use the Springer API instead of trying to get the pdf from web page
-
                 HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(doi);
                 req.Method = "GET";
+                req.CookieContainer = new CookieContainer(); //some websites only work when cookies are allowed
                 req.AllowAutoRedirect = true;
+                //Possibly problems can be fixed by tweaking a lot with these settings
 
-                // Get response web page
                 HttpWebResponse resp = (HttpWebResponse)req.GetResponse();
 
                 return resp.ResponseUri.AbsoluteUri;
