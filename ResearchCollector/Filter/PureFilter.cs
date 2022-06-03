@@ -7,9 +7,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 
-namespace Converter
+namespace ResearchCollector.Filter
 {
-    class PureConverter : Converter
+    class PureFilter : Filter
     {
         /* 
          * Input files for this converter are to be harvested from the PURE api using the following python script:
@@ -20,9 +20,9 @@ namespace Converter
         private int currentFile;
         private int fileCount;
 
-        public PureConverter(SynchronizationContext context) : base(context)
+        public PureFilter(SynchronizationContext context) : base(context)
         {
-            fileCount = 80;
+            fileCount = 117;
             // Increment the progress based on the portion of files that have been processed so far
             progressIncrement = 1.0 / (double)fileCount * 100;
         }
@@ -54,6 +54,7 @@ namespace Converter
             // Get the prepend before the number of the files to be processed
             string directory = Path.GetDirectoryName(inputPath);
             string filePrepend = Path.GetFileName(inputPath).Substring(0, 26);
+            item.origin = "pure";
 
             // Go through each of the files making up the data set
             for (currentFile = 0; currentFile <= fileCount * 2000; currentFile += 2000)
@@ -68,6 +69,9 @@ namespace Converter
 
         public override bool ParsePublicationXml(XmlReader reader)
         {
+            // Pure's unique id
+            item.externalId = reader.GetAttribute("pureId");
+
             // Type (article/inproceedings)
             string nodeType = reader.Name;
             if (nodeType == "contributionToJournal")
@@ -98,25 +102,25 @@ namespace Converter
                 return false;
             if (reader.Name == "personAssociations")
             {
-                List<Person> authors = new List<Person>();
+                List<Author> authors = new List<Author>();
                 if (reader.ReadToDescendant("personAssociation"))
                 {
                     depth = reader.Depth;
                     ParseAuthor(reader, authors);
                     while (reader.Name == "personAssociation")
                         ParseAuthor(reader, authors);
-                    item.authors = authors.ToArray();
+                    item.has = authors.ToArray();
                     MoveToNextNode(reader, depth);
                 }
             }
             else
-                item.authors = new Person[0];
+                item.has = new Author[0];
 
             // Doi (not always present)
             // Move to to electronicVersions if it exists, if not, skip this publication (no doi or file)
             if (!reader.ReadToNextSibling("electronicVersions"))
                 return false;
-            item.doi = ""; item.file = "";
+            item.doi = ""; item.pdfLink = "";
             if (reader.Name == "electronicVersions")
             {
                 depth = reader.Depth;
@@ -126,7 +130,7 @@ namespace Converter
                 if (reader.Name == "file")
                 {
                     if (reader.ReadToDescendant("fileURL"))
-                        item.file = reader.ReadElementContentAsString();
+                        item.pdfLink = reader.ReadElementContentAsString();
                 }
 
                 if (reader.Name == "doi")
@@ -140,16 +144,12 @@ namespace Converter
             // Part of (journal/proceedings)
             if (item.type == "article")
             {
-                if (reader.Name != "journalAssociation")
-                    reader.ReadToNextSibling("journalAssociation");
-                // Couldn't find journal
-                if (reader.Name == nodeType)
+                if (!ParseJournal(reader))
                     return false;
-                reader.ReadToDescendant("title");
-                item.partof = reader.ReadElementContentAsString();
             }
             else
             {
+                proceedings.Reset();
                 if (reader.Name != "event")
                     reader.ReadToNextSibling("event");
                 // Couldn't find journal
@@ -157,66 +157,89 @@ namespace Converter
                     return false;
                 reader.ReadToDescendant("name");
                 reader.ReadToDescendant("text");
-                item.partof = reader.ReadElementContentAsString();
+                // Reuse existing Volume object to avoid excessive memory usage
+                proceedings.title = reader.ReadElementContentAsString();
+                item.partof = proceedings;
             }
 
             ReportAction($"{item.type} parsed: '{item.title}'");
             return true;
         }
-
-        /// <summary>
-        /// Moves the reader to the start element that comes right after the end element of the current depth
-        /// </summary>
-        /// 
-        private void MoveToNextNode(XmlReader reader, int targetDepth)
-        {
-            int depth = reader.Depth;
-            while (reader.Depth > targetDepth)
-                reader.Read();
-            reader.Read();
-        }
-
-        /// <summary>
-        /// Moves the reader to the first sibling node with one of the given names that can be found.
-        /// If no such sibling exists, the reader is positioned at the end of the end element of the current parent element.
-        /// </summary>
-        /// <returns><c>true</c> if a matching sibling was found, <c>false</c> otherwise.</returns>
-        private bool MoveToSibling(XmlReader reader, params string[] nodeNames)
-        {
-            int depth = reader.Depth;
-            while (reader.Depth >= depth && !nodeNames.Contains(reader.Name))
-                reader.Read();
-            if (reader.Depth < depth)
-                return false;
-            return true;
-        }
         
-        private void ParseAuthor(XmlReader reader, List<Person> authors)
+        private void ParseAuthor(XmlReader reader, List<Author> authors)
         {
-            string name = "";
+            string fname = "", lname = "", name = "";
             if (reader.ReadToDescendant("firstName"))
-                name = reader.ReadElementContentAsString();
-            if (name == "" && !reader.ReadToNextSibling("lastName"))
+                fname = reader.ReadElementContentAsString();
+            if (fname == "" && !reader.ReadToNextSibling("lastName"))
                 return;
             int depth = reader.Depth;
-            name += " " + reader.ReadElementContentAsString();
+            lname = reader.ReadElementContentAsString();
+            if (fname != "" && lname != "")
+                name = fname + " " + lname;
             
             MoveToNextNode(reader, depth - 1);
 
             // Role of the person (we only include authors)
             if (reader.Name != "personRole" && !reader.ReadToNextSibling("personRole"))
                 return;
+            depth = reader.Depth;
             reader.ReadToDescendant("text");
             if (reader.ReadElementContentAsString() != "Author")
                 return;
+            MoveToNextNode(reader, depth);
 
-            // TODO: check if the affiliation is not the UU, what it actually is
-            authors.Add(new Person(name, "", "Utrecht University"));
+            // Get affiliation
+            string affiliation = "";
+            if (reader.Name == "organisationalUnits" || reader.ReadToNextSibling("organisationalUnits"))
+            {
+                reader.ReadToDescendant("name");
+                reader.ReadToDescendant("text");
+                affiliation = reader.ReadElementContentAsString();
+            }
+
+            // TODO: affiliation can be a faculty, without reference to actual organization
+            authors.Add(new Author(fname, lname, name, "", "", affiliation));
 
             // Move to end tag of this person element
             while (reader.Name != "personAssociation")
                 reader.Read();
             reader.Read();
+        }
+
+        /// <summary>
+        /// Parse a journal along with information about it (volume/issue)
+        /// </summary>
+        /// <returns><c>true</c> if successfully parsed, <c>false</c> if no journal info could be found</returns>
+        private bool ParseJournal(XmlReader reader)
+        {
+            // Reset current journal object
+            journal.Reset();
+
+            // Journal volume
+            if (reader.Name != "volume")
+                reader.ReadToNextSibling("volume");
+            journal.volume = reader.ReadElementContentAsString();
+
+            // Title
+            if (reader.Name != "journalAssociation")
+                reader.ReadToNextSibling("journalAssociation");
+            int depth = reader.Depth;
+            // Couldn't find journal
+            if (reader.Depth < depth)
+                return false;
+            reader.ReadToDescendant("title");
+            journal.title = reader.ReadElementContentAsString();
+            MoveToNextNode(reader, depth);
+
+            // Issue (number)
+            if (reader.Depth >= depth)
+            {
+                if (reader.Name == "journalNumber" || reader.ReadToNextSibling("journalNumber"))
+                    journal.issue = reader.ReadElementContentAsString();
+            }
+            item.partof = journal;
+            return true;
         }
     }
 }

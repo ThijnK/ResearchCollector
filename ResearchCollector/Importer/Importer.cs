@@ -2,13 +2,12 @@
 using System.IO;
 using System.Text.Json;
 
-namespace Importer
+namespace ResearchCollector.Importer
 {
     class Importer
     {
         private BackgroundWorker worker;
 
-        private Publication pub;
         private int pubCount;
 
         public Importer()
@@ -29,7 +28,7 @@ namespace Importer
                 while ((line = sr.ReadLine()) != null)
                 {
                     json = line.Remove(line.Length - 1, 1);
-                    pub = JsonSerializer.Deserialize<Publication>(json);
+                    //pub = JsonSerializer.Deserialize<Publication>(json);
                     HandlePublication();
                 }
             }
@@ -39,7 +38,7 @@ namespace Importer
         {
             pubCount++;
             //worker.ReportProgress(pubCount++ / ..);
-            
+
             // Get text from pdf
             string text = GetText();
         }
@@ -54,7 +53,7 @@ namespace Importer
             return "";
         }
 
-        
+
         // Old code that may or may not be of use:
 
         /*

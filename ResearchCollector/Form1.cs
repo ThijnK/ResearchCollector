@@ -2,8 +2,9 @@
 using System.ComponentModel;
 using System.IO;
 using System.Windows.Forms;
+using ResearchCollector.Filter;
 
-namespace Converter
+namespace ResearchCollector
 {
     public partial class Form1 : Form
     {
@@ -11,7 +12,7 @@ namespace Converter
         private string outputPath;
         private BackgroundWorker worker;
         private bool workerInterrupted;
-        private Converter converter;
+        private ResearchCollector.Filter.Filter converter;
 
         /// <summary>
         /// Context used to access UI thread from BackgroundWorker
@@ -28,7 +29,7 @@ namespace Converter
             worker.RunWorkerCompleted += worker_RunWorkerCompleted;
 
             this.context = WindowsFormsSynchronizationContext.Current;
-
+            
             // Use presets if provided
             if (File.Exists("../../config.txt"))
             {
@@ -59,6 +60,7 @@ namespace Converter
                 Log("Parsing finished!");
                 progressLabel.Text = "100%";
                 progressBar.Value = 100;
+                Log($"Output saved to {outputPath}\\{converter.ToString()}.json");
             }
         }
 
@@ -174,16 +176,16 @@ namespace Converter
             switch (typeComboBox.SelectedIndex)
             {
                 case 0:
-                    converter = new DblpConverter(context);
+                    converter = new DblpFilter(context);
                     break;
                 case 1:
-                    converter = new PubMedConverter(context);
+                    converter = new PubMedFilter(context);
                     break;
                 case 2:
-                    converter = new PureConverter(context);
+                    converter = new PureFilter(context);
                     break;
                 default:
-                    converter = new DblpConverter(context);
+                    converter = new DblpFilter(context);
                     break;
             }
 

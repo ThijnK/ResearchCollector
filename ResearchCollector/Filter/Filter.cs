@@ -1,15 +1,15 @@
 ﻿using System;
 using System.ComponentModel;
 using System.IO;
-using System.Security.Cryptography;
+using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Xml;
 
-namespace Converter
+namespace ResearchCollector.Filter
 {
-    abstract class Converter
+    abstract class Filter
     {
         /// <summary>
         /// Path of the file to write the output to
@@ -29,6 +29,8 @@ namespace Converter
         /// Same object is reused for every publication.
         /// </summary>
         protected Publication item;
+        protected Volume proceedings;
+        protected Journal journal;
 
         /// <summary>
         /// Current progress
@@ -67,7 +69,7 @@ namespace Converter
         /// </summary>
         private readonly SynchronizationContext context;
 
-        public Converter(SynchronizationContext context)
+        public Filter(SynchronizationContext context)
         {
             this.context = context;
         }
@@ -83,13 +85,33 @@ namespace Converter
             // Set up JSON output file
             string name = ToString();
             this.outputPath = Path.Combine(outputPath, name + ".json");
-            File.WriteAllText(this.outputPath, $"{{\n\t\"{ToString()}\": [");
+            File.WriteAllText(this.outputPath, $"{{\n\t\"publications\": [");
 
             // Parse input and write results to output file
+            InitializeReusables();
             ParseData(inputPath);
 
             // Close off JSON output file
             File.AppendAllText(this.outputPath, "\n\t]\n}");
+        }
+
+        /// <summary>
+        /// Initialize values for the reusable objects of Publication/Journal/Volume so they can be reused for each parsed item
+        /// </summary>
+        private void InitializeReusables()
+        {
+            item = new Publication();
+            item.externalId = "";
+            item.origin = "";
+            item.type = "";
+            item.title = "";
+            item.year = -1;
+            proceedings = new Volume("");
+            journal = new Journal("", "", "", "");
+            item.partof = proceedings;
+            item.doi = "";
+            item.pdfLink = "";
+            item.has = new Author[0];
         }
 
         /// <summary>
@@ -109,17 +131,15 @@ namespace Converter
             {
                 if (reader.IsStartElement())
                 {
-                    Array.ForEach<string>(nodeNames, (string nodeName) =>
+                    foreach (string nodeName in nodeNames)
                     {
-                        if (nodeName == reader.Name && reader.IsStartElement())
+                        if (nodeName == reader.Name)
                         {
                             if (ParsePublicationXml(reader))
-                            {
-                                ComputeHash();
                                 WriteToOutput();
-                            }
+                            break;
                         }
-                    });
+                    }
                 }
             }
             
@@ -139,24 +159,6 @@ namespace Converter
             sb.Append("\n\t\t");
             sb.Append(JsonSerializer.Serialize(item));
             File.AppendAllText(outputPath, sb.ToString());
-        }
-
-        /// <summary>
-        /// Compute SHA256 hash of current item to use as its id
-        /// </summary>
-        private string ComputeHash()
-        {
-            using (SHA256 sha256Hash = SHA256.Create())
-            {
-                byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(item.title));
-
-                // Convert byte array to a string   
-                StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < bytes.Length; i++)
-                    sb.Append(bytes[i].ToString("x2"));
-                item.id = sb.ToString();
-                return item.id;
-            }
         }
 
         /// <summary>
@@ -189,6 +191,32 @@ namespace Converter
         {
             ActionCompleted(this, new ActionCompletedEventArgs((string)state));
         }
+
+        /// <summary>
+        /// Moves the reader to the start element that comes right after the end element of the current depth
+        /// </summary>
+        /// 
+        protected void MoveToNextNode(XmlReader reader, int targetDepth)
+        {
+            while (reader.Depth > targetDepth)
+                reader.Read();
+            reader.Read();
+        }
+
+        /// <summary>
+        /// Moves the reader to the first sibling node with one of the given names that can be found.
+        /// If no such sibling exists, the reader is positioned at the end of the end element of the current parent element.
+        /// </summary>
+        /// <returns><c>true</c> if a matching sibling was found, <c>false</c> otherwise.</returns>
+        protected bool MoveToSibling(XmlReader reader, params string[] nodeNames)
+        {
+            int depth = reader.Depth;
+            while (reader.Depth >= depth && !nodeNames.Contains(reader.Name))
+                reader.Read();
+            if (reader.Depth < depth)
+                return false;
+            return true;
+        }
     }
 
     public class ActionCompletedEventArgs : EventArgs
@@ -202,29 +230,76 @@ namespace Converter
     }
 
     #region Data types for JSON serialization
-    struct Publication
+    class Publication
     {
-        public string id { get; set; }
+        public string externalId { get; set; }
+        public string origin { get; set; }
         public string type { get; set; }
         public string title { get; set; }
         public int year { get; set; }
-        public string partof { get; set; }
         public string doi { get; set; }
-        public string file { get; set; }
-        public Person[] authors { get; set; }
+        public string pdfLink { get; set; }
+        public object partof { get; set; }
+        public Author[] has { get; set; }
     }
 
-    struct Person
+    class Volume
     {
-        public string name { get; set; }
-        public string orcid { get; set; }
-        public string affiliation { get; set; }
+        public string title { get; set; }
 
-        public Person(string name, string orcid, string affiliation)
+        public Volume(string title)
         {
+            this.title = title;
+        }
+
+        /// <summary>
+        /// Reset the attributes of this Volume to an empty string, to be filled for the next publication
+        /// </summary>
+        public virtual void Reset()
+        {
+            this.title = "";
+        }
+    }
+
+    class Journal : Volume
+    {
+        public string issue { get; set; }
+        public string volume { get; set; }
+        public string series { get; set; }
+
+        public Journal(string title, string issue, string volume, string series) : base(title)
+        {
+            this.issue = issue;
+            this.volume = volume;
+            this.series = series;
+        }
+
+        public override void Reset()
+        {
+            base.Reset();
+            this.issue = "";
+            this.volume = "";
+            this.series = "";
+        }
+    }
+
+    struct Author
+    {
+        public string fname { get; set; }
+        public string lname { get; set; }
+        public string name { get; set; }
+        public string email { get; set; }
+        public string orcid { get; set; }
+        public string affiliatedTo { get; set; }
+
+        public Author(string fname, string lname, string name, string email, string orcid, string affiliatedTo)
+        {
+            this.fname = fname;
+            this.lname = lname;
             this.name = name;
+            this.email = email;
             this.orcid = orcid;
-            this.affiliation = affiliation;
+            this.affiliatedTo = affiliatedTo;
         }
     }
     #endregion

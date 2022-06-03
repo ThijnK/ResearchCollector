@@ -7,15 +7,15 @@ using System.Net;
 using System.Threading;
 using System.Xml;
 
-namespace Converter
+namespace ResearchCollector.Filter
 {
-    class PubMedConverter : Converter
+    class PubMedFilter : Filter
     {
         private string tempPath;
         private int currentFile;
         private int fileCount;
 
-        public PubMedConverter(SynchronizationContext context) : base(context) 
+        public PubMedFilter(SynchronizationContext context) : base(context) 
         {
             fileCount = 1114;
             progressIncrement = 1.0 / (double)fileCount * 100.0;
@@ -48,6 +48,8 @@ namespace Converter
             settings.DtdProcessing = DtdProcessing.Parse;
             settings.ValidationType = ValidationType.DTD;
             settings.XmlResolver = new XmlUrlResolver();
+            item.type = "article"; // Only has articles afaik
+            item.origin = "pubmed";
 
             // Go through each of the files making up the data set
             for (currentFile = 1; currentFile <= fileCount; currentFile++)
@@ -97,38 +99,45 @@ namespace Converter
 
         public override bool ParsePublicationXml(XmlReader reader)
         {
-            // Publication type
-            item.type = "article";
+            // PubMed's unique id
+            reader.ReadToDescendant("PMID");
+            item.externalId = reader.ReadElementContentAsString();
 
-            // Publish year
-            reader.ReadToDescendant("PubDate");
-            reader.Read(); reader.Read();
-            if (reader.Name == "Year")
-                item.year = reader.ReadElementContentAsInt();
-            else
+            // Journal volume/issue
+            journal.Reset();
+            reader.ReadToFollowing("JournalIssue");
+            int depth = reader.Depth;
+            reader.Read();reader.Read();
+            if (reader.Name == "Volume")
             {
-                string content = reader.ReadElementContentAsString();
-                // Check if we can parse the year from this date
-                if (!int.TryParse(content.Split(' ')[0], out int year))
-                    return false;
-                item.year = year;
-            }
-
-            // Title of journal and article
-            while (reader.Name != "JournalIssue")
+                journal.volume = reader.ReadElementContentAsString();
                 reader.Read();
-            if (!reader.ReadToNextSibling("Title"))
-            {
-                MoveToNextPublication(reader);
-                return false;
             }
-            item.partof = reader.ReadElementContentAsString();
+            if (reader.Name == "Issue")
+            {
+                journal.issue = reader.ReadElementContentAsString();
+                reader.Read();
+            }
+            if (reader.Name != "PubDate")
+                reader.ReadToFollowing("PubDate");
+            reader.Read(); reader.Read();
+            // Parse the date of publication
+            ParseDate(reader);
+            // Move to end of the JournalIssue node
+            MoveToNextNode(reader, depth);
+            reader.Read();
 
+            // Journal title
+            if (reader.Name == "Title" || reader.ReadToNextSibling("Title"))
+                journal.title = reader.ReadElementContentAsString();
+            item.partof = journal;
+
+            // Article title
             reader.ReadToFollowing("ArticleTitle");
             item.title = reader.ReadInnerXml();
 
             // Authors
-            List<Person> authors = new List<Person>();
+            List<Author> authors = new List<Author>();
             if (reader.ReadToNextSibling("AuthorList"))
             {
                 if (reader.ReadToDescendant("Author"))
@@ -138,7 +147,7 @@ namespace Converter
                         ParseAuthor(authors, reader);
                 }
             }
-            item.authors = authors.ToArray();
+            item.has = authors.ToArray();
 
             while (reader.Name != "MedlineCitation")
                 reader.Read();
@@ -166,7 +175,7 @@ namespace Converter
             item.doi = reader.ReadElementContentAsString();
 
             MoveToNextPublication(reader);
-            item.file = "";
+            item.pdfLink = "";
             ReportAction($"Item parsed: '{item.title}'");
             return true;
         }
@@ -178,14 +187,29 @@ namespace Converter
                 reader.Read();
         }
 
-        private void ParseAuthor(List<Person> authors, XmlReader reader)
+        private void ParseDate(XmlReader reader)
+        {
+            if (reader.Name == "Year")
+                item.year = reader.ReadElementContentAsInt();
+            // Account for MedlineDate instead of separate elements for Year, Month, Day
+            else if (reader.Name == "MedlineDate")
+            {
+                string[] date = reader.ReadElementContentAsString().Split(' ');
+                // If the first string in the above array has 4 chars (digits), it's the year
+                if (date.Length > 0 && date[0].Length == 4)
+                    item.year = int.Parse(date[0]);
+            }
+        }
+
+        private void ParseAuthor(List<Author> authors, XmlReader reader)
         {
             int depth = reader.Depth;
             reader.Read(); reader.Read();
-            string name = reader.ReadElementContentAsString();
+            string lname = reader.ReadElementContentAsString();
             reader.Read();
+            string fname = "";
             if (reader.Name == "ForeName")
-                name = $"{reader.ReadElementContentAsString()} {name}";
+                fname = reader.ReadElementContentAsString();
 
             // Move to AffilitionInfo node if present
             string affiliation = "";
@@ -205,7 +229,7 @@ namespace Converter
                 reader.Read();
             }
 
-            authors.Add(new Person(name, orcid, affiliation));
+            authors.Add(new Author(fname, lname, $"{fname} {lname}", "", orcid, affiliation));
         }
 
         // Parse Orcid from Identifier element

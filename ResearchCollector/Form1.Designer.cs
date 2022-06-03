@@ -1,4 +1,4 @@
-﻿namespace Converter
+﻿namespace ResearchCollector
 {
     partial class Form1
     {
@@ -67,7 +67,6 @@
             this.typeComboBox.Name = "typeComboBox";
             this.typeComboBox.Size = new System.Drawing.Size(174, 21);
             this.typeComboBox.TabIndex = 1;
-            this.typeComboBox.SelectedIndex = 2;
             this.typeComboBox.SelectedIndexChanged += new System.EventHandler(this.typeComboBox_SelectedIndexChanged);
             // 
             // label1
@@ -197,7 +196,7 @@
             this.Controls.Add(this.typeComboBox);
             this.Controls.Add(this.runBtn);
             this.Name = "Form1";
-            this.Text = "Data set converter";
+            this.Text = "Research Collector";
             this.ResumeLayout(false);
             this.PerformLayout();
 
