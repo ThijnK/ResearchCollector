@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Windows.Forms;
 using ResearchCollector.Filter;
+using ResearchCollector.Importer;
 
 namespace ResearchCollector
 {
@@ -43,6 +45,13 @@ namespace ResearchCollector
                     outputLocation.Visible = true;
                 }
             }
+
+            //Data data = new Data();
+            //Importer.Publication pub = new Importer.Publication("id", "test123", 2000, "doi", new string[] { "topic1", "topic2" });
+            //data.publications.Add(pub.id, pub);
+            //API api = new API(data);
+            //HashSet<Importer.Publication> res = api.Search<Importer.Publication>("publications", SearchType.Loose, ("title", "test123"));
+
         }
 
         private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
