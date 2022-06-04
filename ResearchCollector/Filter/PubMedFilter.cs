@@ -17,7 +17,7 @@ namespace ResearchCollector.Filter
 
         public PubMedFilter(SynchronizationContext context, string inputPath, string outputPath) : base(context, inputPath, outputPath)
         {
-            fileCount = 1;
+            fileCount = 1114;
             progressIncrement = 1.0 / (double)fileCount * 100.0;
         }
 
