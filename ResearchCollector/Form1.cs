@@ -75,9 +75,9 @@ namespace ResearchCollector
 
         private void worker_DoWork(object sender, DoWorkEventArgs e)
         {
-                filter.Run(inputPath, outputPath, worker);
             try
             {
+                filter.Run(inputPath, outputPath, worker);
             }
             catch (Exception ex)
             {
@@ -166,6 +166,11 @@ namespace ResearchCollector
             else if (typeComboBox.SelectedIndex == -1)
             {
                 Error("No date set type selected");
+                return;
+            }
+            else if (!File.Exists(inputPath))
+            {
+                Error("Input file does not exist");
                 return;
             }
 

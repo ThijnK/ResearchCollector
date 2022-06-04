@@ -143,23 +143,21 @@ namespace ResearchCollector.Filter
 
             // Part of (journal/proceedings)
             if (item.type == "article")
-            {
-                if (!ParseJournal(reader))
-                    return false;
-            }
+                ParseJournal(reader);
             else
             {
                 proceedings.Reset();
                 if (reader.Name != "event")
                     reader.ReadToNextSibling("event");
                 // Couldn't find journal
-                if (reader.Name == nodeType)
-                    return false;
-                reader.ReadToDescendant("name");
-                reader.ReadToDescendant("text");
-                // Reuse existing Volume object to avoid excessive memory usage
-                proceedings.title = reader.ReadElementContentAsString();
-                item.partof = proceedings;
+                if (reader.Name != nodeType)
+                {
+                    reader.ReadToDescendant("name");
+                    reader.ReadToDescendant("text");
+                    // Reuse existing Volume object to avoid excessive memory usage
+                    proceedings.title = reader.ReadElementContentAsString();
+                    item.partof = proceedings;
+                }
             }
 
             ReportAction($"{item.type} parsed: '{item.title}'");
@@ -216,10 +214,10 @@ namespace ResearchCollector.Filter
             // Reset current journal object
             journal.Reset();
 
-            // Journal volume
-            if (reader.Name != "volume")
-                reader.ReadToNextSibling("volume");
-            journal.volume = reader.ReadElementContentAsString();
+            // Journal volume (if it exists)
+            MoveToSibling(reader, "journalAssociation", "volume");
+            if (reader.Name == "volume")
+                journal.volume = reader.ReadElementContentAsString();
 
             // Title
             if (reader.Name != "journalAssociation")
