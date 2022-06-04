@@ -103,10 +103,12 @@
     <Compile Include="Importer\API.cs" />
     <Compile Include="Importer\DataStructures.cs" />
     <Compile Include="Importer\Importer.cs" />
+    <Compile Include="JsonTypes.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Filter\PubMedFilter.cs" />
     <Compile Include="Filter\PureFilter.cs" />
+    <Compile Include="Worker.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
