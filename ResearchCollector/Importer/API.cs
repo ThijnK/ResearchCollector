@@ -10,7 +10,6 @@ namespace ResearchCollector.Importer
 
     internal class API
     {
-        #region Version Thinus
         Data data;
 
         public API(Data data)
@@ -20,23 +19,69 @@ namespace ResearchCollector.Importer
 
         public HashSet<T> Search<T>(string searchDomain, SearchType searchType, params (string key, string query)[] arguments)
         {
+            bool howToSearch = searchType == SearchType.Exact; //mogelijk beter om searchtype een klasse te maken met een ingebouwde bool -> bool -> bool functie en start bool waarde
             switch (searchDomain)
-            {
+            {         
                 case "publications":
-                    Func<Publication, (string, string), bool> satisfies = (pub, arg) =>
+                    Func<Publication, (string, string), bool> satisfiesPublication = (pub, arg) =>
                     {
                         switch (arg.Item1)
                         {
                             case "title":
                                 return pub.title == arg.Item2;
+                            case "year":
+                                return pub.year.ToString() == arg.Item2;
+                            case "doi":
+                                return pub.doi == arg.Item2;
+                            case "authors":
+                                string[] realNames = pub.authors.ConvertAll<string>(a => { return a.name; }).ToArray();
+                                return CollectionQuery(realNames, arg.Item2.Split('|'), howToSearch, howToSearch);
+                            case "topics":                               
+                                return CollectionQuery(pub.topics, arg.Item2.Split('|'), howToSearch, howToSearch);
                             default:
-                                return false;
+                                throw new ArgumentException($"{searchDomain} does not have {arg.Item1} as key");
                         }
                     };
-                    return FindItems<T>(data.publications as Dictionary<string,T>, searchType, arguments, satisfies as Func<T,(string,string),bool>);
+                    return FindItems<T>(data.publications as Dictionary<string,T>, searchType, arguments, satisfiesPublication as Func<T,(string,string),bool>);
+                case "authors":
+                    Func<Author, (string, string), bool> satisfiesAuthor = (author, arg) =>
+                    {
+                        //toch raar om te zoeken naar author.person?
+                        switch (arg.Item1)
+                        {
+                            case "affiliation":
+                                return author.affiliation.name == arg.Item2;
+                            case "email":
+                                return author.email == arg.Item2;
+                            case "name":
+                                return author.name == arg.Item2;
+                            case "publications":
+                                string[] realTitles = author.publications.ConvertAll<string>(p => { return p.title; }).ToArray();
+                                return CollectionQuery(realTitles, arg.Item2.Split('|'), howToSearch, howToSearch);
+                            default:
+                                throw new ArgumentException($"{searchDomain} does not have {arg.Item1} as key");
+                        }
+                    };
+                    return FindItems<T>(data.authors as Dictionary<string, T>, searchType, arguments, satisfiesAuthor as Func<T, (string, string), bool>);
+                case "people":
+                case "volumes":
+                case "organizations":
                 default:
-                    throw new ArgumentException("Specified search domain does not exist");
+                    throw new ArgumentException($"Searchdomain {searchDomain} does not exist");
             }
+        }       
+        
+        bool CollectionQuery(string[] realCollection, string[] queryCollection, bool howToCompare, bool start)
+        {          
+            foreach (string real in realCollection)
+            {
+                bool thisOne = false;
+                foreach (string query in queryCollection)
+                    if (real == query)
+                        thisOne = true;
+                start = howToCompare ? start && thisOne : start || thisOne;
+            }
+            return start;
         }
 
         private HashSet<T> FindItems<T>(Dictionary<string, T> toSearch, SearchType searchType, (string, string)[] args, Func<T,(string,string),bool> Satisfies)
@@ -79,67 +124,7 @@ namespace ResearchCollector.Importer
 
             return result;
         }
-        #endregion
 
-        #region Version Doormat
-        public HashSet<Article> SearchArticle(Dictionary<string, Article> searchedItems, SearchType searchType, params (string key, string query)[] queryArguments)
-        {
-
-            HashSet<Article> result = new HashSet<Article>();         
-           
-            foreach(Article article in searchedItems.Values)
-            {
-                bool addIt = false;
-
-                //eerste los want exact
-                InitialQuery:
-                (string key, string query) = queryArguments[0];
-                switch (key)
-                {
-                    case "title":
-                        addIt = CompareFirst(article.title, query, searchType);
-                        break;
-                    default: //als de eerste key invalid is telt ie niet mee als eerste
-                        goto InitialQuery;
-                }
-
-                for (int i = 1; i < queryArguments.Length; i++)
-                {
-                    (key, query) = queryArguments[i];
-                    switch (key)
-                    {
-                        case "title":
-                            addIt = Compare(article.title, query, searchType, addIt);
-                            break;
-                        default:
-                            continue;
-                    }
-                }
-                if (addIt)
-                    result.Add(article);
-            }
-            return result;
-        }
-
-        bool Compare(string real, string query, SearchType searchWay, bool currentJudgement)
-        {
-            bool equal = real == query;
-            if (searchWay == SearchType.Exact)
-                return currentJudgement && equal;
-            if (searchWay == SearchType.Loose)
-                return currentJudgement || equal;
-            throw new Exception("Not all search ways implemented");
-        }
-
-        bool CompareFirst(string real, string query, SearchType searchWay)
-        {
-            bool equal = real == query;
-            if (searchWay == SearchType.Exact)
-                return equal;
-            if (searchWay == SearchType.Loose)
-                return equal;
-            throw new Exception("Not all search ways implemented");
-        }
-        #endregion
+        
     }
 }

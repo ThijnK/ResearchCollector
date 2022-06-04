@@ -139,8 +139,8 @@ namespace ResearchCollector.Importer
 
     class Organization
     {
-        GeoCoordinate location;
-        string name;
+        public GeoCoordinate location;
+        public string name;
 
         public Organization(string name)
         {
