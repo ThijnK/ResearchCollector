@@ -58,8 +58,34 @@ namespace ResearchCollector.Importer
         private void ParsePublication()
         {
             currentPubCount++;
+           
+            //hier article / dat andere ding aanmaken
             
-            
+            foreach(JsonAuthor author in pub.has)
+            {
+                if (!data.organizations.TryGetValue(author.affiliatedTo, out Organization currentAffiliation)) 
+                {
+                    currentAffiliation = new Organization(author.affiliatedTo);
+                    data.organizations.Add(author.affiliatedTo, currentAffiliation);
+                }
+
+                if (data.people.TryGetValue(author.orcid, out Person currentPerson) 
+                    && !data.authors.TryGetValue(author.email, out Author currentAuthor)) //if the person already exists but the author doesn't (if person exists, sets it, and same for author
+                {
+                    currentAuthor = new Author(currentPerson, currentAffiliation, author.email, author.name);
+                    data.authors.Add(author.email, currentAuthor);
+                }
+                //als de person niet bestaat bestaat de author (denk ik) sws niet
+                else
+                {
+                    currentPerson = new Person(author.orcid, author.name);
+                    data.people.Add(author.orcid, currentPerson);
+                    currentAuthor = new Author(currentPerson, currentAffiliation, author.email, author.name);
+                    data.authors.Add(author.email, currentAuthor); //email als key voor de author!!!!!
+                }
+
+                //hier author toevoegen aan de publication zn authors
+            }
 
             // Get text from pdf
             string text = GetText();
