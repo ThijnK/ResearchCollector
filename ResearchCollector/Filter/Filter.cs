@@ -9,7 +9,7 @@ using System.Xml;
 
 namespace ResearchCollector.Filter
 {
-    abstract class Filter
+    abstract class Filter : Worker
     {
         /// <summary>
         /// Path of the file to write the output to
@@ -20,17 +20,12 @@ namespace ResearchCollector.Filter
         /// </summary>
         private bool arrayStarted;
         /// <summary>
-        /// Reference to the background worker this is being run on to report progress
-        /// </summary>
-        protected BackgroundWorker worker;
-        public bool logActions;
-        /// <summary>
         /// Stores the info of the publication currently being parsed.
         /// Same object is reused for every publication.
         /// </summary>
-        protected Publication item;
-        protected Volume proceedings;
-        protected Journal journal;
+        protected JsonPublication item;
+        protected JsonVolume proceedings;
+        protected JsonJournal journal;
 
         /// <summary>
         /// Current progress
@@ -60,22 +55,10 @@ namespace ResearchCollector.Filter
         /// <returns>True if the publication was parsed successfully, false otherwise</returns>
         public abstract bool ParsePublicationXml(XmlReader reader);
 
-        /// <summary>
-        /// Event that is raised when an action was completed (like a publication being parsed and added to the output)
-        /// </summary>
-        public event EventHandler<ActionCompletedEventArgs> ActionCompleted;
-        /// <summary>
-        /// Context used for posting messages to the UI (since <see cref="Run(string, string, BackgroundWorker)"/> will be run an a separate background thread)
-        /// </summary>
-        private readonly SynchronizationContext context;
-
-        public Filter(SynchronizationContext context)
-        {
-            this.context = context;
-        }
+        public Filter(SynchronizationContext context) : base(context) { }
 
         /// <summary>
-        /// Convert the given input file to the JSON format <see cref="Publication"/>
+        /// Convert the given input file to the JSON format <see cref="JsonPublication"/>
         /// </summary>
         /// <param name="worker">Background worker that this method is being run on</param>
         public void Run(string inputPath, string outputPath, BackgroundWorker worker)
@@ -100,18 +83,18 @@ namespace ResearchCollector.Filter
         /// </summary>
         private void InitializeReusables()
         {
-            item = new Publication();
+            item = new JsonPublication();
             item.externalId = "";
             item.origin = "";
             item.type = "";
             item.title = "";
             item.year = -1;
-            proceedings = new Volume("");
-            journal = new Journal("", "", "", "");
+            proceedings = new JsonVolume("");
+            journal = new JsonJournal("", "", "", "");
             item.partof = proceedings;
             item.doi = "";
             item.pdfLink = "";
-            item.has = new Author[0];
+            item.has = new JsonAuthor[0];
         }
 
         /// <summary>
@@ -175,27 +158,8 @@ namespace ResearchCollector.Filter
         }
 
         /// <summary>
-        /// Report to the UI a description of what is being done right now
-        /// </summary>
-        protected void ReportAction(string description)
-        {
-            if (logActions)
-                context.Post(new SendOrPostCallback(RaiseActionEvent), description);
-        }
-
-        /// <summary>
-        /// Event to be raised from within the context of the UI
-        /// </summary>
-        /// <param name="state"></param>
-        private void RaiseActionEvent(object state)
-        {
-            ActionCompleted(this, new ActionCompletedEventArgs((string)state));
-        }
-
-        /// <summary>
         /// Moves the reader to the start element that comes right after the end element of the current depth
         /// </summary>
-        /// 
         protected void MoveToNextNode(XmlReader reader, int targetDepth)
         {
             while (reader.Depth > targetDepth)
@@ -218,89 +182,4 @@ namespace ResearchCollector.Filter
             return true;
         }
     }
-
-    public class ActionCompletedEventArgs : EventArgs
-    {
-        public string description;
-
-        public ActionCompletedEventArgs(string description)
-        {
-            this.description = description;
-        }
-    }
-
-    #region Data types for JSON serialization
-    class Publication
-    {
-        public string externalId { get; set; }
-        public string origin { get; set; }
-        public string type { get; set; }
-        public string title { get; set; }
-        public int year { get; set; }
-        public string doi { get; set; }
-        public string pdfLink { get; set; }
-        public object partof { get; set; }
-        public Author[] has { get; set; }
-    }
-
-    class Volume
-    {
-        public string title { get; set; }
-
-        public Volume(string title)
-        {
-            this.title = title;
-        }
-
-        /// <summary>
-        /// Reset the attributes of this Volume to an empty string, to be filled for the next publication
-        /// </summary>
-        public virtual void Reset()
-        {
-            this.title = "";
-        }
-    }
-
-    class Journal : Volume
-    {
-        public string issue { get; set; }
-        public string volume { get; set; }
-        public string series { get; set; }
-
-        public Journal(string title, string issue, string volume, string series) : base(title)
-        {
-            this.issue = issue;
-            this.volume = volume;
-            this.series = series;
-        }
-
-        public override void Reset()
-        {
-            base.Reset();
-            this.issue = "";
-            this.volume = "";
-            this.series = "";
-        }
-    }
-
-    struct Author
-    {
-        public string fname { get; set; }
-        public string lname { get; set; }
-        public string name { get; set; }
-        public string email { get; set; }
-        public string orcid { get; set; }
-        public string affiliatedTo { get; set; }
-
-        public Author(string fname, string lname, string name, string email, string orcid, string affiliatedTo)
-        {
-            this.fname = fname;
-            this.lname = lname;
-            this.name = name;
-            this.email = email;
-            this.orcid = orcid;
-            this.affiliatedTo = affiliatedTo;
-        }
-    }
-    #endregion
 }

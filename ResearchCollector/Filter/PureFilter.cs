@@ -102,7 +102,7 @@ namespace ResearchCollector.Filter
                 return false;
             if (reader.Name == "personAssociations")
             {
-                List<Author> authors = new List<Author>();
+                List<JsonAuthor> authors = new List<JsonAuthor>();
                 if (reader.ReadToDescendant("personAssociation"))
                 {
                     depth = reader.Depth;
@@ -114,7 +114,7 @@ namespace ResearchCollector.Filter
                 }
             }
             else
-                item.has = new Author[0];
+                item.has = new JsonAuthor[0];
 
             // Doi (not always present)
             // Move to to electronicVersions if it exists, if not, skip this publication (no doi or file)
@@ -166,7 +166,7 @@ namespace ResearchCollector.Filter
             return true;
         }
         
-        private void ParseAuthor(XmlReader reader, List<Author> authors)
+        private void ParseAuthor(XmlReader reader, List<JsonAuthor> authors)
         {
             string fname = "", lname = "", name = "";
             if (reader.ReadToDescendant("firstName"))
@@ -199,7 +199,7 @@ namespace ResearchCollector.Filter
             }
 
             // TODO: affiliation can be a faculty, without reference to actual organization
-            authors.Add(new Author(fname, lname, name, "", "", affiliation));
+            authors.Add(new JsonAuthor(fname, lname, name, "", "", affiliation));
 
             // Move to end tag of this person element
             while (reader.Name != "personAssociation")

@@ -14,7 +14,7 @@ namespace ResearchCollector
         private string outputPath;
         private BackgroundWorker worker;
         private bool workerInterrupted;
-        private ResearchCollector.Filter.Filter converter;
+        private ResearchCollector.Filter.Filter filter;
 
         /// <summary>
         /// Context used to access UI thread from BackgroundWorker
@@ -69,13 +69,13 @@ namespace ResearchCollector
                 Log("Parsing finished!");
                 progressLabel.Text = "100%";
                 progressBar.Value = 100;
-                Log($"Output saved to {outputPath}\\{converter.ToString()}.json");
+                Log($"Output saved to {outputPath}\\{filter.ToString()}.json");
             }
         }
 
         private void worker_DoWork(object sender, DoWorkEventArgs e)
         {
-                converter.Run(inputPath, outputPath, worker);
+                filter.Run(inputPath, outputPath, worker);
             try
             {
             }
@@ -152,8 +152,8 @@ namespace ResearchCollector
 
         private void logCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            if (converter != null)
-                converter.logActions = logCheckBox.Checked;
+            if (filter != null)
+                filter.logActions = logCheckBox.Checked;
         }
 
         private void RunBtn_Click(object sender, EventArgs e)
@@ -174,39 +174,39 @@ namespace ResearchCollector
                 if (!AskForOutputLocation())
                     return;
 
-            RunConverter();
+            RunFilter();
         }
 
         /// <summary>
         /// Runs the converter on the currently selected data set
         /// </summary>
-        private void RunConverter()
+        private void RunFilter()
         {
             switch (typeComboBox.SelectedIndex)
             {
                 case 0:
-                    converter = new DblpFilter(context);
+                    filter = new DblpFilter(context);
                     break;
                 case 1:
-                    converter = new PubMedFilter(context);
+                    filter = new PubMedFilter(context);
                     break;
                 case 2:
-                    converter = new PureFilter(context);
+                    filter = new PureFilter(context);
                     break;
                 default:
-                    converter = new DblpFilter(context);
+                    filter = new DblpFilter(context);
                     break;
             }
 
             // Check if input file is the expected data set
-            if (typeComboBox.SelectedIndex != 1 && !converter.CheckFile(inputPath))
+            if (typeComboBox.SelectedIndex != 1 && !filter.CheckFile(inputPath))
             {
                 Error("Selected input file is not valid");
                 return;
             }
 
-            converter.logActions = logCheckBox.Checked;
-            converter.ActionCompleted += (object sender, ActionCompletedEventArgs ace) => { Log(ace.description); };
+            filter.logActions = logCheckBox.Checked;
+            filter.ActionCompleted += (object sender, ActionCompletedEventArgs ace) => { Log(ace.description); };
             runBtn.Enabled = false;
             progressBar.Value = 0;
             progressLabel.Text = "0%";

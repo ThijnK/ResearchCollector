@@ -137,7 +137,7 @@ namespace ResearchCollector.Filter
             item.title = reader.ReadInnerXml();
 
             // Authors
-            List<Author> authors = new List<Author>();
+            List<JsonAuthor> authors = new List<JsonAuthor>();
             if (reader.ReadToNextSibling("AuthorList"))
             {
                 if (reader.ReadToDescendant("Author"))
@@ -201,7 +201,7 @@ namespace ResearchCollector.Filter
             }
         }
 
-        private void ParseAuthor(List<Author> authors, XmlReader reader)
+        private void ParseAuthor(List<JsonAuthor> authors, XmlReader reader)
         {
             int depth = reader.Depth;
             reader.Read(); reader.Read();
@@ -229,7 +229,7 @@ namespace ResearchCollector.Filter
                 reader.Read();
             }
 
-            authors.Add(new Author(fname, lname, $"{fname} {lname}", "", orcid, affiliation));
+            authors.Add(new JsonAuthor(fname, lname, $"{fname} {lname}", "", orcid, affiliation));
         }
 
         // Parse Orcid from Identifier element

@@ -66,7 +66,7 @@ namespace ResearchCollector.Filter
 
             // Authors
             reader.Read(); reader.Read();
-            List<Author> authors = new List<Author>();
+            List<JsonAuthor> authors = new List<JsonAuthor>();
             while (reader.Name == "author")
                 ParseAuthor(authors, reader);
             item.has = authors.ToArray();
@@ -139,12 +139,12 @@ namespace ResearchCollector.Filter
             }
         }
 
-        private void ParseAuthor(List<Author> authors, XmlReader reader)
+        private void ParseAuthor(List<JsonAuthor> authors, XmlReader reader)
         {
             string orcid = reader.GetAttribute("orcid");
             if (orcid == null)
                 orcid = "";
-            authors.Add(new Author("", "", reader.ReadElementContentAsString(), "", orcid, ""));
+            authors.Add(new JsonAuthor("", "", reader.ReadElementContentAsString(), "", orcid, ""));
             reader.Read();
         }
 
