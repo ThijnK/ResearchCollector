@@ -64,8 +64,48 @@ namespace ResearchCollector.Importer
                     };
                     return FindItems<T>(data.authors as Dictionary<string, T>, searchType, arguments, satisfiesAuthor as Func<T, (string, string), bool>);
                 case "people":
+                    Func<Person, (string, string), bool> satisfiesPerson = (person, arg) =>
+                    {
+                        switch (arg.Item1)
+                        {
+                            case "name":
+                                return person.name == arg.Item2;
+                            case "orcid":
+                                return person.orcid == arg.Item2;
+                            case "authored":
+                                string[] realNames = person.authored.ConvertAll<string>(a => { return a.name; }).ToArray();
+                                return CollectionQuery(realNames, arg.Item2.Split('|'), howToSearch, howToSearch);
+                            default:
+                                throw new ArgumentException($"{searchDomain} does not have {arg.Item1} as key");
+                        }
+                    };
+                    return FindItems<T>(data.people as Dictionary<string, T>, searchType, arguments, satisfiesPerson as Func<T, (string, string), bool>);
                 case "volumes":
+                    Func<PublicationVolume, (string, string), bool> satisfiesVolume = (volume, arg) =>
+                    {
+                        switch (arg.Item1)
+                        {
+                            case "title":
+                                return volume.title == arg.Item2;
+                            default:
+                                throw new ArgumentException($"{searchDomain} does not have {arg.Item1} as key");
+                        }
+                    };
+                    return FindItems<T>(data.volumes as Dictionary<string, T>, searchType, arguments, satisfiesVolume as Func<T, (string, string), bool>);
                 case "organizations":
+                    Func<Organization, (string, string), bool> satisfiesOrganization = (org, arg) =>
+                    {
+                        switch (arg.Item1)
+                        {
+                            case "name":
+                                return org.name == arg.Item2;
+                            case "location":
+                                return org.location.ToString() == arg.Item2;
+                            default:
+                                throw new ArgumentException($"{searchDomain} does not have {arg.Item1} as key");
+                        }
+                    };
+                    return FindItems<T>(data.organizations as Dictionary<string, T>, searchType, arguments, satisfiesOrganization as Func<T, (string, string), bool>);
                 default:
                     throw new ArgumentException($"Searchdomain {searchDomain} does not exist");
             }

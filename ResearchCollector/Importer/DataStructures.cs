@@ -107,7 +107,7 @@ namespace ResearchCollector.Importer
 
     class PublicationVolume
     {
-        string title;
+        public string title;
 
         public PublicationVolume(string title)
         {
