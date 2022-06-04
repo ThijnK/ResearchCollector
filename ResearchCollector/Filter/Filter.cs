@@ -12,6 +12,10 @@ namespace ResearchCollector.Filter
     abstract class Filter : Worker
     {
         /// <summary>
+        /// Path of the file to read the input from
+        /// </summary>
+        protected string inputPath;
+        /// <summary>
         /// Path of the file to write the output to
         /// </summary>
         protected string outputPath;
@@ -26,19 +30,6 @@ namespace ResearchCollector.Filter
         protected JsonPublication item;
         protected JsonVolume proceedings;
         protected JsonJournal journal;
-
-        /// <summary>
-        /// Current progress
-        /// </summary>
-        protected double progress;
-        /// <summary>
-        /// How much the progress is incremented with each publication that is parsed
-        /// </summary>
-        protected double progressIncrement;
-        /// <summary>
-        /// Previous progress 
-        /// </summary>
-        protected int prevProgress;
 
         /// <returns>The type of the data set being converted, e.g. "dblp" or "pubmed"</returns>
         public override abstract string ToString();
@@ -55,13 +46,17 @@ namespace ResearchCollector.Filter
         /// <returns>True if the publication was parsed successfully, false otherwise</returns>
         public abstract bool ParsePublicationXml(XmlReader reader);
 
-        public Filter(SynchronizationContext context) : base(context) { }
+        public Filter(SynchronizationContext context, string inputPath, string outputPath) : base(context) 
+        {
+            this.inputPath = inputPath;
+            this.outputPath = outputPath;
+        }
 
         /// <summary>
         /// Convert the given input file to the JSON format <see cref="JsonPublication"/>
         /// </summary>
         /// <param name="worker">Background worker that this method is being run on</param>
-        public void Run(string inputPath, string outputPath, BackgroundWorker worker)
+        public override void Run(BackgroundWorker worker)
         {
             this.worker = worker;
 
@@ -142,19 +137,6 @@ namespace ResearchCollector.Filter
             sb.Append("\n\t\t");
             sb.Append(JsonSerializer.Serialize(item));
             File.AppendAllText(outputPath, sb.ToString());
-        }
-
-        /// <summary>
-        /// Increment progress and inform the UI if progress has been made beyond a few decimals
-        /// </summary>
-        protected void UpdateProgress()
-        {
-            progress = Math.Min(100.0, progress + progressIncrement);
-            if ((int)progress > prevProgress)
-            {
-                prevProgress = (int)progress;
-                worker.ReportProgress(prevProgress);
-            }
         }
 
         /// <summary>

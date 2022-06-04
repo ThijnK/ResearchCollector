@@ -20,6 +20,19 @@ namespace ResearchCollector
         public bool logActions;
 
         /// <summary>
+        /// Current progress
+        /// </summary>
+        protected double progress;
+        /// <summary>
+        /// How much the progress is incremented with each publication/file that is parsed
+        /// </summary>
+        protected double progressIncrement;
+        /// <summary>
+        /// Previous progress 
+        /// </summary>
+        protected int prevProgress;
+
+        /// <summary>
         /// Event that is raised when an action was completed (like a publication being parsed and added to the output)
         /// </summary>
         public event EventHandler<ActionCompletedEventArgs> ActionCompleted;
@@ -50,6 +63,25 @@ namespace ResearchCollector
         {
             ActionCompleted(this, new ActionCompletedEventArgs((string)state));
         }
+
+        /// <summary>
+        /// Increment progress and inform the UI if progress has been made beyond a few decimals
+        /// </summary>
+        protected void UpdateProgress()
+        {
+            progress = Math.Min(100.0, progress + progressIncrement);
+            if ((int)progress > prevProgress)
+            {
+                prevProgress = (int)progress;
+                worker.ReportProgress(prevProgress);
+            }
+        }
+
+        /// <summary>
+        /// Run the current worker
+        /// </summary>
+        /// <param name="worker"></param>
+        public abstract void Run(BackgroundWorker worker);
     }
 
     public class ActionCompletedEventArgs : EventArgs

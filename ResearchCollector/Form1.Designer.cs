@@ -28,64 +28,61 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            this.runBtn = new System.Windows.Forms.Button();
-            this.typeComboBox = new System.Windows.Forms.ComboBox();
+            this.runBtnFilter = new System.Windows.Forms.Button();
+            this.typeComboBoxFilter = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.logBox = new System.Windows.Forms.TextBox();
+            this.logBoxFilter = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.inputLabel = new System.Windows.Forms.Label();
-            this.inputLocation = new System.Windows.Forms.Label();
+            this.inputLocationFilter = new System.Windows.Forms.Label();
             this.dtdLabel = new System.Windows.Forms.Label();
             this.outputLabel = new System.Windows.Forms.Label();
-            this.outputLocation = new System.Windows.Forms.Label();
-            this.progressBar = new System.Windows.Forms.ProgressBar();
-            this.progressLabel = new System.Windows.Forms.Label();
-            this.logCheckBox = new System.Windows.Forms.CheckBox();
-            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.contextMenuStrip2 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.dToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.outputLocationFilter = new System.Windows.Forms.Label();
+            this.progressBarFilter = new System.Windows.Forms.ProgressBar();
+            this.progressLabelFilter = new System.Windows.Forms.Label();
+            this.logCheckBoxFilter = new System.Windows.Forms.CheckBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.filterTab = new System.Windows.Forms.TabPage();
             this.importerTab = new System.Windows.Forms.TabPage();
-            this.apiTab = new System.Windows.Forms.TabPage();
+            this.logBoxImporter = new System.Windows.Forms.TextBox();
+            this.inputLocationImporter = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
             this.runBtnImporter = new System.Windows.Forms.Button();
             this.logCheckBoxImporter = new System.Windows.Forms.CheckBox();
-            this.progressLabelImpoter = new System.Windows.Forms.Label();
+            this.progressLabelImporter = new System.Windows.Forms.Label();
             this.progressBarImporter = new System.Windows.Forms.ProgressBar();
-            this.logBoxImporter = new System.Windows.Forms.TextBox();
-            this.label4 = new System.Windows.Forms.Label();
-            this.contextMenuStrip2.SuspendLayout();
+            this.apiTab = new System.Windows.Forms.TabPage();
             this.tabControl1.SuspendLayout();
             this.filterTab.SuspendLayout();
             this.importerTab.SuspendLayout();
             this.SuspendLayout();
             // 
-            // runBtn
+            // runBtnFilter
             // 
-            this.runBtn.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.runBtn.Location = new System.Drawing.Point(8, 67);
-            this.runBtn.Name = "runBtn";
-            this.runBtn.Size = new System.Drawing.Size(174, 37);
-            this.runBtn.TabIndex = 0;
-            this.runBtn.Text = "Run";
-            this.runBtn.UseVisualStyleBackColor = true;
-            this.runBtn.Click += new System.EventHandler(this.RunBtn_Click);
+            this.runBtnFilter.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.runBtnFilter.Location = new System.Drawing.Point(8, 67);
+            this.runBtnFilter.Name = "runBtnFilter";
+            this.runBtnFilter.Size = new System.Drawing.Size(224, 37);
+            this.runBtnFilter.TabIndex = 0;
+            this.runBtnFilter.Text = "Run";
+            this.runBtnFilter.UseVisualStyleBackColor = true;
+            this.runBtnFilter.Click += new System.EventHandler(this.FilterRunBtn_Click);
             // 
-            // typeComboBox
+            // typeComboBoxFilter
             // 
-            this.typeComboBox.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.typeComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.typeComboBox.FormattingEnabled = true;
-            this.typeComboBox.Items.AddRange(new object[] {
+            this.typeComboBoxFilter.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.typeComboBoxFilter.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.typeComboBoxFilter.FormattingEnabled = true;
+            this.typeComboBoxFilter.Items.AddRange(new object[] {
             "DBLP",
             "PubMed",
             "PURE"});
-            this.typeComboBox.Location = new System.Drawing.Point(8, 40);
-            this.typeComboBox.Name = "typeComboBox";
-            this.typeComboBox.Size = new System.Drawing.Size(174, 21);
-            this.typeComboBox.TabIndex = 1;
-            this.typeComboBox.SelectedIndexChanged += new System.EventHandler(this.typeComboBox_SelectedIndexChanged);
+            this.typeComboBoxFilter.Location = new System.Drawing.Point(8, 40);
+            this.typeComboBoxFilter.Name = "typeComboBoxFilter";
+            this.typeComboBoxFilter.Size = new System.Drawing.Size(224, 21);
+            this.typeComboBoxFilter.TabIndex = 1;
+            this.typeComboBoxFilter.SelectedIndexChanged += new System.EventHandler(this.FilterComboBox_IndexChanged);
             // 
             // label1
             // 
@@ -96,19 +93,19 @@
             this.label1.TabIndex = 2;
             this.label1.Text = "Type of data set:";
             // 
-            // logBox
+            // logBoxFilter
             // 
-            this.logBox.Location = new System.Drawing.Point(195, 24);
-            this.logBox.Multiline = true;
-            this.logBox.Name = "logBox";
-            this.logBox.ReadOnly = true;
-            this.logBox.Size = new System.Drawing.Size(596, 413);
-            this.logBox.TabIndex = 3;
+            this.logBoxFilter.Location = new System.Drawing.Point(238, 24);
+            this.logBoxFilter.Multiline = true;
+            this.logBoxFilter.Name = "logBoxFilter";
+            this.logBoxFilter.ReadOnly = true;
+            this.logBoxFilter.Size = new System.Drawing.Size(553, 413);
+            this.logBoxFilter.TabIndex = 3;
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(192, 8);
+            this.label2.Location = new System.Drawing.Point(235, 8);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(28, 13);
             this.label2.TabIndex = 4;
@@ -124,25 +121,25 @@
             this.inputLabel.Text = "Input file*:";
             this.inputLabel.Visible = false;
             // 
-            // inputLocation
+            // inputLocationFilter
             // 
-            this.inputLocation.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.inputLocation.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.inputLocation.Location = new System.Drawing.Point(8, 248);
-            this.inputLocation.Name = "inputLocation";
-            this.inputLocation.Size = new System.Drawing.Size(174, 20);
-            this.inputLocation.TabIndex = 0;
-            this.inputLocation.Text = "No file selected";
-            this.inputLocation.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.inputLocation.Visible = false;
-            this.inputLocation.Click += new System.EventHandler(this.inputLocation_Click);
+            this.inputLocationFilter.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.inputLocationFilter.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.inputLocationFilter.Location = new System.Drawing.Point(8, 248);
+            this.inputLocationFilter.Name = "inputLocationFilter";
+            this.inputLocationFilter.Size = new System.Drawing.Size(224, 20);
+            this.inputLocationFilter.TabIndex = 0;
+            this.inputLocationFilter.Text = "No file selected";
+            this.inputLocationFilter.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.inputLocationFilter.Visible = false;
+            this.inputLocationFilter.Click += new System.EventHandler(this.FilterInputLocation_Click);
             // 
             // dtdLabel
             // 
             this.dtdLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.75F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.dtdLabel.Location = new System.Drawing.Point(8, 270);
             this.dtdLabel.Name = "dtdLabel";
-            this.dtdLabel.Size = new System.Drawing.Size(177, 56);
+            this.dtdLabel.Size = new System.Drawing.Size(224, 56);
             this.dtdLabel.TabIndex = 13;
             this.dtdLabel.Text = "* DTD file is assumed to be located in the same directory as the input file, as w" +
     "ell as to have the same name as the input file.";
@@ -157,61 +154,43 @@
             this.outputLabel.TabIndex = 9;
             this.outputLabel.Text = "Saving output to:";
             // 
-            // outputLocation
+            // outputLocationFilter
             // 
-            this.outputLocation.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.outputLocation.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.outputLocation.Location = new System.Drawing.Point(8, 196);
-            this.outputLocation.Name = "outputLocation";
-            this.outputLocation.Size = new System.Drawing.Size(174, 20);
-            this.outputLocation.TabIndex = 0;
-            this.outputLocation.Text = "No folder selected";
-            this.outputLocation.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.outputLocation.Click += new System.EventHandler(this.outputLocation_Click);
+            this.outputLocationFilter.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.outputLocationFilter.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.outputLocationFilter.Location = new System.Drawing.Point(8, 196);
+            this.outputLocationFilter.Name = "outputLocationFilter";
+            this.outputLocationFilter.Size = new System.Drawing.Size(224, 20);
+            this.outputLocationFilter.TabIndex = 0;
+            this.outputLocationFilter.Text = "No folder selected";
+            this.outputLocationFilter.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.outputLocationFilter.Click += new System.EventHandler(this.FilterOutputLocation_Click);
             // 
-            // progressBar
+            // progressBarFilter
             // 
-            this.progressBar.Location = new System.Drawing.Point(8, 123);
-            this.progressBar.Name = "progressBar";
-            this.progressBar.Size = new System.Drawing.Size(174, 23);
-            this.progressBar.TabIndex = 14;
+            this.progressBarFilter.Location = new System.Drawing.Point(8, 123);
+            this.progressBarFilter.Name = "progressBarFilter";
+            this.progressBarFilter.Size = new System.Drawing.Size(224, 23);
+            this.progressBarFilter.TabIndex = 14;
             // 
-            // progressLabel
+            // progressLabelFilter
             // 
-            this.progressLabel.Location = new System.Drawing.Point(8, 107);
-            this.progressLabel.Name = "progressLabel";
-            this.progressLabel.Size = new System.Drawing.Size(174, 13);
-            this.progressLabel.TabIndex = 15;
-            this.progressLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.progressLabelFilter.Location = new System.Drawing.Point(8, 107);
+            this.progressLabelFilter.Name = "progressLabelFilter";
+            this.progressLabelFilter.Size = new System.Drawing.Size(224, 13);
+            this.progressLabelFilter.TabIndex = 15;
+            this.progressLabelFilter.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // logCheckBox
+            // logCheckBoxFilter
             // 
-            this.logCheckBox.AutoSize = true;
-            this.logCheckBox.Location = new System.Drawing.Point(8, 153);
-            this.logCheckBox.Name = "logCheckBox";
-            this.logCheckBox.Size = new System.Drawing.Size(81, 17);
-            this.logCheckBox.TabIndex = 16;
-            this.logCheckBox.Text = "Log actions";
-            this.logCheckBox.UseVisualStyleBackColor = true;
-            this.logCheckBox.CheckedChanged += new System.EventHandler(this.logCheckBox_CheckedChanged);
-            // 
-            // contextMenuStrip1
-            // 
-            this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
-            // 
-            // contextMenuStrip2
-            // 
-            this.contextMenuStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.dToolStripMenuItem});
-            this.contextMenuStrip2.Name = "contextMenuStrip2";
-            this.contextMenuStrip2.Size = new System.Drawing.Size(82, 26);
-            // 
-            // dToolStripMenuItem
-            // 
-            this.dToolStripMenuItem.Name = "dToolStripMenuItem";
-            this.dToolStripMenuItem.Size = new System.Drawing.Size(81, 22);
-            this.dToolStripMenuItem.Text = "d";
+            this.logCheckBoxFilter.AutoSize = true;
+            this.logCheckBoxFilter.Location = new System.Drawing.Point(8, 153);
+            this.logCheckBoxFilter.Name = "logCheckBoxFilter";
+            this.logCheckBoxFilter.Size = new System.Drawing.Size(81, 17);
+            this.logCheckBoxFilter.TabIndex = 16;
+            this.logCheckBoxFilter.Text = "Log actions";
+            this.logCheckBoxFilter.UseVisualStyleBackColor = true;
+            this.logCheckBoxFilter.CheckedChanged += new System.EventHandler(this.LogCheckBox_Changed);
             // 
             // tabControl1
             // 
@@ -227,17 +206,17 @@
             // filterTab
             // 
             this.filterTab.Controls.Add(this.label1);
-            this.filterTab.Controls.Add(this.runBtn);
-            this.filterTab.Controls.Add(this.typeComboBox);
-            this.filterTab.Controls.Add(this.outputLocation);
-            this.filterTab.Controls.Add(this.logBox);
-            this.filterTab.Controls.Add(this.inputLocation);
+            this.filterTab.Controls.Add(this.runBtnFilter);
+            this.filterTab.Controls.Add(this.typeComboBoxFilter);
+            this.filterTab.Controls.Add(this.outputLocationFilter);
+            this.filterTab.Controls.Add(this.logBoxFilter);
+            this.filterTab.Controls.Add(this.inputLocationFilter);
             this.filterTab.Controls.Add(this.label2);
-            this.filterTab.Controls.Add(this.logCheckBox);
+            this.filterTab.Controls.Add(this.logCheckBoxFilter);
             this.filterTab.Controls.Add(this.inputLabel);
-            this.filterTab.Controls.Add(this.progressLabel);
+            this.filterTab.Controls.Add(this.progressLabelFilter);
             this.filterTab.Controls.Add(this.outputLabel);
-            this.filterTab.Controls.Add(this.progressBar);
+            this.filterTab.Controls.Add(this.progressBarFilter);
             this.filterTab.Controls.Add(this.dtdLabel);
             this.filterTab.Location = new System.Drawing.Point(4, 22);
             this.filterTab.Name = "filterTab";
@@ -250,10 +229,12 @@
             // importerTab
             // 
             this.importerTab.Controls.Add(this.logBoxImporter);
+            this.importerTab.Controls.Add(this.inputLocationImporter);
+            this.importerTab.Controls.Add(this.label5);
             this.importerTab.Controls.Add(this.label4);
             this.importerTab.Controls.Add(this.runBtnImporter);
             this.importerTab.Controls.Add(this.logCheckBoxImporter);
-            this.importerTab.Controls.Add(this.progressLabelImpoter);
+            this.importerTab.Controls.Add(this.progressLabelImporter);
             this.importerTab.Controls.Add(this.progressBarImporter);
             this.importerTab.Location = new System.Drawing.Point(4, 22);
             this.importerTab.Name = "importerTab";
@@ -263,24 +244,55 @@
             this.importerTab.Text = "Importer";
             this.importerTab.UseVisualStyleBackColor = true;
             // 
-            // apiTab
+            // logBoxImporter
             // 
-            this.apiTab.Location = new System.Drawing.Point(4, 22);
-            this.apiTab.Name = "apiTab";
-            this.apiTab.Size = new System.Drawing.Size(303, 192);
-            this.apiTab.TabIndex = 2;
-            this.apiTab.Text = "API";
-            this.apiTab.UseVisualStyleBackColor = true;
+            this.logBoxImporter.Location = new System.Drawing.Point(238, 24);
+            this.logBoxImporter.Multiline = true;
+            this.logBoxImporter.Name = "logBoxImporter";
+            this.logBoxImporter.ReadOnly = true;
+            this.logBoxImporter.Size = new System.Drawing.Size(553, 413);
+            this.logBoxImporter.TabIndex = 25;
+            // 
+            // inputLocationImporter
+            // 
+            this.inputLocationImporter.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.inputLocationImporter.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.inputLocationImporter.Location = new System.Drawing.Point(8, 156);
+            this.inputLocationImporter.Name = "inputLocationImporter";
+            this.inputLocationImporter.Size = new System.Drawing.Size(224, 20);
+            this.inputLocationImporter.TabIndex = 23;
+            this.inputLocationImporter.Text = "No file selected";
+            this.inputLocationImporter.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.inputLocationImporter.Click += new System.EventHandler(this.ImporterInputLocation_Click);
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(8, 139);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(50, 13);
+            this.label5.TabIndex = 24;
+            this.label5.Text = "Input file:";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(235, 8);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(28, 13);
+            this.label4.TabIndex = 22;
+            this.label4.Text = "Log:";
             // 
             // runBtnImporter
             // 
             this.runBtnImporter.Cursor = System.Windows.Forms.Cursors.Hand;
             this.runBtnImporter.Location = new System.Drawing.Point(8, 24);
             this.runBtnImporter.Name = "runBtnImporter";
-            this.runBtnImporter.Size = new System.Drawing.Size(174, 37);
+            this.runBtnImporter.Size = new System.Drawing.Size(224, 37);
             this.runBtnImporter.TabIndex = 17;
             this.runBtnImporter.Text = "Run";
             this.runBtnImporter.UseVisualStyleBackColor = true;
+            this.runBtnImporter.Click += new System.EventHandler(this.ImporterRunBtn_Click);
             // 
             // logCheckBoxImporter
             // 
@@ -291,39 +303,31 @@
             this.logCheckBoxImporter.TabIndex = 20;
             this.logCheckBoxImporter.Text = "Log actions";
             this.logCheckBoxImporter.UseVisualStyleBackColor = true;
+            this.logCheckBoxImporter.CheckedChanged += new System.EventHandler(this.LogCheckBox_Changed);
             // 
-            // progressLabelImpoter
+            // progressLabelImporter
             // 
-            this.progressLabelImpoter.Location = new System.Drawing.Point(8, 64);
-            this.progressLabelImpoter.Name = "progressLabelImpoter";
-            this.progressLabelImpoter.Size = new System.Drawing.Size(174, 13);
-            this.progressLabelImpoter.TabIndex = 19;
-            this.progressLabelImpoter.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.progressLabelImporter.Location = new System.Drawing.Point(8, 64);
+            this.progressLabelImporter.Name = "progressLabelImporter";
+            this.progressLabelImporter.Size = new System.Drawing.Size(224, 13);
+            this.progressLabelImporter.TabIndex = 19;
+            this.progressLabelImporter.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // progressBarImporter
             // 
             this.progressBarImporter.Location = new System.Drawing.Point(8, 80);
             this.progressBarImporter.Name = "progressBarImporter";
-            this.progressBarImporter.Size = new System.Drawing.Size(174, 23);
+            this.progressBarImporter.Size = new System.Drawing.Size(224, 23);
             this.progressBarImporter.TabIndex = 18;
             // 
-            // logBoxImporter
+            // apiTab
             // 
-            this.logBoxImporter.Location = new System.Drawing.Point(195, 24);
-            this.logBoxImporter.Multiline = true;
-            this.logBoxImporter.Name = "logBoxImporter";
-            this.logBoxImporter.ReadOnly = true;
-            this.logBoxImporter.Size = new System.Drawing.Size(596, 413);
-            this.logBoxImporter.TabIndex = 21;
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(192, 8);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(28, 13);
-            this.label4.TabIndex = 22;
-            this.label4.Text = "Log:";
+            this.apiTab.Location = new System.Drawing.Point(4, 22);
+            this.apiTab.Name = "apiTab";
+            this.apiTab.Size = new System.Drawing.Size(797, 443);
+            this.apiTab.TabIndex = 2;
+            this.apiTab.Text = "API";
+            this.apiTab.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
@@ -335,7 +339,6 @@
             this.Name = "Form1";
             this.ShowIcon = false;
             this.Text = "Research Collector";
-            this.contextMenuStrip2.ResumeLayout(false);
             this.tabControl1.ResumeLayout(false);
             this.filterTab.ResumeLayout(false);
             this.filterTab.PerformLayout();
@@ -347,32 +350,31 @@
 
         #endregion
 
-        private System.Windows.Forms.Button runBtn;
-        private System.Windows.Forms.ComboBox typeComboBox;
+        private System.Windows.Forms.Button runBtnFilter;
+        private System.Windows.Forms.ComboBox typeComboBoxFilter;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox logBox;
+        private System.Windows.Forms.TextBox logBoxFilter;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label inputLabel;
-        private System.Windows.Forms.Label inputLocation;
+        private System.Windows.Forms.Label inputLocationFilter;
         private System.Windows.Forms.Label dtdLabel;
         private System.Windows.Forms.Label outputLabel;
-        private System.Windows.Forms.Label outputLocation;
-        private System.Windows.Forms.ProgressBar progressBar;
-        private System.Windows.Forms.Label progressLabel;
-        private System.Windows.Forms.CheckBox logCheckBox;
-        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
-        private System.Windows.Forms.ContextMenuStrip contextMenuStrip2;
-        private System.Windows.Forms.ToolStripMenuItem dToolStripMenuItem;
+        private System.Windows.Forms.Label outputLocationFilter;
+        private System.Windows.Forms.ProgressBar progressBarFilter;
+        private System.Windows.Forms.Label progressLabelFilter;
+        private System.Windows.Forms.CheckBox logCheckBoxFilter;
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage filterTab;
         private System.Windows.Forms.TabPage importerTab;
         private System.Windows.Forms.TabPage apiTab;
-        private System.Windows.Forms.TextBox logBoxImporter;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Button runBtnImporter;
         private System.Windows.Forms.CheckBox logCheckBoxImporter;
-        private System.Windows.Forms.Label progressLabelImpoter;
+        private System.Windows.Forms.Label progressLabelImporter;
         private System.Windows.Forms.ProgressBar progressBarImporter;
+        private System.Windows.Forms.Label inputLocationImporter;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.TextBox logBoxImporter;
     }
 }
 

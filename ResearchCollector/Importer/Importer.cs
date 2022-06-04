@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Threading;
 
@@ -7,41 +8,65 @@ namespace ResearchCollector.Importer
 {
     class Importer : Worker
     {
+        /// <summary>
+        /// Data object containing all of the parsed data
+        /// </summary>
+        public Data data;
         private JsonPublication pub;
-        private int pubCount;
+        private int currentPubCount;
+        private int totalPubCount;
+        private string path;
 
-        public Importer(SynchronizationContext context) : base(context) { }
+        public Importer(SynchronizationContext context, string path) : base(context) 
+        {
+            this.path = path;
+            if (!File.Exists(path))
+                throw new System.Exception("Input file does not exist");
+            // Get the lineCount, and thus the nr of publications, in the input file
+            int lineCount = File.ReadLines(path).Count();
+            totalPubCount = lineCount - 4;
+            progressIncrement = 1.0 / (double)totalPubCount * 100.0;
+        }
 
         /// <summary>
         /// Insert content from given JSON file into (in-memory mock) database
         /// </summary>
         /// <param name="path">Path to the JSON file</param>
         /// <param name="worker">BackgroundWorker this will be run on</param>
-        public void Run(string path, BackgroundWorker worker)
+        public override void Run(BackgroundWorker worker)
         {
+            data = new Data();
             this.worker = worker;
+            
             using (StreamReader sr = new StreamReader(path))
             {
-                sr.ReadLine();
-                sr.ReadLine();
+                string t = sr.ReadLine();
+                string t2 = sr.ReadLine();
                 string line = "";
-                string json = "";
-                while ((line = sr.ReadLine()) != null)
+                while (currentPubCount < totalPubCount)
                 {
-                    json = line.Remove(line.Length - 1, 1);
-                    pub = JsonSerializer.Deserialize<JsonPublication>(json);
-                    HandlePublication();
+                    line = sr.ReadLine();
+                    // For all lines that are not the last line
+                    if (currentPubCount < totalPubCount - 1)
+                        line = line.Remove(line.Length - 1, 1);
+                    pub = JsonSerializer.Deserialize<JsonPublication>(line);
+                    ParsePublication();
                 }
             }
         }
 
-        private void HandlePublication()
+        private void ParsePublication()
         {
-            pubCount++;
-            //worker.ReportProgress(pubCount++ / ..);
+            currentPubCount++;
+            
+            
 
             // Get text from pdf
             string text = GetText();
+
+            // Report action and progress to UI
+            ReportAction($"Item parsed: '{pub.title}'");
+            UpdateProgress();
         }
 
         private string GetText()

@@ -9,7 +9,7 @@ namespace ResearchCollector.Filter
 {
     class DblpFilter : Filter
     {
-        public DblpFilter(SynchronizationContext context) : base(context) 
+        public DblpFilter(SynchronizationContext context, string inputPath, string outputPath) : base(context, inputPath, outputPath) 
         {
             // Since there are roughly 4,836,150 publications that we extract from the dblp data set
             progressIncrement = 1.0 / 48361.50;

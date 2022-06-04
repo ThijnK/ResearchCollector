@@ -10,11 +10,22 @@ namespace ResearchCollector
 {
     public partial class Form1 : Form
     {
-        private string inputPath;
-        private string outputPath;
-        private BackgroundWorker worker;
+        private BackgroundWorker bgWorker;
         private bool workerInterrupted;
-        private ResearchCollector.Filter.Filter filter;
+        private TextBox currentLogBox;
+        private Label currentProgressLabel;
+        private ProgressBar currentProgressBar;
+
+        // Custom worker class for filter/importer
+        private Worker worker;
+
+        // Filter variables
+        private string filterInputPath;
+        private string filterOutputPath;
+
+        // Importer variables
+        private string importerInputPath;
+        private Data data;
 
         /// <summary>
         /// Context used to access UI thread from BackgroundWorker
@@ -24,11 +35,11 @@ namespace ResearchCollector
         public Form1()
         {
             InitializeComponent();
-            worker = new BackgroundWorker();
-            worker.WorkerReportsProgress = true;
-            worker.ProgressChanged += worker_ProgressChanged;
-            worker.DoWork += worker_DoWork;
-            worker.RunWorkerCompleted += worker_RunWorkerCompleted;
+            bgWorker = new BackgroundWorker();
+            bgWorker.WorkerReportsProgress = true;
+            bgWorker.ProgressChanged += WorkerProgress;
+            bgWorker.DoWork += DoWork;
+            bgWorker.RunWorkerCompleted += WorkerCompleted;
 
             this.context = WindowsFormsSynchronizationContext.Current;
             
@@ -37,12 +48,12 @@ namespace ResearchCollector
             {
                 using (StreamReader sr = new StreamReader("../../config.txt"))
                 {
-                    inputPath = sr.ReadLine();
-                    outputPath = sr.ReadLine();
-                    inputLocation.Text = inputPath;
-                    outputLocation.Text = outputPath;
+                    filterInputPath = sr.ReadLine();
+                    filterOutputPath = sr.ReadLine();
+                    inputLocationFilter.Text = filterInputPath;
+                    outputLocationFilter.Text = filterOutputPath;
                     outputLabel.Visible = true;
-                    outputLocation.Visible = true;
+                    outputLocationFilter.Visible = true;
                 }
             }
 
@@ -54,129 +65,142 @@ namespace ResearchCollector
 
         }
 
-        private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        private void DoWork(object sender, DoWorkEventArgs e)
         {
-            runBtn.Enabled = true;
+            try
+            {
+                worker.Run(bgWorker);
+            }
+            catch (Exception ex)
+            {
+                bgWorker.ReportProgress(progressBarFilter.Value, ex.Message);
+                workerInterrupted = true;
+            }
+        }
+
+        private void WorkerProgress(object sender, ProgressChangedEventArgs e)
+        {
+            if (e.UserState != null)
+                if (!string.IsNullOrEmpty(e.UserState.ToString()))
+                    Error(e.UserState.ToString());
+            currentProgressLabel.Text = $"{e.ProgressPercentage}%";
+            currentProgressBar.Value = e.ProgressPercentage;
+        }
+
+        private void WorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            ToggleRunButtons();
             if (e.Cancelled || e.Error != null || workerInterrupted)
             {
                 Log("Parsing interrupted");
-                progressLabel.Text = "";
-                progressBar.Value = 0;
+                currentProgressLabel.Text = "";
+                currentProgressBar.Value = 0;
                 workerInterrupted = false;
             }
             else
             {
                 Log("Parsing finished!");
-                progressLabel.Text = "100%";
-                progressBar.Value = 100;
-                Log($"Output saved to {outputPath}\\{filter.ToString()}.json");
+                currentProgressLabel.Text = "100%";
+                currentProgressBar.Value = 100;
+                if (currentProgressBar.Equals(progressBarFilter)) // Filter finished
+                {
+                    string outputPath = Path.Combine(filterOutputPath, $"{worker}.json");
+                    importerInputPath = outputPath;
+                    inputLocationImporter.Text = outputPath;
+                    Log($"Output saved to {outputPath}");
+                }
+                else // Importer finished
+                {
+                    // Import data to this form for use by the API
+                    data = (worker as Importer.Importer).data;
+                    Log("Data collected. Run again to parse data of another file, or go the the API tab to query the data");
+                }
             }
         }
 
-        private void worker_DoWork(object sender, DoWorkEventArgs e)
+        private void LogCheckBox_Changed(object sender, EventArgs e)
         {
-            try
-            {
-                filter.Run(inputPath, outputPath, worker);
-            }
-            catch (Exception ex)
-            {
-                worker.ReportProgress(progressBar.Value, ex.Message);
-                workerInterrupted = true;
-            }
+            if (worker != null)
+                worker.logActions = (sender as CheckBox).Checked;
         }
 
-        private void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
-        {
-            if (e.UserState != null)
-                if (!string.IsNullOrEmpty(e.UserState.ToString()))
-                    Error(e.UserState.ToString());
-            progressLabel.Text = $"{e.ProgressPercentage}%";
-            progressBar.Value = e.ProgressPercentage;
-        }
-
-        private void inputLocation_Click(object sender, EventArgs e)
+        #region Filter UI methods
+        private void FilterInputLocation_Click(object sender, EventArgs e)
         {
             OpenFileDialog dialog = new OpenFileDialog();
             DialogResult result = dialog.ShowDialog();
             if (result == DialogResult.OK)
             {
-                inputPath = dialog.FileName;
-                inputLocation.Text = inputPath;
+                filterInputPath = dialog.FileName;
+                inputLocationFilter.Text = filterInputPath;
             }
         }
 
-        private void outputLocation_Click(object sender, EventArgs e)
+        private void FilterOutputLocation_Click(object sender, EventArgs e)
         {
-            AskForOutputLocation();
+            AskForFilterOutputLocation();
         }
 
-        private bool AskForOutputLocation()
+        private bool AskForFilterOutputLocation()
         {
             FolderBrowserDialog dialog = new FolderBrowserDialog();
             dialog.Description = "Select a folder to write the output to.";
             DialogResult result = dialog.ShowDialog();
             if (result == DialogResult.OK)
             {
-                outputPath = dialog.SelectedPath;
-                outputLocation.Text = outputPath;
+                filterOutputPath = dialog.SelectedPath;
+                outputLocationFilter.Text = filterOutputPath;
                 return true;
             }
 
             return false;
         }
 
-        private void typeComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        private void FilterComboBox_IndexChanged(object sender, EventArgs e)
         {
-            if (typeComboBox.SelectedIndex == 0)
+            if (typeComboBoxFilter.SelectedIndex == 0)
             {
                 inputLabel.Visible = true;
                 dtdLabel.Text = "* DTD file is assumed to be located in the same directory as the input file, as well as to have the same name as the input file.";
                 dtdLabel.Visible = true;
-                inputLocation.Visible = true;
+                inputLocationFilter.Visible = true;
             }
-            else if (typeComboBox.SelectedIndex == 2)
+            else if (typeComboBoxFilter.SelectedIndex == 2)
             {
                 inputLabel.Visible = true;
                 dtdLabel.Text = "* Select the first of the downloaded files. The download date of all files (in the name) is assumed to be the same as this first one.";
                 dtdLabel.Visible = true;
-                inputLocation.Visible = true;
+                inputLocationFilter.Visible = true;
             }
             else
             {
                 inputLabel.Visible = false;
                 dtdLabel.Visible = false;
-                inputLocation.Visible = false;
+                inputLocationFilter.Visible = false;
             }
         }
 
-        private void logCheckBox_CheckedChanged(object sender, EventArgs e)
+        private void FilterRunBtn_Click(object sender, EventArgs e)
         {
-            if (filter != null)
-                filter.logActions = logCheckBox.Checked;
-        }
-
-        private void RunBtn_Click(object sender, EventArgs e)
-        {
-            if (string.IsNullOrEmpty(inputPath) && typeComboBox.SelectedIndex != 1)
+            if (string.IsNullOrEmpty(filterInputPath) && typeComboBoxFilter.SelectedIndex != 1)
             {
                 Error("No input file selected");
                 return;
             }
-            else if (typeComboBox.SelectedIndex == -1)
+            else if (typeComboBoxFilter.SelectedIndex == -1)
             {
                 Error("No date set type selected");
                 return;
             }
-            else if (!File.Exists(inputPath))
+            else if (!File.Exists(filterInputPath))
             {
                 Error("Input file does not exist");
                 return;
             }
 
             // Ask for output location if not provided in config file
-            if (string.IsNullOrEmpty(outputPath))
-                if (!AskForOutputLocation())
+            if (string.IsNullOrEmpty(filterOutputPath))
+                if (!AskForFilterOutputLocation())
                     return;
 
             RunFilter();
@@ -187,36 +211,89 @@ namespace ResearchCollector
         /// </summary>
         private void RunFilter()
         {
-            switch (typeComboBox.SelectedIndex)
+            switch (typeComboBoxFilter.SelectedIndex)
             {
                 case 0:
-                    filter = new DblpFilter(context);
+                    worker = new DblpFilter(context, filterInputPath, filterOutputPath);
                     break;
                 case 1:
-                    filter = new PubMedFilter(context);
+                    worker = new PubMedFilter(context, filterInputPath, filterOutputPath);
                     break;
                 case 2:
-                    filter = new PureFilter(context);
+                    worker = new PureFilter(context, filterInputPath, filterOutputPath);
                     break;
                 default:
-                    filter = new DblpFilter(context);
+                    worker = new DblpFilter(context, filterInputPath, filterOutputPath);
                     break;
             }
 
             // Check if input file is the expected data set
-            if (typeComboBox.SelectedIndex != 1 && !filter.CheckFile(inputPath))
+            Filter.Filter filter = worker as Filter.Filter;
+            if (typeComboBoxFilter.SelectedIndex != 1 && !filter.CheckFile(filterInputPath))
             {
                 Error("Selected input file is not valid");
                 return;
             }
 
-            filter.logActions = logCheckBox.Checked;
+            currentLogBox = logBoxFilter;
+            currentProgressLabel = progressLabelFilter;
+            currentProgressBar = progressBarFilter;
+            filter.logActions = logCheckBoxFilter.Checked;
             filter.ActionCompleted += (object sender, ActionCompletedEventArgs ace) => { Log(ace.description); };
-            runBtn.Enabled = false;
-            progressBar.Value = 0;
-            progressLabel.Text = "0%";
-            Log($"Parsing {typeComboBox.SelectedItem} data set...");
-            worker.RunWorkerAsync();
+            ToggleRunButtons();
+            progressBarFilter.Value = 0;
+            progressLabelFilter.Text = "0%";
+            Log($"Parsing {typeComboBoxFilter.SelectedItem} data set...");
+            bgWorker.RunWorkerAsync();
+        }
+        #endregion
+
+        #region Importer UI methods
+        private void ImporterRunBtn_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(importerInputPath) || !File.Exists(importerInputPath))
+            {
+                Error("Selected input file does not exist");
+                return;
+            }
+            try
+            {
+                worker = new Importer.Importer(context, importerInputPath);
+            }
+            catch
+            {
+                Error("Input file does not exist");
+                return;
+            }
+
+            currentLogBox = logBoxImporter;
+            currentProgressLabel = progressLabelImporter;
+            currentProgressBar = progressBarImporter;
+            worker.logActions = logCheckBoxImporter.Checked;
+            worker.ActionCompleted += (object s, ActionCompletedEventArgs ace) => { Log(ace.description); };
+            ToggleRunButtons();
+            progressBarImporter.Value = 0;
+            progressLabelImporter.Text = "0%";
+            Log($"Parsing native JSON file...");
+            bgWorker.RunWorkerAsync();
+        }
+
+        private void ImporterInputLocation_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog dialog = new OpenFileDialog();
+            DialogResult result = dialog.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+                importerInputPath = dialog.FileName;
+                inputLocationImporter.Text = importerInputPath;
+            }
+        }
+        #endregion
+
+        private void ToggleRunButtons()
+        {
+            runBtnFilter.Enabled = !runBtnFilter.Enabled;
+            runBtnImporter.Enabled = !runBtnImporter.Enabled;
         }
 
         /// <summary>
@@ -225,7 +302,7 @@ namespace ResearchCollector
         /// <param name="msg">Message to log</param>
         private void Log(string msg)
         {
-            logBox.AppendText($"[{DateTime.Now.ToString("H:mm:ss")}] {msg}{Environment.NewLine}");
+            currentLogBox.AppendText($"[{DateTime.Now.ToString("H:mm:ss")}] {msg}{Environment.NewLine}");
         }
 
         /// <summary>

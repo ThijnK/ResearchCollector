@@ -20,7 +20,7 @@ namespace ResearchCollector.Filter
         private int currentFile;
         private int fileCount;
 
-        public PureFilter(SynchronizationContext context) : base(context)
+        public PureFilter(SynchronizationContext context, string inputPath, string outputPath) : base(context, inputPath, outputPath)
         {
             fileCount = 117;
             // Increment the progress based on the portion of files that have been processed so far

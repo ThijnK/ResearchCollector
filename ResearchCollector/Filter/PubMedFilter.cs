@@ -15,9 +15,9 @@ namespace ResearchCollector.Filter
         private int currentFile;
         private int fileCount;
 
-        public PubMedFilter(SynchronizationContext context) : base(context) 
+        public PubMedFilter(SynchronizationContext context, string inputPath, string outputPath) : base(context, inputPath, outputPath)
         {
-            fileCount = 1114;
+            fileCount = 1;
             progressIncrement = 1.0 / (double)fileCount * 100.0;
         }
 
