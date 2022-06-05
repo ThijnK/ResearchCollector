@@ -50,7 +50,7 @@ namespace ResearchCollector.Importer
                         switch (arg.Item1)
                         {
                             case "affiliation":
-                                return author.affiliation.name == arg.Item2;
+                                return author.affiliatedTo.name == arg.Item2;
                             case "email":
                                 return author.email == arg.Item2;
                             case "name":
@@ -79,7 +79,7 @@ namespace ResearchCollector.Importer
                                 throw new ArgumentException($"{searchDomain} does not have {arg.Item1} as key");
                         }
                     };
-                    return FindItems<T>(data.people as Dictionary<string, T>, searchType, arguments, satisfiesPerson as Func<T, (string, string), bool>);
+                    return FindItems<T>(data.persons as Dictionary<string, T>, searchType, arguments, satisfiesPerson as Func<T, (string, string), bool>);
                 case "volumes":
                     Func<PublicationVolume, (string, string), bool> satisfiesVolume = (volume, arg) =>
                     {
@@ -100,7 +100,7 @@ namespace ResearchCollector.Importer
                             case "name":
                                 return org.name == arg.Item2;
                             case "location":
-                                return org.location.ToString() == arg.Item2;
+                                return org.locatedAt.ToString() == arg.Item2;
                             default:
                                 throw new ArgumentException($"{searchDomain} does not have {arg.Item1} as key");
                         }
