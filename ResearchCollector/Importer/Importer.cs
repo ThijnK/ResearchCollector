@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -61,49 +63,137 @@ namespace ResearchCollector.Importer
         {
             currentPubCount++;
 
-            // Our custom id for publication
-            string customId = CreateId();
+            Publication currentPublication = GoThroughPublication();
 
-            //hier article / dat andere ding aanmaken
+            GoThroughAuthors(currentPublication);
 
-            foreach (JsonAuthor author in pub.has)
-            {
-                if (!data.organizations.TryGetValue(author.affiliatedTo, out Organization currentAffiliation))
-                {
-                    currentAffiliation = new Organization(author.affiliatedTo);
-                    data.organizations.Add(author.affiliatedTo, currentAffiliation);
-                }
-
-                if (data.persons.TryGetValue(author.orcid, out Person currentPerson)
-                    && !data.authors.TryGetValue(author.email, out Author currentAuthor)) //if the person already exists but the author doesn't (if person exists, sets it, and same for author
-                {
-                    currentAuthor = new Author(currentPerson, currentAffiliation, author.email, author.name);
-                    data.authors.Add(author.email, currentAuthor);
-                }
-                //als de person niet bestaat bestaat de author (denk ik) sws niet
-                else
-                {
-                    currentPerson = new Person(author.orcid, author.name);
-                    data.persons.Add(author.orcid, currentPerson);
-                    currentAuthor = new Author(currentPerson, currentAffiliation, author.email, author.name);
-                    data.authors.Add(author.email, currentAuthor); //email als key voor de author!!!!!
-                }
-
-                //hier author toevoegen aan de publication zn authors
-            }
-
-            // Get text from pdf
-            string text = GetText();
+            //Download and save text from the publcation
+            /*if(!string.IsNullOrEmpty(pub.pdfLink))
+                //downlaod using the direct pdf link               
+            else
+                //try to find the pdf using the doi and then save it
+            */
 
             // Report action and progress to UI
             ReportAction($"Item parsed: '{pub.title}'");
             UpdateProgress();
         }
 
-        private string GetText()
+        Publication GoThroughPublication()
         {
-            /// Use the field <see cref="pub"/> to access the data of current json publication
-            return "";
+            Publication currentPublication;
+
+            // Our custom id for publication
+            string customId = CreateId();
+
+            //if the publication is an article
+            if (pub.type == "article")
+            {
+                //if it is an article, it is part of a journal
+                JsonJournal jsonJournal = JsonSerializer.Deserialize<JsonJournal>(pub.partof.ToString());
+
+                if (!data.journals.TryGetValue(jsonJournal.title, out Journal currentJournal))
+                {
+                    currentJournal = new Journal(jsonJournal.issue, jsonJournal.volume, jsonJournal.series, jsonJournal.title);
+                    //try
+                    //{
+                        data.journals.Add(currentJournal.title, currentJournal);
+                    //}
+                    //catch(Exception e) { }
+                }
+
+                if (!data.articles.TryGetValue(customId, out Article currentArticle))
+                {
+                    //abstract and topics are left empty because those do not get retrieved currently
+                    currentArticle = new Article(currentJournal, customId, pub.title, null, pub.year, pub.doi, null);
+                    //try
+                    //{
+                        data.articles.Add(customId, currentArticle);
+                    //}
+                    //catch(Exception e) { }
+                }
+
+                currentPublication = currentArticle;
+            }
+            //if the publication is an inproceedings
+            else
+            {
+                //if it is an inproceedings, it is part of a proceedings
+                JsonVolume jsonVolume = JsonSerializer.Deserialize<JsonVolume>(pub.partof.ToString());
+                if (!data.proceedings.TryGetValue(jsonVolume.title, out Proceedings currentProceedings))
+                {
+                    currentProceedings = new Proceedings(jsonVolume.title);
+                    //try
+                    //{
+                        data.proceedings.Add(currentProceedings.title, currentProceedings);
+                    //}
+                    //catch(Exception e) { }
+                }
+
+                if (!data.inproceedings.TryGetValue(customId, out Inproceedings currentInproceedings))
+                {
+                    //abstract and topics are left empty because those do not get retrieved currently
+                    currentInproceedings = new Inproceedings(currentProceedings, customId, pub.title, null, pub.year, pub.doi, null);
+                    //try
+                    //{
+                        data.inproceedings.Add(customId, currentInproceedings);
+                    //}
+                    //catch (Exception e) { }
+                }
+
+                currentPublication = currentInproceedings;
+            }
+            //add the external id from the source to the id's
+            if (!string.IsNullOrEmpty(pub.externalId) && !currentPublication.externalIds.ContainsKey(pub.origin))
+                currentPublication.externalIds.Add(pub.origin, pub.externalId);
+
+            return currentPublication;
+        }
+
+        void GoThroughAuthors(Publication currentPublication)
+        {
+            foreach (JsonAuthor author in pub.has)
+            {
+                if (!data.organizations.TryGetValue(author.affiliatedTo, out Organization currentAffiliation))
+                {
+                    //if affilition == "", skip it possibly TODO
+                    currentAffiliation = new Organization(author.affiliatedTo);
+                    //try
+                    //{
+                        data.organizations.Add(author.affiliatedTo, currentAffiliation);
+                    //}
+                    //catch(Exception e) { }
+
+                    //still needs geolocalization
+                }
+
+                if (!data.persons.TryGetValue(author.name, out Person currentPerson))
+                {
+                    currentPerson = new Person(author.orcid, author.name);
+                    currentPerson.fname = author.fname; currentPerson.lname = author.lname;
+                    //try
+                    //{
+                        data.persons.Add(author.name, currentPerson);
+                    //}
+                    //catch(Exception e) { }
+                }
+
+                if (!data.authors.TryGetValue(author.name, out Author currentAuthor))
+                {
+                    currentAuthor = new Author(currentPerson, currentAffiliation, author.email, author.name);
+                    currentAuthor.fname = author.fname; currentAuthor.lname = author.lname;
+                    //possibly first check if it was already added TODO
+                    currentAuthor.publications.Add(currentPublication);
+
+                    //try
+                    //{
+                        data.authors.Add(author.name, currentAuthor);
+                    //}
+                    //catch(Exception e) { }
+                }
+
+                currentPublication.authors.Add(currentAuthor);
+            }
         }
 
         /// <summary>

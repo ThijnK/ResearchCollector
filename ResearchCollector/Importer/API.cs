@@ -21,28 +21,65 @@ namespace ResearchCollector.Importer
         {
             bool howToSearch = searchType == SearchType.Exact; //mogelijk beter om searchtype een klasse te maken met een ingebouwde bool -> bool -> bool functie en start bool waarde
             switch (searchDomain)
-            {         
-                case "publications":
-                    Func<Publication, (string, string), bool> satisfiesPublication = (pub, arg) =>
+            {
+                case "articles":
+                    Func<Article, (string, string), bool> satisfiesArticle = (article, arg) =>
                     {
+                        //perhaps also abstract???
                         switch (arg.Item1)
                         {
                             case "title":
-                                return pub.title == arg.Item2;
+                                return article.title == arg.Item2;
+                            case "journal":
+                                return article.partOf.title == arg.Item2;
+                            case "id":
+                                return article.id == arg.Item2;
+                            case "externals":
+                                string[] realIds = article.externalIds.Values.ToArray<string>();
+                                return CollectionQuery(realIds, arg.Item2.Split('|'), howToSearch, howToSearch);
                             case "year":
-                                return pub.year.ToString() == arg.Item2;
+                                return article.year.ToString() == arg.Item2;
                             case "doi":
-                                return pub.doi == arg.Item2;
+                                return article.doi == arg.Item2;
                             case "authors":
-                                string[] realNames = pub.authors.ConvertAll<string>(a => { return a.name; }).ToArray();
+                                string[] realNames = article.authors.ConvertAll<string>(a => { return a.name; }).ToArray();
                                 return CollectionQuery(realNames, arg.Item2.Split('|'), howToSearch, howToSearch);
-                            case "topics":                               
-                                return CollectionQuery(pub.topics, arg.Item2.Split('|'), howToSearch, howToSearch);
+                            case "topics":
+                                return CollectionQuery(article.topics, arg.Item2.Split('|'), howToSearch, howToSearch);
                             default:
                                 throw new ArgumentException($"{searchDomain} does not have {arg.Item1} as key");
                         }
                     };
-                    return FindItems<T>(data.publications as Dictionary<string,T>, searchType, arguments, satisfiesPublication as Func<T,(string,string),bool>);
+                    return FindItems<T>(data.articles as Dictionary<string, T>, searchType, arguments, satisfiesArticle as Func<T, (string, string), bool>);
+                case "inproceedings":
+                    Func<Inproceedings, (string, string), bool> satisfiesInproceedings = (inpr, arg) =>
+                    {
+                        //perhaps also abstract???
+                        switch (arg.Item1)
+                        { 
+                            case "title":
+                                return inpr.title == arg.Item2;
+                            case "proceedings":
+                                return inpr.partOf.title == arg.Item2;
+                            case "id":
+                                return inpr.id == arg.Item2;
+                            case "externals":
+                                string[] realIds = inpr.externalIds.Values.ToArray<string>();
+                                return CollectionQuery(realIds, arg.Item2.Split('|'), howToSearch, howToSearch);
+                            case "year":
+                                return inpr.year.ToString() == arg.Item2;
+                            case "doi":
+                                return inpr.doi == arg.Item2;
+                            case "authors":
+                                string[] realNames = inpr.authors.ConvertAll<string>(a => { return a.name; }).ToArray();
+                                return CollectionQuery(realNames, arg.Item2.Split('|'), howToSearch, howToSearch);
+                            case "topics":
+                                return CollectionQuery(inpr.topics, arg.Item2.Split('|'), howToSearch, howToSearch);
+                            default:
+                                throw new ArgumentException($"{searchDomain} does not have {arg.Item1} as key");
+                        }
+                    };
+                    return FindItems<T>(data.inproceedings as Dictionary<string, T>, searchType, arguments, satisfiesInproceedings as Func<T, (string, string), bool>);
                 case "authors":
                     Func<Author, (string, string), bool> satisfiesAuthor = (author, arg) =>
                     {
@@ -80,18 +117,36 @@ namespace ResearchCollector.Importer
                         }
                     };
                     return FindItems<T>(data.persons as Dictionary<string, T>, searchType, arguments, satisfiesPerson as Func<T, (string, string), bool>);
-                case "volumes":
-                    Func<PublicationVolume, (string, string), bool> satisfiesVolume = (volume, arg) =>
+                case "journals":
+                    Func<Journal, (string, string), bool> satisfiesJournal = (journal, arg) =>
                     {
                         switch (arg.Item1)
-                        {
+                        {                           
                             case "title":
-                                return volume.title == arg.Item2;
+                                return journal.title == arg.Item2;
+                            case "issue":
+                                return journal.issue == arg.Item2;
+                            case "series":
+                                return journal.series == arg.Item2;
+                            case "volume":
+                                return journal.volume == arg.Item2;
                             default:
                                 throw new ArgumentException($"{searchDomain} does not have {arg.Item1} as key");
                         }
                     };
-                    return FindItems<T>(data.volumes as Dictionary<string, T>, searchType, arguments, satisfiesVolume as Func<T, (string, string), bool>);
+                    return FindItems<T>(data.journals as Dictionary<string, T>, searchType, arguments, satisfiesJournal as Func<T, (string, string), bool>);
+                case "proceedings":
+                    Func<Proceedings, (string, string), bool> satisfiesProceedings = (proc, arg) =>
+                    {
+                        switch (arg.Item1)
+                        { 
+                            case "title":
+                                return proc.title == arg.Item2;
+                            default:
+                                throw new ArgumentException($"{searchDomain} does not have {arg.Item1} as key");
+                        }
+                    };
+                    return FindItems<T>(data.proceedings as Dictionary<string, T>, searchType, arguments, satisfiesProceedings as Func<T, (string, string), bool>);
                 case "organizations":
                     Func<Organization, (string, string), bool> satisfiesOrganization = (org, arg) =>
                     {
