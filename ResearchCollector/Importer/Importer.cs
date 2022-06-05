@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
+using ResearchCollector.PDFParser;
+using ResearchCollector.PDFParser.Exceptions;
 
 namespace ResearchCollector.Importer
 {
@@ -20,6 +23,7 @@ namespace ResearchCollector.Importer
         private int currentPubCount;
         private int totalPubCount;
         private string path;
+        PDFInfoFinder pdfFixer;
 
         public Importer(SynchronizationContext context, string path) : base(context)
         {
@@ -30,6 +34,7 @@ namespace ResearchCollector.Importer
             int lineCount = File.ReadLines(path).Count();
             totalPubCount = lineCount - 4;
             progressIncrement = 1.0 / (double)totalPubCount * 100.0;
+            pdfFixer = new PDFInfoFinder();
         }
 
         /// <summary>
@@ -63,28 +68,31 @@ namespace ResearchCollector.Importer
         {
             currentPubCount++;
 
-            Publication currentPublication = GoThroughPublication();
+            // Our custom id for publication
+            string customId = CreateId();
+
+            Publication currentPublication = GoThroughPublication(customId);
 
             GoThroughAuthors(currentPublication);
 
             //Download and save text from the publcation
-            /*if(!string.IsNullOrEmpty(pub.pdfLink))
-                //downlaod using the direct pdf link               
-            else
-                //try to find the pdf using the doi and then save it
-            */
+            try
+            {
+                if (!string.IsNullOrEmpty(pub.pdfLink))
+                    pdfFixer.FindInfo(pub.pdfLink, customId, false);
+                else
+                    pdfFixer.FindInfo(pub.doi, customId, true);
+            }
+            catch(Exception e) { }
 
-            // Report action and progress to UI
+            // Report action and progress to UI          
             ReportAction($"Item parsed: '{pub.title}'");
             UpdateProgress();
         }
 
-        Publication GoThroughPublication()
+        Publication GoThroughPublication(string customId)
         {
-            Publication currentPublication;
-
-            // Our custom id for publication
-            string customId = CreateId();
+            Publication currentPublication;           
 
             //if the publication is an article
             if (pub.type == "article")

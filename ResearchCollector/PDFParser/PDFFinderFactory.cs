@@ -1,14 +1,14 @@
-﻿using PDFParser.PDFFinders;
-using PDFParser.Exceptions;
+﻿using ResearchCollector.PDFParser.PDFFinders;
+using ResearchCollector.PDFParser.Exceptions;
 
-namespace PDFParser
+namespace ResearchCollector.PDFParser
 {
     class PDFFinderFactory
     {
         string identifier;
         public PDFFinderFactory(string link)
         {
-            identifier = link.Split("/")[2];          
+            identifier = link.Split('/')[2];
         }
         public PDFFinder correctPDFFinder()
         {
@@ -27,8 +27,6 @@ namespace PDFParser
             }
         }
 
-        
-    }
 
-    
+    }
 }

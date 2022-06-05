@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
-using PDFParser.Exceptions;
+using System.Threading.Tasks;
+using ResearchCollector.PDFParser.Exceptions;
 
-namespace PDFParser
+namespace ResearchCollector.PDFParser
 {
     /// <summary>
     /// Starts redirecting from a doi link and tries to end up at the real website
@@ -28,11 +29,28 @@ namespace PDFParser
                 req.AllowAutoRedirect = true;
                 //Possibly problems can be fixed by tweaking a lot with these settings
 
-                HttpWebResponse resp = (HttpWebResponse)req.GetResponse();
-
-                return resp.ResponseUri.AbsoluteUri;
+                HttpWebResponse resp = null;
+              
+                bool linkFound = ExecuteWithTimeLimit(TimeSpan.FromSeconds(1), () => { resp = (HttpWebResponse)req.GetResponse(); });
+                if(linkFound)
+                    return resp.ResponseUri.AbsoluteUri;
+                throw new TimeLimitException("The real link was not found in the time limit");
             }
             catch (Exception ex) { throw new RedirectingException($"doi: {doi}", ex); }
+        }
+
+        bool ExecuteWithTimeLimit(TimeSpan timeSpan, Action codeBlock)
+        {
+            try
+            {
+                Task task = Task.Factory.StartNew(() => codeBlock());
+                task.Wait(timeSpan);
+                return task.IsCompleted;
+            }
+            catch (AggregateException ae)
+            {
+                throw ae.InnerExceptions[0];
+            }
         }
     }
 }
