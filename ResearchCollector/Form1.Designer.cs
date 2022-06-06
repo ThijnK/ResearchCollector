@@ -53,6 +53,7 @@
             this.progressLabelImporter = new System.Windows.Forms.Label();
             this.progressBarImporter = new System.Windows.Forms.ProgressBar();
             this.apiTab = new System.Windows.Forms.TabPage();
+            this.DownLoad_Articles = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.filterTab.SuspendLayout();
             this.importerTab.SuspendLayout();
@@ -228,6 +229,7 @@
             // 
             // importerTab
             // 
+            this.importerTab.Controls.Add(this.DownLoad_Articles);
             this.importerTab.Controls.Add(this.logBoxImporter);
             this.importerTab.Controls.Add(this.inputLocationImporter);
             this.importerTab.Controls.Add(this.label5);
@@ -329,6 +331,16 @@
             this.apiTab.Text = "API";
             this.apiTab.UseVisualStyleBackColor = true;
             // 
+            // DownLoad_Articles
+            // 
+            this.DownLoad_Articles.Location = new System.Drawing.Point(8, 190);
+            this.DownLoad_Articles.Name = "DownLoad_Articles";
+            this.DownLoad_Articles.Size = new System.Drawing.Size(224, 23);
+            this.DownLoad_Articles.TabIndex = 26;
+            this.DownLoad_Articles.Text = "Download Articles";
+            this.DownLoad_Articles.UseVisualStyleBackColor = true;
+            this.DownLoad_Articles.Click += new System.EventHandler(this.DownLoad_Articles_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -375,6 +387,7 @@
         private System.Windows.Forms.Label inputLocationImporter;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox logBoxImporter;
+        private System.Windows.Forms.Button DownLoad_Articles;
     }
 }
 

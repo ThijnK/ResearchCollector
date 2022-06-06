@@ -76,14 +76,14 @@ namespace ResearchCollector.Importer
             GoThroughAuthors(currentPublication);
 
             //Download and save text from the publcation
-            try
+            /*try
             {
                 if (!string.IsNullOrEmpty(pub.pdfLink))
                     pdfFixer.FindInfo(pub.pdfLink, customId, false);
                 else
                     pdfFixer.FindInfo(pub.doi, customId, true);
             }
-            catch(Exception e) { }
+            catch(Exception e) { }*/
 
             // Report action and progress to UI          
             ReportAction($"Item parsed: '{pub.title}'");
@@ -113,7 +113,7 @@ namespace ResearchCollector.Importer
                 if (!data.articles.TryGetValue(customId, out Article currentArticle))
                 {
                     //abstract and topics are left empty because those do not get retrieved currently
-                    currentArticle = new Article(currentJournal, customId, pub.title, null, pub.year, pub.doi, null);
+                    currentArticle = new Article(currentJournal, customId, pub.title, null, pub.year, pub.doi, pub.pdfLink, null);
                     //try
                     //{
                         data.articles.Add(customId, currentArticle);
@@ -141,7 +141,7 @@ namespace ResearchCollector.Importer
                 if (!data.inproceedings.TryGetValue(customId, out Inproceedings currentInproceedings))
                 {
                     //abstract and topics are left empty because those do not get retrieved currently
-                    currentInproceedings = new Inproceedings(currentProceedings, customId, pub.title, null, pub.year, pub.doi, null);
+                    currentInproceedings = new Inproceedings(currentProceedings, customId, pub.title, null, pub.year, pub.doi, pub.pdfLink, null);
                     //try
                     //{
                         data.inproceedings.Add(customId, currentInproceedings);

@@ -36,11 +36,12 @@ namespace ResearchCollector.Importer
         public string abstr; //act (abstract is a reserved keyword)
         public int year;
         public string doi;
+        public string pdfLink;
         public string[] topics;
 
         public List<Author> authors;
 
-        public Publication(string id, string title, string abstr, int year, string doi, string[] topics)
+        public Publication(string id, string title, string abstr, int year, string doi, string pdfLink, string[] topics)
         {
             authors = new List<Author>();
             externalIds = new Dictionary<string, string>();
@@ -49,6 +50,7 @@ namespace ResearchCollector.Importer
             this.abstr = abstr;
             this.year = year;
             this.doi = doi;
+            this.pdfLink = pdfLink;
             this.topics = topics;
         }
 
@@ -67,7 +69,7 @@ namespace ResearchCollector.Importer
     {
         public Journal partOf;
 
-        public Article(Journal journal, string id, string title, string abstr, int year, string doi, string[] topics) : base(id, title, abstr, year, doi, topics)
+        public Article(Journal journal, string id, string title, string abstr, int year, string doi, string pdfLink, string[] topics) : base(id, title, abstr, year, doi, pdfLink, topics)
         {
             this.partOf = journal;
         }
@@ -77,7 +79,7 @@ namespace ResearchCollector.Importer
     {
         public Proceedings partOf;
 
-        public Inproceedings(Proceedings proceedings, string id, string title, string abstr, int year, string doi, string[] topics) : base(id, title, abstr, year, doi, topics)
+        public Inproceedings(Proceedings proceedings, string id, string title, string abstr, int year, string doi, string pdfLink, string[] topics) : base(id, title, abstr, year, doi, pdfLink, topics)
         {
             this.partOf = proceedings;
         }

@@ -5,6 +5,7 @@ using System.IO;
 using System.Windows.Forms;
 using ResearchCollector.Filter;
 using ResearchCollector.Importer;
+using ResearchCollector.PDFParser;
 
 namespace ResearchCollector
 {
@@ -26,6 +27,8 @@ namespace ResearchCollector
         // Importer variables
         private string importerInputPath;
         private Data data;
+
+        PDFInfoFinder pdfFixer = new PDFInfoFinder();
 
         /// <summary>
         /// Context used to access UI thread from BackgroundWorker
@@ -313,6 +316,32 @@ namespace ResearchCollector
         {
             Log($"Encountered error: '{msg}'");
             MessageBox.Show(msg, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        private void DownLoad_Articles_Click(object sender, EventArgs e)
+        {
+            foreach (Article article in data.articles.Values)
+            {
+                try
+                {
+                    if (!string.IsNullOrEmpty(article.pdfLink))
+                        pdfFixer.FindInfo(article.pdfLink, article.id, false);
+                    else
+                        pdfFixer.FindInfo(article.doi, article.id, true);
+                }
+                catch (Exception exp) { }
+            }
+            foreach (Inproceedings inpr in data.inproceedings.Values)
+            {
+                try
+                {
+                    if (!string.IsNullOrEmpty(inpr.pdfLink))
+                        pdfFixer.FindInfo(inpr.pdfLink, inpr.id, false);
+                    else
+                        pdfFixer.FindInfo(inpr.doi, inpr.id, true);
+                }
+                catch (Exception exp) { }
+            }
         }
     }
 }
