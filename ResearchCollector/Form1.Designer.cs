@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.runBtnFilter = new System.Windows.Forms.Button();
             this.typeComboBoxFilter = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
@@ -54,9 +55,24 @@
             this.progressBarImporter = new System.Windows.Forms.ProgressBar();
             this.apiTab = new System.Windows.Forms.TabPage();
             this.DownLoad_Articles = new System.Windows.Forms.Button();
+            this.label10 = new System.Windows.Forms.Label();
+            this.label9 = new System.Windows.Forms.Label();
+            this.comboBoxSearch = new System.Windows.Forms.ComboBox();
+            this.label8 = new System.Windows.Forms.Label();
+            this.comboBoxApi = new System.Windows.Forms.ComboBox();
+            this.logBoxApi = new System.Windows.Forms.TextBox();
+            this.label18 = new System.Windows.Forms.Label();
+            this.label7 = new System.Windows.Forms.Label();
+            this.ApiRunBtn = new System.Windows.Forms.Button();
+            this.apiQuery = new System.Windows.Forms.TextBox();
+            this.label6 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
+            this.dbStatsPanel = new System.Windows.Forms.TableLayoutPanel();
+            this.label11 = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.filterTab.SuspendLayout();
             this.importerTab.SuspendLayout();
+            this.apiTab.SuspendLayout();
             this.SuspendLayout();
             // 
             // runBtnFilter
@@ -324,6 +340,20 @@
             // 
             // apiTab
             // 
+            this.apiTab.Controls.Add(this.label11);
+            this.apiTab.Controls.Add(this.label10);
+            this.apiTab.Controls.Add(this.label9);
+            this.apiTab.Controls.Add(this.comboBoxSearch);
+            this.apiTab.Controls.Add(this.label8);
+            this.apiTab.Controls.Add(this.comboBoxApi);
+            this.apiTab.Controls.Add(this.logBoxApi);
+            this.apiTab.Controls.Add(this.label18);
+            this.apiTab.Controls.Add(this.label7);
+            this.apiTab.Controls.Add(this.ApiRunBtn);
+            this.apiTab.Controls.Add(this.apiQuery);
+            this.apiTab.Controls.Add(this.label6);
+            this.apiTab.Controls.Add(this.label3);
+            this.apiTab.Controls.Add(this.dbStatsPanel);
             this.apiTab.Location = new System.Drawing.Point(4, 22);
             this.apiTab.Name = "apiTab";
             this.apiTab.Size = new System.Drawing.Size(797, 443);
@@ -340,6 +370,158 @@
             this.DownLoad_Articles.Text = "Download Articles";
             this.DownLoad_Articles.UseVisualStyleBackColor = true;
             this.DownLoad_Articles.Click += new System.EventHandler(this.DownLoad_Articles_Click);
+            // label10
+            // 
+            this.label10.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label10.Location = new System.Drawing.Point(429, 122);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(361, 56);
+            this.label10.TabIndex = 32;
+            this.label10.Text = resources.GetString("label10.Text");
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(240, 93);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(82, 13);
+            this.label9.TabIndex = 31;
+            this.label9.Text = "Search method:";
+            // 
+            // comboBoxSearch
+            // 
+            this.comboBoxSearch.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.comboBoxSearch.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxSearch.FormattingEnabled = true;
+            this.comboBoxSearch.Items.AddRange(new object[] {
+            "Exact",
+            "Loose"});
+            this.comboBoxSearch.Location = new System.Drawing.Point(243, 109);
+            this.comboBoxSearch.Name = "comboBoxSearch";
+            this.comboBoxSearch.Size = new System.Drawing.Size(175, 21);
+            this.comboBoxSearch.TabIndex = 30;
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(240, 53);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(120, 13);
+            this.label8.TabIndex = 29;
+            this.label8.Text = "Type of items to search:";
+            // 
+            // comboBoxApi
+            // 
+            this.comboBoxApi.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.comboBoxApi.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxApi.FormattingEnabled = true;
+            this.comboBoxApi.Items.AddRange(new object[] {
+            "Articles",
+            "Inproceedings",
+            "Authors",
+            "Persons",
+            "Journals",
+            "Proceedings",
+            "Organizations"});
+            this.comboBoxApi.Location = new System.Drawing.Point(243, 69);
+            this.comboBoxApi.Name = "comboBoxApi";
+            this.comboBoxApi.Size = new System.Drawing.Size(175, 21);
+            this.comboBoxApi.TabIndex = 28;
+            // 
+            // logBoxApi
+            // 
+            this.logBoxApi.Location = new System.Drawing.Point(11, 204);
+            this.logBoxApi.Multiline = true;
+            this.logBoxApi.Name = "logBoxApi";
+            this.logBoxApi.ReadOnly = true;
+            this.logBoxApi.Size = new System.Drawing.Size(779, 231);
+            this.logBoxApi.TabIndex = 27;
+            // 
+            // label18
+            // 
+            this.label18.AutoSize = true;
+            this.label18.Location = new System.Drawing.Point(8, 188);
+            this.label18.Name = "label18";
+            this.label18.Size = new System.Drawing.Size(28, 13);
+            this.label18.TabIndex = 26;
+            this.label18.Text = "Log:";
+            // 
+            // label7
+            // 
+            this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label7.Location = new System.Drawing.Point(429, 53);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(361, 37);
+            this.label7.TabIndex = 5;
+            this.label7.Text = "The query should be of the form \'<attribute> = <value>\', where each value is sepa" +
+    "rated by a comma. For example: \'title = some title, year = 2000\'. ";
+            // 
+            // ApiRunBtn
+            // 
+            this.ApiRunBtn.Location = new System.Drawing.Point(243, 136);
+            this.ApiRunBtn.Name = "ApiRunBtn";
+            this.ApiRunBtn.Size = new System.Drawing.Size(175, 25);
+            this.ApiRunBtn.TabIndex = 4;
+            this.ApiRunBtn.Text = "Search";
+            this.ApiRunBtn.UseVisualStyleBackColor = true;
+            this.ApiRunBtn.Click += new System.EventHandler(this.ApiRunBtn_Click);
+            // 
+            // apiQuery
+            // 
+            this.apiQuery.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.apiQuery.Location = new System.Drawing.Point(243, 26);
+            this.apiQuery.Name = "apiQuery";
+            this.apiQuery.Size = new System.Drawing.Size(547, 20);
+            this.apiQuery.TabIndex = 3;
+            this.apiQuery.Text = "Type your query here...";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(240, 10);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(76, 13);
+            this.label6.TabIndex = 2;
+            this.label6.Text = "Query the API:";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(8, 10);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(99, 13);
+            this.label3.TabIndex = 1;
+            this.label3.Text = "Database statistics:";
+            // 
+            // dbStatsPanel
+            // 
+            this.dbStatsPanel.AutoSize = true;
+            this.dbStatsPanel.BackColor = System.Drawing.SystemColors.Control;
+            this.dbStatsPanel.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.dbStatsPanel.ColumnCount = 2;
+            this.dbStatsPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 170F));
+            this.dbStatsPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 45F));
+            this.dbStatsPanel.Location = new System.Drawing.Point(8, 26);
+            this.dbStatsPanel.Name = "dbStatsPanel";
+            this.dbStatsPanel.Padding = new System.Windows.Forms.Padding(5);
+            this.dbStatsPanel.RowCount = 5;
+            this.dbStatsPanel.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.dbStatsPanel.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.dbStatsPanel.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.dbStatsPanel.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.dbStatsPanel.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.dbStatsPanel.Size = new System.Drawing.Size(225, 75);
+            this.dbStatsPanel.TabIndex = 0;
+            // 
+            // label11
+            // 
+            this.label11.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label11.Location = new System.Drawing.Point(429, 85);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(361, 37);
+            this.label11.TabIndex = 33;
+            this.label11.Text = "To specify that a value of some attribute can have multiple values, separate each" +
+    " option by a \'|\'. For example: \'authors = Alice | Bob\'.";
             // 
             // Form1
             // 
@@ -356,6 +538,8 @@
             this.filterTab.PerformLayout();
             this.importerTab.ResumeLayout(false);
             this.importerTab.PerformLayout();
+            this.apiTab.ResumeLayout(false);
+            this.apiTab.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -388,6 +572,20 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox logBoxImporter;
         private System.Windows.Forms.Button DownLoad_Articles;
+        private System.Windows.Forms.TableLayoutPanel dbStatsPanel;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.TextBox apiQuery;
+        private System.Windows.Forms.Button ApiRunBtn;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.TextBox logBoxApi;
+        private System.Windows.Forms.Label label18;
+        private System.Windows.Forms.ComboBox comboBoxApi;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.ComboBox comboBoxSearch;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Label label11;
     }
 }
 

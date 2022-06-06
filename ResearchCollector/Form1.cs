@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 using ResearchCollector.Filter;
 using ResearchCollector.Importer;
@@ -45,7 +46,10 @@ namespace ResearchCollector
             bgWorker.RunWorkerCompleted += WorkerCompleted;
 
             this.context = WindowsFormsSynchronizationContext.Current;
-            
+
+            SetupDbStatistics();
+            data = new Data();
+
             // Use presets if provided
             if (File.Exists("../../config.txt"))
             {
@@ -59,15 +63,9 @@ namespace ResearchCollector
                     outputLocationFilter.Visible = true;
                 }
             }
-
-            //Data data = new Data();
-            //Importer.Publication pub = new Importer.Publication("id", "test123", 2000, "doi", new string[] { "topic1", "topic2" });
-            //data.publications.Add(pub.id, pub);
-            //API api = new API(data);
-            //HashSet<Importer.Publication> res = api.Search<Importer.Publication>("publications", SearchType.Loose, ("title", "test123"));
-
         }
 
+        #region BackgroundWorker event handlers
         private void DoWork(object sender, DoWorkEventArgs e)
         {
             try
@@ -76,6 +74,7 @@ namespace ResearchCollector
             }
             catch (Exception ex)
             {
+                // Report error to UI thread 
                 bgWorker.ReportProgress(progressBarFilter.Value, ex.Message);
                 workerInterrupted = true;
             }
@@ -116,27 +115,62 @@ namespace ResearchCollector
                 {
                     // Import data to this form for use by the API
                     data = (worker as Importer.Importer).data;
-                    Log("Data collected. Run again to parse data of another file, or go the the API tab to query the data");
+                    Log($"{data.pubCount} publications parsed. The collected data kan be queried using the API (see API tab ↑)");
+                    UpdateDbStatistics();
                 }
             }
         }
+        #endregion
 
+        #region General UI helper methods
         private void LogCheckBox_Changed(object sender, EventArgs e)
         {
             if (worker != null)
                 worker.logActions = (sender as CheckBox).Checked;
         }
-
-        #region Filter UI methods
-        private void FilterInputLocation_Click(object sender, EventArgs e)
+        
+        private string GetFileLocation()
         {
             OpenFileDialog dialog = new OpenFileDialog();
             DialogResult result = dialog.ShowDialog();
             if (result == DialogResult.OK)
             {
-                filterInputPath = dialog.FileName;
-                inputLocationFilter.Text = filterInputPath;
+                return dialog.FileName;
             }
+            return "";
+        }
+
+        private void ToggleRunButtons()
+        {
+            runBtnFilter.Enabled = !runBtnFilter.Enabled;
+            runBtnImporter.Enabled = !runBtnImporter.Enabled;
+        }
+
+        /// <summary>
+        /// Log a msg to the UI
+        /// </summary>
+        /// <param name="msg">Message to log</param>
+        private void Log(string msg)
+        {
+            currentLogBox.AppendText($"[{DateTime.Now.ToString("H:mm:ss")}] {msg}{Environment.NewLine}");
+        }
+
+        /// <summary>
+        /// Display an error in a message box
+        /// </summary>
+        /// <param name="msg">Message to display</param>
+        private void Error(string msg)
+        {
+            Log($"Encountered error: '{msg}'");
+            MessageBox.Show(msg, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+        #endregion
+
+        #region Filter UI methods
+        private void FilterInputLocation_Click(object sender, EventArgs e)
+        {
+            filterInputPath = GetFileLocation();
+            inputLocationFilter.Text = filterInputPath;
         }
 
         private void FilterOutputLocation_Click(object sender, EventArgs e)
@@ -185,6 +219,7 @@ namespace ResearchCollector
 
         private void FilterRunBtn_Click(object sender, EventArgs e)
         {
+            currentLogBox = logBoxFilter;
             if (string.IsNullOrEmpty(filterInputPath) && typeComboBoxFilter.SelectedIndex != 1)
             {
                 Error("No input file selected");
@@ -238,7 +273,6 @@ namespace ResearchCollector
                 return;
             }
 
-            currentLogBox = logBoxFilter;
             currentProgressLabel = progressLabelFilter;
             currentProgressBar = progressBarFilter;
             filter.logActions = logCheckBoxFilter.Checked;
@@ -254,22 +288,25 @@ namespace ResearchCollector
         #region Importer UI methods
         private void ImporterRunBtn_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(importerInputPath) || !File.Exists(importerInputPath))
+            currentLogBox = logBoxImporter;
+            // Check if input path is valid and ask for input if not
+            if (string.IsNullOrEmpty(importerInputPath))
+            {
+                importerInputPath = GetFileLocation();
+                if (importerInputPath == "")
+                    return;
+                inputLocationImporter.Text = importerInputPath;
+            }
+            
+            // Check that the input file exists
+            if (!File.Exists(importerInputPath))
             {
                 Error("Selected input file does not exist");
                 return;
             }
-            try
-            {
-                worker = new Importer.Importer(context, importerInputPath);
-            }
-            catch
-            {
-                Error("Input file does not exist");
-                return;
-            }
 
-            currentLogBox = logBoxImporter;
+            worker = new Importer.Importer(context, importerInputPath, data);
+
             currentProgressLabel = progressLabelImporter;
             currentProgressBar = progressBarImporter;
             worker.logActions = logCheckBoxImporter.Checked;
@@ -290,32 +327,6 @@ namespace ResearchCollector
                 importerInputPath = dialog.FileName;
                 inputLocationImporter.Text = importerInputPath;
             }
-        }
-        #endregion
-
-        private void ToggleRunButtons()
-        {
-            runBtnFilter.Enabled = !runBtnFilter.Enabled;
-            runBtnImporter.Enabled = !runBtnImporter.Enabled;
-        }
-
-        /// <summary>
-        /// Log a msg to the UI
-        /// </summary>
-        /// <param name="msg">Message to log</param>
-        private void Log(string msg)
-        {
-            currentLogBox.AppendText($"[{DateTime.Now.ToString("H:mm:ss")}] {msg}{Environment.NewLine}");
-        }
-
-        /// <summary>
-        /// Display an error in a message box
-        /// </summary>
-        /// <param name="msg">Message to display</param>
-        private void Error(string msg)
-        {
-            Log($"Encountered error: '{msg}'");
-            MessageBox.Show(msg, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
         private void DownLoad_Articles_Click(object sender, EventArgs e)
@@ -343,5 +354,188 @@ namespace ResearchCollector
                 catch (Exception exp) { }
             }
         }
+        #endregion
+
+        #region API UI methods
+        private void UpdateDbStatistics()
+        {
+            Label lbl = new Label();
+            lbl.Text = data.articles.Count.ToString();
+            dbStatsPanel.Controls.Add(lbl, 1,0);
+            lbl = new Label();
+            lbl.Text = data.inproceedings.Count.ToString();
+            dbStatsPanel.Controls.Add(lbl, 1, 1);
+            lbl = new Label();
+            lbl.Text = data.authors.Count.ToString();
+            dbStatsPanel.Controls.Add(lbl, 1, 2);
+            lbl = new Label();
+            lbl.Text = data.journals.Count.ToString();
+            dbStatsPanel.Controls.Add(lbl, 1, 3);
+            lbl = new Label();
+            lbl.Text = data.proceedings.Count.ToString();
+            dbStatsPanel.Controls.Add(lbl, 1, 4);
+            lbl = new Label();
+            lbl.Text = data.organizations.Count.ToString();
+            dbStatsPanel.Controls.Add(lbl, 1, 5);
+        }
+
+        private void SetupDbStatistics()
+        {
+            // Add labels to db stats panel for API
+            Label lbl = new Label();
+            lbl.Text = "Nr of articles:";
+            dbStatsPanel.Controls.Add(lbl, 0, 0);
+            lbl = new Label();
+            lbl.Text = "0";
+            lbl.Width = 10;
+            dbStatsPanel.Controls.Add(lbl, 1, 0);
+            lbl = new Label();
+            lbl.Text = "Nr of inproceedings:";
+            lbl.AutoSize = true;
+            dbStatsPanel.Controls.Add(lbl, 0, 1);
+            lbl = new Label();
+            lbl.Text = "0";
+            lbl.Width = 10;
+            dbStatsPanel.Controls.Add(lbl, 1, 1);
+            lbl = new Label();
+            lbl.Text = "Nr of authors:";
+            dbStatsPanel.Controls.Add(lbl, 0, 2);
+            lbl = new Label();
+            lbl.Text = "0";
+            lbl.Width = 10;
+            dbStatsPanel.Controls.Add(lbl, 1, 2);
+            lbl = new Label();
+            lbl.Text = "Nr of journals:";
+            dbStatsPanel.Controls.Add(lbl, 0, 3);
+            lbl = new Label();
+            lbl.Text = "0";
+            lbl.Width = 10;
+            dbStatsPanel.Controls.Add(lbl, 1, 3);
+            lbl = new Label();
+            lbl.Text = "Nr of proceedings:";
+            dbStatsPanel.Controls.Add(lbl, 0, 4);
+            lbl = new Label();
+            lbl.Text = "0";
+            lbl.Width = 10;
+            dbStatsPanel.Controls.Add(lbl, 1, 4);
+            lbl = new Label();
+            lbl.Text = "Nr of organizations:";
+            dbStatsPanel.Controls.Add(lbl, 0, 5);
+            lbl = new Label();
+            lbl.Text = "0";
+            lbl.Width = 10;
+            dbStatsPanel.Controls.Add(lbl, 1, 5);
+        }
+
+
+        private void ApiRunBtn_Click(object sender, EventArgs e)
+        {
+            currentLogBox = logBoxApi;
+            if (apiQuery.Text == "Type your query here..." || string.IsNullOrEmpty(apiQuery.Text))
+            {
+                Error("No input query given");
+                return;
+            }
+            if (comboBoxApi.SelectedIndex == -1)
+            {
+                Error("The type of items to search for was not specified");
+                return;
+            }
+            if (comboBoxSearch.SelectedIndex == -1)
+            {
+                Error("The search method to use was not specified");
+                return;
+            }
+
+            (string, string)[] args = ParseQuery(out bool success);
+            if (!success)
+                return;
+
+            Log("Querying the database...");
+            API api = new API(data);
+            SearchType st;
+            if (comboBoxSearch.SelectedIndex == 0)
+                st = SearchType.Exact;
+            else
+                st = SearchType.Loose;
+
+            try
+            {
+                switch (comboBoxApi.SelectedIndex)
+                {
+                    case 0:
+                        HandleQueryResult(api.Search<Article>(SearchDomain.Articles, st, args));
+                        break;
+                    case 1:
+                        HandleQueryResult(api.Search<Inproceedings>(SearchDomain.Inproceedings, st, args));
+                        break;
+                    case 2:
+                        HandleQueryResult(api.Search<Inproceedings>(SearchDomain.Authors, st, args));
+                        break;
+                    case 3:
+                        HandleQueryResult(api.Search<Inproceedings>(SearchDomain.Persons, st, args));
+                        break;
+                    case 4:
+                        HandleQueryResult(api.Search<Inproceedings>(SearchDomain.Journals, st, args));
+                        break;
+                    case 5:
+                        HandleQueryResult(api.Search<Inproceedings>(SearchDomain.Proceedings, st, args));
+                        break;
+                    case 6:
+                        HandleQueryResult(api.Search<Inproceedings>(SearchDomain.Organizations, st, args));
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                Error(ex.Message);
+            }
+        }
+
+        private void HandleQueryResult<T>(HashSet<T> results)
+        {
+            // Do something with results..
+
+            Log($"{results.Count} items found");
+        }
+
+        /// <summary>
+        /// Parses a query for the api into the format needed by the Search method
+        /// </summary>
+        /// <returns>A boolean indicating whether the query is valid or not</returns>
+        private (string,string)[] ParseQuery(out bool success)
+        {
+            string[] ps = apiQuery.Text.Split('\u002C');
+            if (ps.Length < 1)
+            {
+                success = false;
+                return new (string, string)[0];
+            }
+
+            List<(string, string)> predicates = new List<(string, string)>();
+            foreach (string p in ps)
+            {
+                string[] parts = p.Split('=');
+                if (parts.Length < 2)
+                    continue;
+
+                string attr = parts[0].Trim(' ');
+                string val = parts[1].Trim(' ');
+                
+                if (API.possibleArgs.Contains(attr))
+                    predicates.Add((attr, val));
+            }
+
+            if (predicates.Count == 0)
+            {
+                Error("The query did not contain any valid arguments");
+                success = false;
+                return new (string, string)[0];
+            }
+
+            success = true;
+            return predicates.ToArray();
+        }
+        #endregion
     }
 }

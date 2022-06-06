@@ -6,6 +6,11 @@ namespace ResearchCollector.Importer
     #region Data types for storage in memory
     class Data
     {
+        /// <summary>
+        /// Number of publications contained in this object
+        /// </summary>
+        public int pubCount;
+
         // Articles and Inproceedings are indexed by their custom id created by us
         public Dictionary<string, Article> articles;
         public Dictionary<string, Inproceedings> inproceedings;

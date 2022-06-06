@@ -20,16 +20,14 @@ namespace ResearchCollector.Importer
         /// </summary>
         public Data data;
         private JsonPublication pub;
-        private int currentPubCount;
         private int totalPubCount;
         private string path;
         PDFInfoFinder pdfFixer;
 
-        public Importer(SynchronizationContext context, string path) : base(context)
+        public Importer(SynchronizationContext context, string path, Data data) : base(context)
         {
             this.path = path;
-            if (!File.Exists(path))
-                throw new System.Exception("Input file does not exist");
+            this.data = data;
             // Get the lineCount, and thus the nr of publications, in the input file
             int lineCount = File.ReadLines(path).Count();
             totalPubCount = lineCount - 4;
@@ -44,7 +42,6 @@ namespace ResearchCollector.Importer
         /// <param name="worker">BackgroundWorker this will be run on</param>
         public override void Run(BackgroundWorker worker)
         {
-            data = new Data();
             this.worker = worker;
 
             using (StreamReader sr = new StreamReader(path))
@@ -52,11 +49,11 @@ namespace ResearchCollector.Importer
                 string t = sr.ReadLine();
                 string t2 = sr.ReadLine();
                 string line = "";
-                while (currentPubCount < totalPubCount)
+                while (data.pubCount < totalPubCount)
                 {
                     line = sr.ReadLine();
                     // For all lines that are not the last line, remove the comma from the end
-                    if (currentPubCount < totalPubCount - 1)
+                    if (data.pubCount < totalPubCount - 1)
                         line = line.Remove(line.Length - 1, 1);
                     pub = JsonSerializer.Deserialize<JsonPublication>(line);
                     ParsePublication();
@@ -66,7 +63,7 @@ namespace ResearchCollector.Importer
 
         private void ParsePublication()
         {
-            currentPubCount++;
+            data.pubCount++;
 
             // Our custom id for publication
             string customId = CreateId();

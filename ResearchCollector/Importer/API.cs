@@ -7,22 +7,33 @@ using System.Threading.Tasks;
 namespace ResearchCollector.Importer
 {
     public enum SearchType { Exact, Loose }
+    public enum SearchDomain { Articles, Inproceedings, Authors, Persons, Journals, Proceedings, Organizations}
 
     internal class API
     {
-        Data data;
+        /// <summary>
+        /// Array of possible attributes that can be searched for using the api
+        /// </summary>
+        public static string[] possibleArgs = new string[]
+        {
+            "title", "journal", "proceedings", "id", "externals", "year", "doi", "authors", "topics",
+            "affiliation", "email", "name", "publications", "orcid", "authored",
+            "issue", "series", "volume", "location"
+        };
+
+        private Data data;
 
         public API(Data data)
         {
             this.data = data;
         }
 
-        public HashSet<T> Search<T>(string searchDomain, SearchType searchType, params (string key, string query)[] arguments)
+        public HashSet<T> Search<T>(SearchDomain searchDomain, SearchType searchType, params (string key, string query)[] arguments)
         {
             bool howToSearch = searchType == SearchType.Exact; //mogelijk beter om searchtype een klasse te maken met een ingebouwde bool -> bool -> bool functie en start bool waarde
             switch (searchDomain)
             {
-                case "articles":
+                case SearchDomain.Articles:
                     Func<Article, (string, string), bool> satisfiesArticle = (article, arg) =>
                     {
                         //perhaps also abstract???
@@ -51,7 +62,7 @@ namespace ResearchCollector.Importer
                         }
                     };
                     return FindItems<T>(data.articles as Dictionary<string, T>, searchType, arguments, satisfiesArticle as Func<T, (string, string), bool>);
-                case "inproceedings":
+                case SearchDomain.Inproceedings:
                     Func<Inproceedings, (string, string), bool> satisfiesInproceedings = (inpr, arg) =>
                     {
                         //perhaps also abstract???
@@ -80,7 +91,7 @@ namespace ResearchCollector.Importer
                         }
                     };
                     return FindItems<T>(data.inproceedings as Dictionary<string, T>, searchType, arguments, satisfiesInproceedings as Func<T, (string, string), bool>);
-                case "authors":
+                case SearchDomain.Authors:
                     Func<Author, (string, string), bool> satisfiesAuthor = (author, arg) =>
                     {
                         //toch raar om te zoeken naar author.person?
@@ -100,7 +111,7 @@ namespace ResearchCollector.Importer
                         }
                     };
                     return FindItems<T>(data.authors as Dictionary<string, T>, searchType, arguments, satisfiesAuthor as Func<T, (string, string), bool>);
-                case "people":
+                case SearchDomain.Persons:
                     Func<Person, (string, string), bool> satisfiesPerson = (person, arg) =>
                     {
                         switch (arg.Item1)
@@ -117,7 +128,7 @@ namespace ResearchCollector.Importer
                         }
                     };
                     return FindItems<T>(data.persons as Dictionary<string, T>, searchType, arguments, satisfiesPerson as Func<T, (string, string), bool>);
-                case "journals":
+                case SearchDomain.Journals:
                     Func<Journal, (string, string), bool> satisfiesJournal = (journal, arg) =>
                     {
                         switch (arg.Item1)
@@ -135,7 +146,7 @@ namespace ResearchCollector.Importer
                         }
                     };
                     return FindItems<T>(data.journals as Dictionary<string, T>, searchType, arguments, satisfiesJournal as Func<T, (string, string), bool>);
-                case "proceedings":
+                case SearchDomain.Proceedings:
                     Func<Proceedings, (string, string), bool> satisfiesProceedings = (proc, arg) =>
                     {
                         switch (arg.Item1)
@@ -147,7 +158,7 @@ namespace ResearchCollector.Importer
                         }
                     };
                     return FindItems<T>(data.proceedings as Dictionary<string, T>, searchType, arguments, satisfiesProceedings as Func<T, (string, string), bool>);
-                case "organizations":
+                case SearchDomain.Organizations:
                     Func<Organization, (string, string), bool> satisfiesOrganization = (org, arg) =>
                     {
                         switch (arg.Item1)

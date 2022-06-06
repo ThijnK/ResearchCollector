@@ -117,4 +117,7 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="label10.Text" xml:space="preserve">
+    <value>The search method specifies when an item is considered a match for the query. Exact means every argument in the query must be satisfied for an item to match. Loose means satisfying a single argument is enough for an item to be considered a match.</value>
+  </data>
 </root>
