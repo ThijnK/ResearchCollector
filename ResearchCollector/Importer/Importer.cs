@@ -53,12 +53,7 @@ namespace ResearchCollector.Importer
                         line = line.Remove(line.Length - 1, 1);
                     pub = JsonSerializer.Deserialize<JsonPublication>(line);
                     ParsePublication();
-                }
-
-                using (StreamWriter sw = new StreamWriter("pizza.json"))
-                {
-                    sw.Write(data.ToJson());
-                }
+                }                
             }
         }
 

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Device.Location;
 using System.Text;
 using System.Text.Json;
@@ -34,6 +35,12 @@ namespace ResearchCollector.Importer
             organizations = new Dictionary<string, Organization>();
         }
 
+        void LengthCheck(StringBuilder sb, int length)
+        {
+            if (length > 0)
+                sb.Length--;
+        }
+
         public StringBuilder ToJson()
         {
             StringBuilder sb = new StringBuilder("\'\"articles\":[");
@@ -45,8 +52,7 @@ namespace ResearchCollector.Importer
                 article.ToJson(sb, encounteredJournals, encounteredAuthors);
                 sb.Append(",");
             }
-            if (this.articles.Values.Count > 0)
-                sb.Length--;
+            LengthCheck(sb, this.articles.Values.Count);
 
             sb.Append("],\"journals\":[");
             foreach (Journal journal in encounteredJournals)
@@ -54,8 +60,7 @@ namespace ResearchCollector.Importer
                 journal.ToJson(sb);
                 sb.Append(",");
             }
-            if (encounteredJournals.Count > 0)
-                sb.Length--;
+            LengthCheck(sb, encounteredJournals.Count);
 
             sb.Append("],\"inproceedings\":[");
             HashSet<Proceedings> encounteredproceedings = new HashSet<Proceedings>();
@@ -64,8 +69,7 @@ namespace ResearchCollector.Importer
                 inproceedings.ToJson(sb, encounteredproceedings, encounteredAuthors);
                 sb.Append(",");
             }
-            if (this.inproceedings.Values.Count > 0)
-                sb.Length--;
+            LengthCheck(sb, this.inproceedings.Values.Count);
 
             sb.Append("],\"proceedings\":[");
             foreach (Proceedings proceedings in encounteredproceedings)
@@ -73,8 +77,7 @@ namespace ResearchCollector.Importer
                 proceedings.ToJson(sb);
                 sb.Append(",");
             }
-            if (encounteredproceedings.Count > 0)
-                sb.Length--;
+            LengthCheck(sb, encounteredproceedings.Count);
 
             sb.Append("],\"authors\":[");
             HashSet<Organization> organizations = new HashSet<Organization>();
@@ -84,8 +87,7 @@ namespace ResearchCollector.Importer
                 author.ToJson(sb, organizations, persons);
                 sb.Append(",");
             }
-            if (encounteredAuthors.Count > 0)
-                sb.Length--;
+            LengthCheck(sb, encounteredAuthors.Count);
 
             sb.Append("],\"organizations\":[");
             foreach (Organization orginazation in organizations)
@@ -93,8 +95,7 @@ namespace ResearchCollector.Importer
                 orginazation.ToJson(sb);
                 sb.Append(",");
             }
-            if (organizations.Count > 0)
-                sb.Length--;
+            LengthCheck(sb, organizations.Count);
 
             sb.Append("],\"persons\":[");
             foreach (Person person in persons)
@@ -102,8 +103,7 @@ namespace ResearchCollector.Importer
                 person.ToJson(sb);
                 sb.Append(",");
             }
-            if (persons.Count > 0)
-                sb.Length--;
+            LengthCheck(sb, persons.Count);
 
             sb.Append("]\'");
 

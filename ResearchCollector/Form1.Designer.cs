@@ -69,6 +69,7 @@
             this.label6 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.dbStatsPanel = new System.Windows.Forms.TableLayoutPanel();
+            this.Export_Json = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.filterTab.SuspendLayout();
             this.importerTab.SuspendLayout();
@@ -242,10 +243,10 @@
             this.filterTab.TabIndex = 0;
             this.filterTab.Text = "Filter";
             this.filterTab.UseVisualStyleBackColor = true;
-            this.filterTab.Enter += TabSwitched;
             // 
             // importerTab
             // 
+            this.importerTab.Controls.Add(this.Export_Json);
             this.importerTab.Controls.Add(this.DownLoad_Articles);
             this.importerTab.Controls.Add(this.logBoxImporter);
             this.importerTab.Controls.Add(this.inputLocationImporter);
@@ -262,7 +263,6 @@
             this.importerTab.TabIndex = 1;
             this.importerTab.Text = "Importer";
             this.importerTab.UseVisualStyleBackColor = true;
-            this.importerTab.Enter += TabSwitched;
             // 
             // DownLoad_Articles
             // 
@@ -372,7 +372,6 @@
             this.apiTab.TabIndex = 2;
             this.apiTab.Text = "API";
             this.apiTab.UseVisualStyleBackColor = true;
-            this.apiTab.Enter += TabSwitched;
             // 
             // label11
             // 
@@ -527,6 +526,16 @@
             this.dbStatsPanel.Size = new System.Drawing.Size(225, 75);
             this.dbStatsPanel.TabIndex = 0;
             // 
+            // Export_Json
+            // 
+            this.Export_Json.Location = new System.Drawing.Point(8, 254);
+            this.Export_Json.Name = "Export_Json";
+            this.Export_Json.Size = new System.Drawing.Size(224, 28);
+            this.Export_Json.TabIndex = 27;
+            this.Export_Json.Text = "Export to JSON";
+            this.Export_Json.UseVisualStyleBackColor = true;
+            this.Export_Json.Click += new System.EventHandler(this.Export_Json_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -590,6 +599,7 @@
         private System.Windows.Forms.ComboBox comboBoxSearch;
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.Button Export_Json;
     }
 }
 

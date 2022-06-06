@@ -399,6 +399,22 @@ namespace ResearchCollector
             Log("Finished downloading pdf's");
             Log($"Pdf's can be found in the following directory: {outputPath}");
         }
+
+        private void Export_Json_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using (StreamWriter sw = new StreamWriter("pizza.json"))
+                {
+                    sw.Write(data.ToJson());
+                }
+            }
+            catch (Exception ex)
+            {
+                Error(ex.Message);
+                return;
+            }
+        }
         #endregion
 
         #region API UI methods
