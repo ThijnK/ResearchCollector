@@ -8,8 +8,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
-using ResearchCollector.PDFParser;
-using ResearchCollector.PDFParser.Exceptions;
 
 namespace ResearchCollector.Importer
 {
@@ -22,7 +20,6 @@ namespace ResearchCollector.Importer
         private JsonPublication pub;
         private int totalPubCount;
         private string path;
-        PDFInfoFinder pdfFixer;
 
         public Importer(SynchronizationContext context, string path, Data data) : base(context)
         {
@@ -32,7 +29,6 @@ namespace ResearchCollector.Importer
             int lineCount = File.ReadLines(path).Count();
             totalPubCount = lineCount - 4;
             progressIncrement = 1.0 / (double)totalPubCount * 100.0;
-            pdfFixer = new PDFInfoFinder();
         }
 
         /// <summary>
@@ -71,16 +67,6 @@ namespace ResearchCollector.Importer
             Publication currentPublication = GoThroughPublication(customId);
 
             GoThroughAuthors(currentPublication);
-
-            //Download and save text from the publcation
-            /*try
-            {
-                if (!string.IsNullOrEmpty(pub.pdfLink))
-                    pdfFixer.FindInfo(pub.pdfLink, customId, false);
-                else
-                    pdfFixer.FindInfo(pub.doi, customId, true);
-            }
-            catch(Exception e) { }*/
 
             // Report action and progress to UI          
             ReportAction($"Item parsed: '{pub.title}'");
