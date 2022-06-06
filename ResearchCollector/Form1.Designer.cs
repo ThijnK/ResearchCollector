@@ -45,6 +45,7 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.filterTab = new System.Windows.Forms.TabPage();
             this.importerTab = new System.Windows.Forms.TabPage();
+            this.DownLoad_Articles = new System.Windows.Forms.Button();
             this.logBoxImporter = new System.Windows.Forms.TextBox();
             this.inputLocationImporter = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
@@ -54,7 +55,7 @@
             this.progressLabelImporter = new System.Windows.Forms.Label();
             this.progressBarImporter = new System.Windows.Forms.ProgressBar();
             this.apiTab = new System.Windows.Forms.TabPage();
-            this.DownLoad_Articles = new System.Windows.Forms.Button();
+            this.label11 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
             this.comboBoxSearch = new System.Windows.Forms.ComboBox();
@@ -68,7 +69,6 @@
             this.label6 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.dbStatsPanel = new System.Windows.Forms.TableLayoutPanel();
-            this.label11 = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.filterTab.SuspendLayout();
             this.importerTab.SuspendLayout();
@@ -242,6 +242,7 @@
             this.filterTab.TabIndex = 0;
             this.filterTab.Text = "Filter";
             this.filterTab.UseVisualStyleBackColor = true;
+            this.filterTab.Enter += TabSwitched;
             // 
             // importerTab
             // 
@@ -261,6 +262,17 @@
             this.importerTab.TabIndex = 1;
             this.importerTab.Text = "Importer";
             this.importerTab.UseVisualStyleBackColor = true;
+            this.importerTab.Enter += TabSwitched;
+            // 
+            // DownLoad_Articles
+            // 
+            this.DownLoad_Articles.Location = new System.Drawing.Point(8, 220);
+            this.DownLoad_Articles.Name = "DownLoad_Articles";
+            this.DownLoad_Articles.Size = new System.Drawing.Size(224, 28);
+            this.DownLoad_Articles.TabIndex = 26;
+            this.DownLoad_Articles.Text = "Download pdf\'s ";
+            this.DownLoad_Articles.UseVisualStyleBackColor = true;
+            this.DownLoad_Articles.Click += new System.EventHandler(this.DownLoad_Articles_Click);
             // 
             // logBoxImporter
             // 
@@ -360,16 +372,18 @@
             this.apiTab.TabIndex = 2;
             this.apiTab.Text = "API";
             this.apiTab.UseVisualStyleBackColor = true;
+            this.apiTab.Enter += TabSwitched;
             // 
-            // DownLoad_Articles
+            // label11
             // 
-            this.DownLoad_Articles.Location = new System.Drawing.Point(8, 190);
-            this.DownLoad_Articles.Name = "DownLoad_Articles";
-            this.DownLoad_Articles.Size = new System.Drawing.Size(224, 23);
-            this.DownLoad_Articles.TabIndex = 26;
-            this.DownLoad_Articles.Text = "Download Articles";
-            this.DownLoad_Articles.UseVisualStyleBackColor = true;
-            this.DownLoad_Articles.Click += new System.EventHandler(this.DownLoad_Articles_Click);
+            this.label11.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label11.Location = new System.Drawing.Point(429, 85);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(361, 37);
+            this.label11.TabIndex = 33;
+            this.label11.Text = "To specify that a value of some attribute can have multiple values, separate each" +
+    " option by a \'|\'. For example: \'authors = Alice | Bob\'.";
+            // 
             // label10
             // 
             this.label10.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -512,16 +526,6 @@
             this.dbStatsPanel.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.dbStatsPanel.Size = new System.Drawing.Size(225, 75);
             this.dbStatsPanel.TabIndex = 0;
-            // 
-            // label11
-            // 
-            this.label11.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label11.Location = new System.Drawing.Point(429, 85);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(361, 37);
-            this.label11.TabIndex = 33;
-            this.label11.Text = "To specify that a value of some attribute can have multiple values, separate each" +
-    " option by a \'|\'. For example: \'authors = Alice | Bob\'.";
             // 
             // Form1
             // 

@@ -29,6 +29,9 @@ namespace ResearchCollector
         private string importerInputPath;
         private Data data;
 
+        // API db stats panel labels
+        Label articleCount, inproceedingCount, authorCount, journalCount, proceedingCount, organizationCount;
+
         PDFInfoFinder pdfFixer = new PDFInfoFinder();
 
         /// <summary>
@@ -140,10 +143,42 @@ namespace ResearchCollector
             return "";
         }
 
+        private string GetFolderLocation(out bool success)
+        {
+            FolderBrowserDialog dialog = new FolderBrowserDialog();
+            dialog.Description = "Select a folder to write the output to.";
+            DialogResult result = dialog.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+                success = true;
+                return dialog.SelectedPath;
+            }
+
+            success = false;
+            return "";
+        }
+
         private void ToggleRunButtons()
         {
             runBtnFilter.Enabled = !runBtnFilter.Enabled;
             runBtnImporter.Enabled = !runBtnImporter.Enabled;
+        }
+
+        // Called when user switches to a new tab
+        private void TabSwitched(object sender, EventArgs e)
+        {
+            switch ((sender as TabPage).Text)
+            {
+                case "Filter":
+                    currentLogBox = logBoxFilter;
+                    break;
+                case "Importer":
+                    currentLogBox = logBoxImporter;
+                    break;
+                case "API":
+                    currentLogBox = logBoxApi;
+                    break;
+            }
         }
 
         /// <summary>
@@ -175,22 +210,8 @@ namespace ResearchCollector
 
         private void FilterOutputLocation_Click(object sender, EventArgs e)
         {
-            AskForFilterOutputLocation();
-        }
-
-        private bool AskForFilterOutputLocation()
-        {
-            FolderBrowserDialog dialog = new FolderBrowserDialog();
-            dialog.Description = "Select a folder to write the output to.";
-            DialogResult result = dialog.ShowDialog();
-            if (result == DialogResult.OK)
-            {
-                filterOutputPath = dialog.SelectedPath;
-                outputLocationFilter.Text = filterOutputPath;
-                return true;
-            }
-
-            return false;
+            filterOutputPath = GetFolderLocation(out _);
+            outputLocationFilter.Text = filterOutputPath;
         }
 
         private void FilterComboBox_IndexChanged(object sender, EventArgs e)
@@ -238,9 +259,12 @@ namespace ResearchCollector
 
             // Ask for output location if not provided in config file
             if (string.IsNullOrEmpty(filterOutputPath))
-                if (!AskForFilterOutputLocation())
+            {
+                filterOutputPath = GetFolderLocation(out bool success);
+                if (!success)
                     return;
-
+                outputLocationFilter.Text = filterOutputPath;
+            }
             RunFilter();
         }
 
@@ -331,6 +355,19 @@ namespace ResearchCollector
 
         private void DownLoad_Articles_Click(object sender, EventArgs e)
         {
+            if (data.pubCount == 0)
+            {
+                Error("Database does not contain any publications");
+                return;
+            }
+            string outputPath = GetFolderLocation(out bool success);
+            if (!success)
+            {
+                Error("No output path selected");
+                return;
+            }
+
+            Log("Downloading pdf's for articles in database");
             foreach (Article article in data.articles.Values)
             {
                 try
@@ -340,7 +377,10 @@ namespace ResearchCollector
                     else
                         pdfFixer.FindInfo(article.doi, article.id, true);
                 }
-                catch (Exception exp) { }
+                catch (Exception ex) 
+                {
+                    Error(ex.Message);
+                }
             }
             foreach (Inproceedings inpr in data.inproceedings.Values)
             {
@@ -351,32 +391,25 @@ namespace ResearchCollector
                     else
                         pdfFixer.FindInfo(inpr.doi, inpr.id, true);
                 }
-                catch (Exception exp) { }
+                catch (Exception ex)
+                {
+                    Error(ex.Message);
+                }
             }
+            Log("Finished downloading pdf's");
+            Log($"Pdf's can be found in the following directory: {outputPath}");
         }
         #endregion
 
         #region API UI methods
         private void UpdateDbStatistics()
         {
-            Label lbl = new Label();
-            lbl.Text = data.articles.Count.ToString();
-            dbStatsPanel.Controls.Add(lbl, 1,0);
-            lbl = new Label();
-            lbl.Text = data.inproceedings.Count.ToString();
-            dbStatsPanel.Controls.Add(lbl, 1, 1);
-            lbl = new Label();
-            lbl.Text = data.authors.Count.ToString();
-            dbStatsPanel.Controls.Add(lbl, 1, 2);
-            lbl = new Label();
-            lbl.Text = data.journals.Count.ToString();
-            dbStatsPanel.Controls.Add(lbl, 1, 3);
-            lbl = new Label();
-            lbl.Text = data.proceedings.Count.ToString();
-            dbStatsPanel.Controls.Add(lbl, 1, 4);
-            lbl = new Label();
-            lbl.Text = data.organizations.Count.ToString();
-            dbStatsPanel.Controls.Add(lbl, 1, 5);
+            articleCount.Text = data.articles.Count.ToString();
+            inproceedingCount.Text = data.inproceedings.Count.ToString();
+            authorCount.Text = data.authors.Count.ToString();
+            journalCount.Text = data.journals.Count.ToString();
+            proceedingCount.Text = data.proceedings.Count.ToString();
+            organizationCount.Text = data.organizations.Count.ToString();
         }
 
         private void SetupDbStatistics()
@@ -385,46 +418,46 @@ namespace ResearchCollector
             Label lbl = new Label();
             lbl.Text = "Nr of articles:";
             dbStatsPanel.Controls.Add(lbl, 0, 0);
-            lbl = new Label();
-            lbl.Text = "0";
-            lbl.Width = 10;
-            dbStatsPanel.Controls.Add(lbl, 1, 0);
+            articleCount = new Label();
+            articleCount.Text = "0";
+            //articleCount.Width = 10;
+            dbStatsPanel.Controls.Add(articleCount, 1, 0);
             lbl = new Label();
             lbl.Text = "Nr of inproceedings:";
             lbl.AutoSize = true;
             dbStatsPanel.Controls.Add(lbl, 0, 1);
-            lbl = new Label();
-            lbl.Text = "0";
-            lbl.Width = 10;
-            dbStatsPanel.Controls.Add(lbl, 1, 1);
+            inproceedingCount = new Label();
+            inproceedingCount.Text = "0";
+            //inproceedingCount.Width = 10;
+            dbStatsPanel.Controls.Add(inproceedingCount, 1, 1);
             lbl = new Label();
             lbl.Text = "Nr of authors:";
             dbStatsPanel.Controls.Add(lbl, 0, 2);
-            lbl = new Label();
-            lbl.Text = "0";
-            lbl.Width = 10;
-            dbStatsPanel.Controls.Add(lbl, 1, 2);
+            authorCount = new Label();
+            authorCount.Text = "0";
+            //authorCount.Width = 10;
+            dbStatsPanel.Controls.Add(authorCount, 1, 2);
             lbl = new Label();
             lbl.Text = "Nr of journals:";
             dbStatsPanel.Controls.Add(lbl, 0, 3);
-            lbl = new Label();
-            lbl.Text = "0";
-            lbl.Width = 10;
-            dbStatsPanel.Controls.Add(lbl, 1, 3);
+            journalCount = new Label();
+            journalCount.Text = "0";
+            //journalCount.Width = 10;
+            dbStatsPanel.Controls.Add(journalCount, 1, 3);
             lbl = new Label();
             lbl.Text = "Nr of proceedings:";
             dbStatsPanel.Controls.Add(lbl, 0, 4);
-            lbl = new Label();
-            lbl.Text = "0";
-            lbl.Width = 10;
-            dbStatsPanel.Controls.Add(lbl, 1, 4);
+            proceedingCount = new Label();
+            proceedingCount.Text = "0";
+            //proceedingCount.Width = 10;
+            dbStatsPanel.Controls.Add(proceedingCount, 1, 4);
             lbl = new Label();
             lbl.Text = "Nr of organizations:";
             dbStatsPanel.Controls.Add(lbl, 0, 5);
-            lbl = new Label();
-            lbl.Text = "0";
-            lbl.Width = 10;
-            dbStatsPanel.Controls.Add(lbl, 1, 5);
+            organizationCount = new Label();
+            organizationCount.Text = "0";
+            //organizationCount.Width = 10;
+            dbStatsPanel.Controls.Add(organizationCount, 1, 5);
         }
 
 
