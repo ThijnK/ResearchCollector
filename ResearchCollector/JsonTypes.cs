@@ -10,20 +10,34 @@ namespace ResearchCollector
 
     class JsonPublication
     {
-        public string externalId { get; set; }
+        public JsonExternalId[] externalIds { get; set; }
         public string origin { get; set; }
         public string type { get; set; }
         public string title { get; set; }
         public int year { get; set; }
         public string doi { get; set; }
         public string pdfLink { get; set; }
+        public string pages { get; set; }
         public object partof { get; set; }
         public JsonAuthor[] has { get; set; }
+    }
+
+    struct JsonExternalId
+    {
+        public string id { get; set; }
+        public string origin { get; set; }
+
+        public JsonExternalId(string id, string origin)
+        {
+            this.id = id;
+            this.origin = origin;
+        }
     }
 
     class JsonVolume
     {
         public string title { get; set; }
+        public string publisher { get; set; }
 
         public JsonVolume(string title)
         {
