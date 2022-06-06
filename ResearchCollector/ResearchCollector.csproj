@@ -115,6 +115,7 @@
     <Compile Include="Importer\API.cs" />
     <Compile Include="Importer\DataStructures.cs" />
     <Compile Include="Importer\Importer.cs" />
+    <Compile Include="Importer\JsonMemoryTypes.cs" />
     <Compile Include="JsonTypes.cs" />
     <Compile Include="PDFParser\Exceptions\DoiProviderNotKnownException.cs" />
     <Compile Include="PDFParser\Exceptions\RedirectingException.cs" />

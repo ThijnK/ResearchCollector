@@ -54,6 +54,125 @@ namespace ResearchCollector.Importer
                     pub = JsonSerializer.Deserialize<JsonPublication>(line);
                     ParsePublication();
                 }
+
+                StringBuilder sbTotal = new StringBuilder("\'\"articles\":[");
+
+                HashSet<Author> encounteredAuthors = new HashSet<Author>();
+                HashSet<Journal> encounteredJournals = new HashSet<Journal>();
+                foreach (Article article in data.articles.Values)
+                {
+                    if (!encounteredJournals.Contains(article.partOf))
+                        encounteredJournals.Add(article.partOf);
+
+                    string[] authors = new string[article.authors.Count];
+                    for( int i = 0; i < article.authors.Count; i++)
+                    {
+                        Author author = article.authors[i];
+                        if (!encounteredAuthors.Contains(author))
+                            encounteredAuthors.Add(author);
+                        authors[i] = author.name;
+                    }
+
+
+                    JsonMemArticle jarticle = new JsonMemArticle { abstr = article.abstr, doi = article.doi, authorKeys = authors, id = article.id, journalKey = article.partOf.title, pdfLink = article.pdfLink, title = article.title, topics = article.topics, year = article.year };
+                    string current = JsonSerializer.Serialize<JsonMemArticle>(jarticle);
+                    sbTotal.Append(current);
+                    sbTotal.Append(",");
+                }
+                if(data.articles.Values.Count > 0)
+                    sbTotal.Length--;
+                sbTotal.Append("],\"journals\":[");
+
+                foreach (Journal journal in encounteredJournals)
+                {
+                    JsonMemJournal jjournal = new JsonMemJournal { issue = journal.issue, series = journal.series, title = journal.title, volume = journal.volume };
+                    string current = JsonSerializer.Serialize<JsonMemJournal>(jjournal);
+                    sbTotal.Append(current);
+                    sbTotal.Append(",");
+                }
+                if(encounteredJournals.Count > 0)
+                    sbTotal.Length--;
+                sbTotal.Append("],\"inproceedings\":[");
+
+                HashSet<Proceedings> encounteredproceedings = new HashSet<Proceedings>();
+                foreach (Inproceedings inproceedings in data.inproceedings.Values)
+                {
+                    if (!encounteredproceedings.Contains(inproceedings.partOf))
+                        encounteredproceedings.Add(inproceedings.partOf);
+
+                    string[] authors = new string[inproceedings.authors.Count];
+                    for (int i = 0; i < inproceedings.authors.Count; i++)
+                    {
+                        Author author = inproceedings.authors[i];
+                        if (!encounteredAuthors.Contains(author))
+                            encounteredAuthors.Add(author);
+                        authors[i] = author.name;
+                    }
+
+                    JsonMemInproceedings jinproceedings = new JsonMemInproceedings { abstr = inproceedings.abstr, doi = inproceedings.doi, authorKeys = authors, id = inproceedings.id, proceedingsKey = inproceedings.partOf.title, pdfLink = inproceedings.pdfLink, title = inproceedings.title, topics = inproceedings.topics, year = inproceedings.year };
+                    string current = JsonSerializer.Serialize<JsonMemInproceedings>(jinproceedings);
+                    sbTotal.Append(current);
+                    sbTotal.Append(",");
+                }
+                if (data.inproceedings.Values.Count > 0)
+                    sbTotal.Length--;
+                sbTotal.Append("],\"proceedings\":[");
+
+                foreach (Proceedings proceedings in encounteredproceedings)
+                {
+                    JsonMemProceedings jproceedings = new JsonMemProceedings { title = proceedings.title };
+                    string current = JsonSerializer.Serialize<JsonMemProceedings>(jproceedings);
+                    sbTotal.Append(current);
+                    sbTotal.Append(",");
+                }
+                if (encounteredproceedings.Count > 0)
+                    sbTotal.Length--;
+                sbTotal.Append("],\"authors\":[");
+
+                HashSet<Organization> organizations = new HashSet<Organization>();
+                HashSet<Person> persons = new HashSet<Person>();
+                foreach (Author author in encounteredAuthors)
+                {
+                    if (!organizations.Contains(author.affiliatedTo))
+                        organizations.Add(author.affiliatedTo);
+                    if (!persons.Contains(author.person))
+                        persons.Add(author.person);
+
+                    JsonMemAuthor jauthor = new JsonMemAuthor { affiliatedToKey = author.affiliatedTo.name, email = author.email, fname = author.fname, lname = author.lname, name = author.name, personKey = author.person.name };
+                    string current = JsonSerializer.Serialize<JsonMemAuthor>(jauthor);
+                    sbTotal.Append(current);
+                    sbTotal.Append(",");
+                }
+                if (encounteredAuthors.Count > 0)
+                    sbTotal.Length--;
+                sbTotal.Append("],\"organizations\":[");
+
+                foreach (Organization orginazation in organizations)
+                {
+                    JsonMemOrganization jorganization = new JsonMemOrganization { name = orginazation.name };
+                    string current = JsonSerializer.Serialize<JsonMemOrganization>(jorganization);
+                    sbTotal.Append(current);
+                    sbTotal.Append(",");
+                }
+                if (organizations.Count > 0)
+                    sbTotal.Length--;
+                sbTotal.Append("],\"persons\":[");
+
+                foreach (Person person in persons)
+                {
+                    JsonMemPerson jperson = new JsonMemPerson { name = person.name, fname = person.fname, lname = person.lname, orcid = person.orcid };
+                    string current = JsonSerializer.Serialize<JsonMemPerson>(jperson);
+                    sbTotal.Append(current);
+                    sbTotal.Append(",");
+                }
+                if (persons.Count > 0)
+                    sbTotal.Length--;
+                sbTotal.Append("]\'");
+
+                using (StreamWriter sw = new StreamWriter("pizza.json"))
+                {
+                    sw.Write(sbTotal);
+                }
             }
         }
 
