@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Windows.Forms;
 using ResearchCollector.Filter;
 using ResearchCollector.Importer;
@@ -33,6 +34,14 @@ namespace ResearchCollector
         Label articleCount, inproceedingCount, authorCount, journalCount, proceedingCount, organizationCount;
 
         PDFInfoFinder pdfFixer = new PDFInfoFinder();
+
+        HashSet<Article> articles;
+        HashSet<Inproceedings> inproceedings;
+        HashSet<Journal> journals;
+        HashSet<Proceedings> proceedings;
+        HashSet<Author> authors;
+        HashSet<Person> persons;
+        HashSet<Organization> organizations;
 
         /// <summary>
         /// Context used to access UI thread from BackgroundWorker
@@ -415,6 +424,92 @@ namespace ResearchCollector
                 return;
             }
         }
+
+        private void Query_Json_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                StringBuilder sb = new StringBuilder("\'");
+
+                switch (comboBoxApi.SelectedIndex)
+                {
+                    case 0:                  
+                        HashSet<Author> encounteredAuthorsA = new HashSet<Author>();
+                        HashSet<Journal> encounteredJournals = data.ArticlesToJson(sb, articles, encounteredAuthorsA);
+
+                        sb.Append(",");
+
+                        (HashSet<Organization> organizations, HashSet<Person> persons) comboA = data.AuthorsToJson(sb, encounteredAuthorsA);
+
+                        sb.Append(",");
+
+                        data.OrganizationsToJson(sb, comboA.organizations);
+
+                        sb.Append(",");
+
+                        data.PersonsToJson(sb, comboA.persons);
+
+                        break;
+                    case 1:
+                        HashSet<Author> encounteredAuthorsI = new HashSet<Author>();
+                        HashSet<Proceedings> encounteredproceedings = data.InproceedingsToJson(sb, inproceedings, encounteredAuthorsI);
+
+                        sb.Append(",");
+
+                        data.ProceedingsToJson(sb, encounteredproceedings);
+
+                        sb.Append(",");
+
+                        (HashSet<Organization> organizations, HashSet<Person> persons) comboI = data.AuthorsToJson(sb, encounteredAuthorsI);
+
+                        sb.Append(",");
+
+                        data.OrganizationsToJson(sb, comboI.organizations);
+
+                        sb.Append(",");
+
+                        data.PersonsToJson(sb, comboI.persons);
+
+                        break;
+                    case 2:
+                        (HashSet<Organization> organizations, HashSet<Person> persons) comboAu = data.AuthorsToJson(sb, authors);
+
+                        sb.Append(",");
+
+                        data.OrganizationsToJson(sb, comboAu.organizations);
+
+                        sb.Append(",");
+
+                        data.PersonsToJson(sb, comboAu.persons);
+
+                        break;
+                    case 3:
+                        data.PersonsToJson(sb, persons);
+                        break;
+                    case 4:
+                        data.JournalsToJson(sb, journals);
+                        break;
+                    case 5:
+                        data.ProceedingsToJson(sb, proceedings);
+                        break;
+                    case 6:
+                        data.OrganizationsToJson(sb, organizations);
+                        break;
+                }
+                sb.Append("\'");
+
+                using (StreamWriter sw = new StreamWriter("pizza.json"))
+                {
+                    sw.Write(sb);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Error(ex.Message);
+            }
+
+        }
         #endregion
 
         #region API UI methods
@@ -513,25 +608,25 @@ namespace ResearchCollector
                 switch (comboBoxApi.SelectedIndex)
                 {
                     case 0:
-                        HandleQueryResult(api.Search<Article>(SearchDomain.Articles, st, args));
+                        HandleQueryResult(articles = api.Search<Article>(SearchDomain.Articles, st, args));
                         break;
                     case 1:
-                        HandleQueryResult(api.Search<Inproceedings>(SearchDomain.Inproceedings, st, args));
+                        HandleQueryResult(inproceedings = api.Search<Inproceedings>(SearchDomain.Inproceedings, st, args));
                         break;
                     case 2:
-                        HandleQueryResult(api.Search<Inproceedings>(SearchDomain.Authors, st, args));
+                        HandleQueryResult(authors = api.Search<Author>(SearchDomain.Authors, st, args));
                         break;
                     case 3:
-                        HandleQueryResult(api.Search<Inproceedings>(SearchDomain.Persons, st, args));
+                        HandleQueryResult(persons = api.Search<Person>(SearchDomain.Persons, st, args));
                         break;
                     case 4:
-                        HandleQueryResult(api.Search<Inproceedings>(SearchDomain.Journals, st, args));
+                        HandleQueryResult(journals = api.Search<Journal>(SearchDomain.Journals, st, args));
                         break;
                     case 5:
-                        HandleQueryResult(api.Search<Inproceedings>(SearchDomain.Proceedings, st, args));
+                        HandleQueryResult(proceedings = api.Search<Proceedings>(SearchDomain.Proceedings, st, args));
                         break;
                     case 6:
-                        HandleQueryResult(api.Search<Inproceedings>(SearchDomain.Organizations, st, args));
+                        HandleQueryResult(organizations = api.Search<Organization>(SearchDomain.Organizations, st, args));
                         break;
                 }
             }

@@ -70,6 +70,7 @@
             this.label3 = new System.Windows.Forms.Label();
             this.dbStatsPanel = new System.Windows.Forms.TableLayoutPanel();
             this.Export_Json = new System.Windows.Forms.Button();
+            this.Query_Json = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.filterTab.SuspendLayout();
             this.importerTab.SuspendLayout();
@@ -352,6 +353,7 @@
             // 
             // apiTab
             // 
+            this.apiTab.Controls.Add(this.Query_Json);
             this.apiTab.Controls.Add(this.label11);
             this.apiTab.Controls.Add(this.label10);
             this.apiTab.Controls.Add(this.label9);
@@ -536,6 +538,17 @@
             this.Export_Json.UseVisualStyleBackColor = true;
             this.Export_Json.Click += new System.EventHandler(this.Export_Json_Click);
             // 
+            // Query_Json
+            // 
+            this.Query_Json.Location = new System.Drawing.Point(11, 122);
+            this.Query_Json.Name = "Query_Json";
+            this.Query_Json.Size = new System.Drawing.Size(222, 23);
+            this.Query_Json.TabIndex = 34;
+            this.Query_Json.Text = "Download result to JSON";
+            this.Query_Json.TextImageRelation = System.Windows.Forms.TextImageRelation.TextAboveImage;
+            this.Query_Json.UseVisualStyleBackColor = true;
+            this.Query_Json.Click += new System.EventHandler(this.Query_Json_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -600,6 +613,7 @@
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.Button Export_Json;
+        private System.Windows.Forms.Button Query_Json;
     }
 }
 
