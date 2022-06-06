@@ -46,7 +46,9 @@ namespace ResearchCollector.Importer
                             case "id":
                                 return article.id == arg.Item2;
                             case "externals":
-                                string[] realIds = article.externalIds.Values.ToArray<string>();
+                                //string[] realIds = article.externalIds.Values.ToArray<string>();
+                                string[] realIds = new string[article.externalIds.Count]; int i = 0;
+                                foreach(var id in article.externalIds) { realIds[i++] = $"{id.Key}:{id.Value}"; }
                                 return CollectionQuery(realIds, arg.Item2.Split('|'), howToSearch, howToSearch);
                             case "year":
                                 return article.year.ToString() == arg.Item2;
@@ -178,7 +180,9 @@ namespace ResearchCollector.Importer
         }       
         
         bool CollectionQuery(string[] realCollection, string[] queryCollection, bool howToCompare, bool start)
-        {          
+        {
+            if (realCollection.Length < 1)
+                return false;
             foreach (string real in realCollection)
             {
                 bool thisOne = false;
