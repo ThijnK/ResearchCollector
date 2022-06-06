@@ -197,7 +197,7 @@ namespace ResearchCollector
         private void Error(string msg)
         {
             Log($"Encountered error: '{msg}'");
-            MessageBox.Show(msg, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //MessageBox.Show(msg, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
         #endregion
 
@@ -373,9 +373,9 @@ namespace ResearchCollector
                 try
                 {
                     if (!string.IsNullOrEmpty(article.pdfLink))
-                        pdfFixer.FindInfo(article.pdfLink, article.id, false);
+                        pdfFixer.FindInfo(article.pdfLink, article.id, false, outputPath);
                     else
-                        pdfFixer.FindInfo(article.doi, article.id, true);
+                        pdfFixer.FindInfo(article.doi, article.id, true, outputPath);
                 }
                 catch (Exception ex) 
                 {
@@ -387,9 +387,9 @@ namespace ResearchCollector
                 try
                 {
                     if (!string.IsNullOrEmpty(inpr.pdfLink))
-                        pdfFixer.FindInfo(inpr.pdfLink, inpr.id, false);
+                        pdfFixer.FindInfo(inpr.pdfLink, inpr.id, false, outputPath);
                     else
-                        pdfFixer.FindInfo(inpr.doi, inpr.id, true);
+                        pdfFixer.FindInfo(inpr.doi, inpr.id, true, outputPath);
                 }
                 catch (Exception ex)
                 {

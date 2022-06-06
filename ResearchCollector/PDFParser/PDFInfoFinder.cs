@@ -18,7 +18,7 @@ namespace ResearchCollector.PDFParser
         /// <param name="link">either the doi link or the direct PDF link</param>
         /// <param name="id">the ID of the article</param>
         /// <param name="doiOrDirect">wether the link is a doi or a direct link</param>
-        public void FindInfo(string link, string id, bool doiOrDirect)
+        public void FindInfo(string link, string id, bool doiOrDirect, string savePath)
         {
             try
             {
@@ -41,14 +41,14 @@ namespace ResearchCollector.PDFParser
                     pdflink = link;
                 }
 
-                DownloadPDF(pdflink, id);
+                DownloadPDF(pdflink, id, savePath);
 
                 string textOfPDF = GetTextFromPDF(id);
 
-                File.Delete($"{id}.pdf");
+                File.Delete(Path.Combine(savePath, $"{id}.pdf"));
 
                 //write the text from the PDF to a txt file
-                File.WriteAllText($"{id}.txt", textOfPDF);
+                File.WriteAllText(Path.Combine(savePath, $"{id}.txt"), textOfPDF);
             }
             catch (RedirectingException re) { throw new Exception("redirecting error", re); }
             catch (DoiProviderNotKnownExpection de) { throw new Exception("doi error", de); }
@@ -60,11 +60,11 @@ namespace ResearchCollector.PDFParser
         /// </summary>
         /// <param name="pdflink">the link to the PDF</param>
         /// <param name="id">The ID from the article</param>
-        void DownloadPDF(string pdflink, string id)
+        void DownloadPDF(string pdflink, string id, string savePath)
         {
             using (var client = new WebClient())
             {
-                client.DownloadFile(pdflink /*"https://dspace.library.uu.nl/bitstream/handle/1874/22547/simons-creating%2520strategic%2520value.pdf?sequence=2"*/, $"{id}.pdf");
+                client.DownloadFile(pdflink /*"https://dspace.library.uu.nl/bitstream/handle/1874/22547/simons-creating%2520strategic%2520value.pdf?sequence=2"*/, Path.Combine(savePath, $"{id}.pdf"));
             }
         }
 
