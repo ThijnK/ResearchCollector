@@ -254,11 +254,12 @@ namespace ResearchCollector.Importer
                 currentPublication = currentInproceedings;
             }
             //add the external id from the source to the id's of the publication
-            foreach (JsonExternalId exId in pub.externalIds)
-            {
-                if (!string.IsNullOrEmpty(exId.id) && !currentPublication.externalIds.ContainsKey(exId.origin))
-                    currentPublication.externalIds.Add(exId.origin, exId.id);
-            }
+            if(pub.externalIds != null)
+                foreach (JsonExternalId exId in pub.externalIds)
+                {
+                    if (!string.IsNullOrEmpty(exId.id) && !currentPublication.externalIds.ContainsKey(exId.origin))
+                     currentPublication.externalIds.Add(exId.origin, exId.id);
+                }
 
             return currentPublication;
         }
