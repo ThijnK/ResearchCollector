@@ -50,7 +50,7 @@ namespace ResearchCollector.Filter
             settings.XmlResolver = new XmlUrlResolver();
             item.type = "article"; // Only has articles afaik
             item.origin = "pubmed";
-            //item.externalIds[0].origin = "pubmed";
+            item.externalIds[0].origin = "pubmed";
 
             // Go through each of the files making up the data set
             for (currentFile = 1; currentFile <= fileCount; currentFile++)
@@ -102,8 +102,7 @@ namespace ResearchCollector.Filter
         {
             // PubMed's unique id
             reader.ReadToDescendant("PMID");
-            //item.externalIds[0].id = reader.ReadElementContentAsString();
-            item.externalId = reader.ReadElementContentAsString();
+            item.externalIds[0].id = reader.ReadElementContentAsString();
 
             // Journal volume/issue
             journal.Reset();

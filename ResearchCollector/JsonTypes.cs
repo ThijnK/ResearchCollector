@@ -10,8 +10,7 @@ namespace ResearchCollector
 
     class JsonPublication
     {
-        //public JsonExternalId[] externalIds { get; set; }
-        public string externalId { get; set; }
+        public JsonExternalId[] externalIds { get; set; }
         public string origin { get; set; }
         public string type { get; set; }
         public string title { get; set; }

@@ -79,8 +79,7 @@ namespace ResearchCollector.Filter
         private void InitializeReusables()
         {
             item = new JsonPublication();
-            //item.externalIds = new JsonExternalId[1] {new JsonExternalId("", "")};
-            item.externalId = "";
+            item.externalIds = new JsonExternalId[1] {new JsonExternalId("", "")};
             item.origin = "";
             item.type = "";
             item.title = "";
