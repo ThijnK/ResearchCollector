@@ -79,11 +79,13 @@ namespace ResearchCollector.Filter
         private void InitializeReusables()
         {
             item = new JsonPublication();
+            //item.externalIds = new JsonExternalId[1] {new JsonExternalId("", "")};
             item.externalId = "";
             item.origin = "";
             item.type = "";
             item.title = "";
             item.year = -1;
+            item.pages = "";
             proceedings = new JsonVolume("");
             journal = new JsonJournal("", "", "", "");
             item.partof = proceedings;

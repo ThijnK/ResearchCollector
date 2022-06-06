@@ -55,6 +55,7 @@ namespace ResearchCollector.Filter
             string directory = Path.GetDirectoryName(inputPath);
             string filePrepend = Path.GetFileName(inputPath).Substring(0, 26);
             item.origin = "pure";
+            //item.externalIds[0].origin = "pure";
 
             // Go through each of the files making up the data set
             for (currentFile = 0; currentFile <= fileCount * 2000; currentFile += 2000)
@@ -70,6 +71,7 @@ namespace ResearchCollector.Filter
         public override bool ParsePublicationXml(XmlReader reader)
         {
             // Pure's unique id
+            //item.externalIds[0].id = reader.GetAttribute("pureId");
             item.externalId = reader.GetAttribute("pureId");
 
             // Type (article/inproceedings)
@@ -215,7 +217,12 @@ namespace ResearchCollector.Filter
             journal.Reset();
 
             // Journal volume (if it exists)
-            MoveToSibling(reader, "journalAssociation", "volume");
+            MoveToSibling(reader, "journalAssociation", "volume", "pages");
+            if (reader.Name == "pages")
+            {
+                item.pages = reader.ReadElementContentAsString();
+                MoveToSibling(reader, "journalAssociation", "volume");
+            }
             if (reader.Name == "volume")
                 journal.volume = reader.ReadElementContentAsString();
 

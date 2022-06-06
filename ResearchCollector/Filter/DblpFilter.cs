@@ -50,6 +50,7 @@ namespace ResearchCollector.Filter
 
             progress = 0;
             item.origin = "dblp";
+            //item.externalIds[0].origin = "dblp";
             ParseXml(inputPath, settings, "article", "inproceedings");
             File.Delete($"./{fileName}.dtd");
         }
@@ -59,6 +60,7 @@ namespace ResearchCollector.Filter
             int depth = reader.Depth;
 
             // DBLP's unique id
+            //item.externalIds[0].id = reader.GetAttribute("key");
             item.externalId = reader.GetAttribute("key");
 
             // Publication type
@@ -129,6 +131,14 @@ namespace ResearchCollector.Filter
                     break;
                 case "journal":
                     journal.title = reader.ReadElementContentAsString();
+                    break;
+                case "publisher":
+                    string publisher = reader.ReadElementContentAsString();
+                    journal.publisher = publisher;
+                    proceedings.publisher = publisher;
+                    break;
+                case "pages":
+                    item.pages = reader.ReadElementContentAsString();
                     break;
                 // If the element is nothing of interest, skip to its end tag
                 default:
