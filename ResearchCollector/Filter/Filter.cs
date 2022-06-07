@@ -85,8 +85,8 @@ namespace ResearchCollector.Filter
             item.title = "";
             item.year = -1;
             item.pages = "";
-            proceedings = new JsonVolume("");
-            journal = new JsonJournal("", "", "", "");
+            proceedings = new JsonVolume("", "");
+            journal = new JsonJournal("", "", "", "", "");
             item.partof = proceedings;
             item.doi = "";
             item.pdfLink = "";

@@ -73,6 +73,9 @@ namespace ResearchCollector
 
             this.context = WindowsFormsSynchronizationContext.Current;
 
+
+
+
             SetupDbStatistics();
             data = new Data();
 
@@ -94,9 +97,9 @@ namespace ResearchCollector
         #region BackgroundWorker event handlers
         private void DoWork(object sender, DoWorkEventArgs e)
         {
+                worker.Run(bgWorker);
             try
             {
-                worker.Run(bgWorker);
             }
             catch (Exception ex)
             {
