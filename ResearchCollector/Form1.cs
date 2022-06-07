@@ -246,7 +246,7 @@ namespace ResearchCollector
 
             using (StreamReader sr = new StreamReader(filepath))
             {
-                backToMemory.JsonToMemory(sr);
+                backToMemory.JsonToMemory(sr, null);
             }
             //bestand naar json
             

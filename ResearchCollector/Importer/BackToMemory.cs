@@ -10,13 +10,40 @@ namespace ResearchCollector.Importer
 {
     class BackToMemory
     {
-        public void JsonToMemory(StreamReader sr)
+        public void JsonToMemory(StreamReader sr, Data data)
         {           
             JsonMemArticle[] jarticles = null; JsonMemJournal[] jjournals = null; JsonMemInproceedings[] jinproceedings = null; JsonMemProceedings[] jproceedings = null;
             JsonMemAuthor[] jauthors = null; JsonMemOrganization[] jorganizations = null; JsonMemPerson[] jpersons = null;
             ParseJsonContent(sr, jarticles, jjournals, jinproceedings, jproceedings, jauthors, jorganizations, jpersons);
 
-
+            if (jjournals != null)
+                foreach (JsonMemJournal jjournal in jjournals)
+                    if (!data.journals.ContainsKey(jjournal.title))
+                        data.journals.Add(jjournal.title, new Journal(jjournal.issue, jjournal.volume, jjournal.series, jjournal.title, jjournal.publisher));
+            if (jproceedings != null)
+                foreach (JsonMemProceedings jproceeding in jproceedings)
+                    if(!data.proceedings.ContainsKey(jproceeding.title))
+                        data.proceedings.Add(jproceeding.title, new Proceedings(jproceeding.title, jproceeding.publisher));
+            if (jpersons != null)
+                foreach (JsonMemPerson jperson in jpersons)
+                    if(!data.persons.ContainsKey(jperson.name))
+                        data.persons.Add(jperson.name, new Person(jperson.orcid, jperson.name) { fname = jperson.fname, lname = jperson.lname });
+            if (jorganizations != null)
+                foreach (JsonMemOrganization jorganization in jorganizations)
+                    if(!data.organizations.ContainsKey(jorganization.name))
+                        data.organizations.Add(jorganization.name, new Organization(jorganization.name) { locatedAt = new System.Device.Location.GeoCoordinate() }); //locatedAdd nog incorporaten. seperated by , dus .Split(',')[0] en [1]
+            if (jauthors != null)
+                foreach (JsonMemAuthor jauthor in jauthors)
+                    if(!data.authors.ContainsKey(jauthor.name))
+                        data.authors.Add(jauthor.name, new Author(data.persons[jauthor.personKey], data.organizations[jauthor.affiliatedToKey], jauthor.email, jauthor.name) { fname = jauthor.fname, lname = jauthor.lname });
+            if (jarticles != null)
+                foreach (JsonMemArticle jarticle in jarticles)
+                    if(!data.articles.ContainsKey(jarticle.id))
+                        data.articles.Add(jarticle.id, new Article(data.journals[jarticle.journalKey], jarticle.id, jarticle.title, jarticle.abstr, jarticle.year, jarticle.doi, jarticle.pdfLink, jarticle.topics, jarticle.pages));
+            if (jinproceedings != null)
+                foreach (JsonMemInproceedings jinproceeding in jinproceedings)
+                    if(!data.inproceedings.ContainsKey(jinproceeding.id))
+                        data.inproceedings.Add(jinproceeding.id, new Inproceedings(data.proceedings[jinproceeding.proceedingsKey], jinproceeding.id, jinproceeding.title, jinproceeding.abstr, jinproceeding.year, jinproceeding.doi, jinproceeding.pdfLink, jinproceeding.topics, jinproceeding.pages));
         }
 
         void ParseJsonContent(StreamReader sr, JsonMemArticle[] jarticles, JsonMemJournal[] jjournals, JsonMemInproceedings[] jinproceedings, JsonMemProceedings[] jproceedings, JsonMemAuthor[] jauthors, JsonMemOrganization[] jorganizations, JsonMemPerson[] jpersons)
