@@ -41,7 +41,7 @@ namespace ResearchCollector.Importer
                 sb.Length--;
         }
 
-        public HashSet<Journal> ArticlesToJson(StringBuilder sb, HashSet<Article> articles, HashSet<Author> encounteredAuthors)
+        public void ArticlesToJson(StringBuilder sb, HashSet<Article> articles, HashSet<Author> encounteredAuthors)
         {
             sb.Append("\"articles\":[");
 
@@ -55,7 +55,9 @@ namespace ResearchCollector.Importer
             LengthCheck(sb, this.articles.Values.Count);
             sb.Append("]");
 
-            return encounteredJournals;
+            sb.Append(",");
+
+            JournalsToJson(sb, encounteredJournals);
         }
 
         public void JournalsToJson(StringBuilder sb, HashSet<Journal> encounteredJournals)
@@ -72,7 +74,7 @@ namespace ResearchCollector.Importer
             sb.Append("]");
         }
 
-        public HashSet<Proceedings> InproceedingsToJson(StringBuilder sb, HashSet<Inproceedings> inproceedingss, HashSet<Author> encounteredAuthors)
+        public void InproceedingsToJson(StringBuilder sb, HashSet<Inproceedings> inproceedingss, HashSet<Author> encounteredAuthors)
         {
             sb.Append("\"inproceedings\":[");
 
@@ -86,7 +88,9 @@ namespace ResearchCollector.Importer
             LengthCheck(sb, this.inproceedings.Values.Count);
             sb.Append("]");
 
-            return encounteredproceedings;
+            sb.Append(",");
+
+            ProceedingsToJson(sb, encounteredproceedings);
         }
 
         public void ProceedingsToJson(StringBuilder sb, HashSet<Proceedings> encounteredproceedings)
@@ -103,7 +107,7 @@ namespace ResearchCollector.Importer
             sb.Append("]");
         }
 
-        public (HashSet<Organization>, HashSet<Person>) AuthorsToJson(StringBuilder sb, HashSet<Author> encounteredAuthors)
+        public void AuthorsToJson(StringBuilder sb, HashSet<Author> encounteredAuthors)
         {
             sb.Append("\"authors\":[");
 
@@ -118,7 +122,13 @@ namespace ResearchCollector.Importer
             LengthCheck(sb, encounteredAuthors.Count);
             sb.Append("]");
 
-            return (organizations, persons);
+            sb.Append(",");
+
+            OrganizationsToJson(sb, organizations);
+
+            sb.Append(",");
+
+            PersonsToJson(sb, persons);
         }
 
         public void OrganizationsToJson(StringBuilder sb, HashSet<Organization> organizations)
@@ -155,31 +165,15 @@ namespace ResearchCollector.Importer
 
             HashSet<Author> encounteredAuthors = new HashSet<Author>();
 
-            HashSet<Journal> encounteredJournals = ArticlesToJson(sb, new HashSet<Article>(this.articles.Values), encounteredAuthors);
+            ArticlesToJson(sb, new HashSet<Article>(this.articles.Values), encounteredAuthors);            
 
             sb.Append(",");
 
-            JournalsToJson(sb, encounteredJournals);
+            InproceedingsToJson(sb, new HashSet<Inproceedings>(this.inproceedings.Values), encounteredAuthors);
 
             sb.Append(",");
 
-            HashSet<Proceedings> encounteredproceedings = InproceedingsToJson(sb, new HashSet<Inproceedings>(this.inproceedings.Values), encounteredAuthors);
-
-            sb.Append(",");
-
-            ProceedingsToJson(sb, encounteredproceedings);
-
-            sb.Append(",");
-
-            (HashSet<Organization> organizations, HashSet<Person> persons) combo = AuthorsToJson(sb, encounteredAuthors);
-
-            sb.Append(",");
-
-            OrganizationsToJson(sb, combo.organizations);
-
-            sb.Append(",");
-
-            PersonsToJson(sb, combo.persons);
+            AuthorsToJson(sb, encounteredAuthors);
 
             sb.Append("\'");
 

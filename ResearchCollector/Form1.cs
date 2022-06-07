@@ -435,53 +435,22 @@ namespace ResearchCollector
                 {
                     case 0:                  
                         HashSet<Author> encounteredAuthorsA = new HashSet<Author>();
-                        HashSet<Journal> encounteredJournals = data.ArticlesToJson(sb, articles, encounteredAuthorsA);
+                        data.ArticlesToJson(sb, articles, encounteredAuthorsA);
 
                         sb.Append(",");
 
-                        (HashSet<Organization> organizations, HashSet<Person> persons) comboA = data.AuthorsToJson(sb, encounteredAuthorsA);
-
-                        sb.Append(",");
-
-                        data.OrganizationsToJson(sb, comboA.organizations);
-
-                        sb.Append(",");
-
-                        data.PersonsToJson(sb, comboA.persons);
-
+                        data.AuthorsToJson(sb, encounteredAuthorsA);
                         break;
                     case 1:
                         HashSet<Author> encounteredAuthorsI = new HashSet<Author>();
-                        HashSet<Proceedings> encounteredproceedings = data.InproceedingsToJson(sb, inproceedings, encounteredAuthorsI);
+                        data.InproceedingsToJson(sb, inproceedings, encounteredAuthorsI);
 
                         sb.Append(",");
 
-                        data.ProceedingsToJson(sb, encounteredproceedings);
-
-                        sb.Append(",");
-
-                        (HashSet<Organization> organizations, HashSet<Person> persons) comboI = data.AuthorsToJson(sb, encounteredAuthorsI);
-
-                        sb.Append(",");
-
-                        data.OrganizationsToJson(sb, comboI.organizations);
-
-                        sb.Append(",");
-
-                        data.PersonsToJson(sb, comboI.persons);
-
+                        data.AuthorsToJson(sb, encounteredAuthorsI);
                         break;
                     case 2:
-                        (HashSet<Organization> organizations, HashSet<Person> persons) comboAu = data.AuthorsToJson(sb, authors);
-
-                        sb.Append(",");
-
-                        data.OrganizationsToJson(sb, comboAu.organizations);
-
-                        sb.Append(",");
-
-                        data.PersonsToJson(sb, comboAu.persons);
-
+                        data.AuthorsToJson(sb, authors);
                         break;
                     case 3:
                         data.PersonsToJson(sb, persons);
