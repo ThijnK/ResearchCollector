@@ -11,29 +11,30 @@ namespace ResearchCollector.Importer
     class BackToMemory
     {
         public void JsonToMemory(StreamReader sr)
+        {           
+            JsonMemArticle[] jarticles = null; JsonMemJournal[] jjournals = null; JsonMemInproceedings[] jinproceedings = null; JsonMemProceedings[] jproceedings = null;
+            JsonMemAuthor[] jauthors = null; JsonMemOrganization[] jorganizations = null; JsonMemPerson[] jpersons = null;
+            ParseJsonContent(sr, jarticles, jjournals, jinproceedings, jproceedings, jauthors, jorganizations, jpersons);
+
+
+        }
+
+        void ParseJsonContent(StreamReader sr, JsonMemArticle[] jarticles, JsonMemJournal[] jjournals, JsonMemInproceedings[] jinproceedings, JsonMemProceedings[] jproceedings, JsonMemAuthor[] jauthors, JsonMemOrganization[] jorganizations, JsonMemPerson[] jpersons)
         {
             StringBuilder sb;
             sr.ReadLine();
-            JsonMemArticle[] jarticles;
-            JsonMemJournal[] jjournals;
-            JsonMemInproceedings[] jinproceedings;
-            JsonMemProceedings[] jproceedings;
-            JsonMemAuthor[] jauthors;
-            JsonMemOrganization[] jorganizations;
-            JsonMemPerson[] jpersons;
-
             for (int i = 0; i < 7; i++)
             {
                 string current = sr.ReadLine();
                 string start = current.Split('"')[1];
                 current = sr.ReadLine();
                 sb = new StringBuilder(current);
-                if(i < 6)
+                if (i < 6)
                     RemoveComma(sb, current);
                 switch (start)
                 {
                     case "articles":
-                        jarticles = JsonSerializer.Deserialize<JsonMemArticle[]>(sb.ToString());                       
+                        jarticles = JsonSerializer.Deserialize<JsonMemArticle[]>(sb.ToString());
                         break;
                     case "journals":
                         jjournals = JsonSerializer.Deserialize<JsonMemJournal[]>(sb.ToString());
@@ -56,7 +57,7 @@ namespace ResearchCollector.Importer
                         break;
                     default:
                         break;
-                }                
+                }
             }
         }
 
