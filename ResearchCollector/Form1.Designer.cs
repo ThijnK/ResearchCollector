@@ -43,6 +43,7 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.filterTab = new System.Windows.Forms.TabPage();
             this.importerTab = new System.Windows.Forms.TabPage();
+            this.MemoryJson_Memory = new System.Windows.Forms.Button();
             this.label12 = new System.Windows.Forms.Label();
             this.dbStatsPanelImporter = new System.Windows.Forms.TableLayoutPanel();
             this.Export_Json = new System.Windows.Forms.Button();
@@ -67,7 +68,6 @@
             this.label6 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.dbStatsPanel = new System.Windows.Forms.TableLayoutPanel();
-            this.MemoryJson_Memory = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.filterTab.SuspendLayout();
             this.importerTab.SuspendLayout();
@@ -246,10 +246,20 @@
             this.importerTab.UseVisualStyleBackColor = true;
             this.importerTab.Enter += new System.EventHandler(this.TabSwitched);
             // 
+            // MemoryJson_Memory
+            // 
+            this.MemoryJson_Memory.Location = new System.Drawing.Point(8, 373);
+            this.MemoryJson_Memory.Name = "MemoryJson_Memory";
+            this.MemoryJson_Memory.Size = new System.Drawing.Size(224, 28);
+            this.MemoryJson_Memory.TabIndex = 32;
+            this.MemoryJson_Memory.Text = "Import Memory JSON";
+            this.MemoryJson_Memory.UseVisualStyleBackColor = true;
+            this.MemoryJson_Memory.Click += new System.EventHandler(this.MemoryJson_Memory_Click);
+            // 
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(8, 232);
+            this.label12.Location = new System.Drawing.Point(6, 203);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(99, 13);
             this.label12.TabIndex = 31;
@@ -263,7 +273,7 @@
             this.dbStatsPanelImporter.ColumnCount = 2;
             this.dbStatsPanelImporter.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 130F));
             this.dbStatsPanelImporter.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 85F));
-            this.dbStatsPanelImporter.Location = new System.Drawing.Point(8, 248);
+            this.dbStatsPanelImporter.Location = new System.Drawing.Point(6, 219);
             this.dbStatsPanelImporter.Name = "dbStatsPanelImporter";
             this.dbStatsPanelImporter.Padding = new System.Windows.Forms.Padding(5);
             this.dbStatsPanelImporter.RowCount = 5;
@@ -525,16 +535,6 @@
             this.dbStatsPanel.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.dbStatsPanel.Size = new System.Drawing.Size(225, 75);
             this.dbStatsPanel.TabIndex = 0;
-            // 
-            // MemoryJson_Memory
-            // 
-            this.MemoryJson_Memory.Location = new System.Drawing.Point(8, 329);
-            this.MemoryJson_Memory.Name = "MemoryJson_Memory";
-            this.MemoryJson_Memory.Size = new System.Drawing.Size(224, 28);
-            this.MemoryJson_Memory.TabIndex = 32;
-            this.MemoryJson_Memory.Text = "Import Memory JSON";
-            this.MemoryJson_Memory.UseVisualStyleBackColor = true;
-            this.MemoryJson_Memory.Click += new System.EventHandler(this.MemoryJson_Memory_Click);
             // 
             // Form1
             // 
