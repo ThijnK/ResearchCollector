@@ -238,58 +238,84 @@ namespace ResearchCollector
 
         private void MemoryJson_Memory_Click(object sender, EventArgs e)
         {
-            //kies bepaald bestand
-            
-            using (StreamReader sr = new StreamReader("export_1654601553.json"))
+            //JsonMemArticle art = JsonSerializer.Deserialize<JsonMemArticle>("{\"externalIds\":[{ \"origin\":\"pubmed\",\"id\":\"1\"}],\"journalKey\":\"Biochemical medicine\",\"topics\":null,\"id\":\"8d91e5b976ea85c2af0237525d3eedec0f397781f384c7dddd7eba0d684f3b5b41975\",\"title\":\"Formate assay in body fluids: application in methanol poisoning.\",\"abstr\":null,\"year\":1975,\"doi\":\"10.1016/0006-2944(75)90147-7\",\"pdfLink\":\"\",\"authorKeys\":[\"A B Makar\",\"K E McMartin\",\"M Palese\",\"T R Tephly\"],\"pages\":\"117-26\"}");
+
+            string filepath = GetFileLocation();
+
+            using (StreamReader sr = new StreamReader(filepath))
             {
+                //geef bepaalde naam aan file zodat je weet wat er allemaal inzit!!!!!!
+                StringBuilder sb;
                 sr.ReadLine();
                 string current = sr.ReadLine();
+                JsonMemArticle[] jarticles;
                 if (current.StartsWith("\"articles\""))
                 {
-                    current = sr.ReadLine();
-                    JsonMemArticle[] jarticles = JsonSerializer.Deserialize<JsonMemArticle[]>(current);
+                    sb = new StringBuilder(sr.ReadLine());
+                    sb.Length -= 2;
+                    sb.Append("]");
+                    jarticles = JsonSerializer.Deserialize<JsonMemArticle[]>(sb.ToString());
                     current = sr.ReadLine();                   
                 }
 
+                JsonMemJournal[] jjournals;
                 if (current.StartsWith("\"journals\""))
                 {
-                    current = sr.ReadLine();
-                    JsonMemJournal[] jjournals = JsonSerializer.Deserialize<JsonMemJournal[]>(current);
+                    sb = new StringBuilder(sr.ReadLine());
+                    sb.Length -= 2;
+                    sb.Append("]");
+                    jjournals = JsonSerializer.Deserialize<JsonMemJournal[]>(sb.ToString());
                     current = sr.ReadLine();
                 }
 
+                JsonMemInproceedings[] jinproceedings;
                 if (current.StartsWith("\"inproceedings\""))
                 {
-                    current = sr.ReadLine();
-                    JsonMemInproceedings[] jinproceedings = JsonSerializer.Deserialize<JsonMemInproceedings[]>(current);
+                    sb = new StringBuilder(sr.ReadLine());
+                    sb.Length -= 2;
+                    sb.Append("]");
+                    jinproceedings = JsonSerializer.Deserialize<JsonMemInproceedings[]>(sb.ToString());
                     current = sr.ReadLine();                   
                 }
 
+                JsonMemProceedings[] jproceedings;
                 if (current.StartsWith("\"proceedings\""))
                 {
-                    current = sr.ReadLine();
-                    JsonMemProceedings[] jproceedings = JsonSerializer.Deserialize<JsonMemProceedings[]>(current);
+                    sb = new StringBuilder(sr.ReadLine());
+                    sb.Length -= 2;
+                    sb.Append("]");
+                    jproceedings = JsonSerializer.Deserialize<JsonMemProceedings[]>(sb.ToString());
                     current = sr.ReadLine();
                 }
 
+                JsonMemAuthor[] jauthors;
                 if (current.StartsWith("\"authors\""))
                 {
-                    current = sr.ReadLine();
-                    JsonMemAuthor[] jauthors = JsonSerializer.Deserialize<JsonMemAuthor[]>(current);
+                    sb = new StringBuilder(sr.ReadLine());
+                    sb.Length -= 2;
+                    sb.Append("]");
+                    jauthors = JsonSerializer.Deserialize<JsonMemAuthor[]>(sb.ToString());
                     current = sr.ReadLine();
                 }
 
+                JsonMemOrganization[] jorganizations;
                 if (current.StartsWith("\"organizations\""))
                 {
-                    current = sr.ReadLine();
-                    JsonMemOrganization[] jorganizations = JsonSerializer.Deserialize<JsonMemOrganization[]>(current);
+                    sb = new StringBuilder(sr.ReadLine());
+                    sb.Length -= 2;
+                    sb.Append("]");
+                    jorganizations = JsonSerializer.Deserialize<JsonMemOrganization[]>(sb.ToString());
                     current = sr.ReadLine();
                 }
 
+                //persons is anders omdat het de laatste is. dus geen comma. ook organizations, journals en proceedings kan als laatste zijn
+                JsonMemPerson[] jpersons;
                 if (current.StartsWith("\"persons\""))
                 {
-                    current = sr.ReadLine();
-                    JsonMemPerson[] jauthors = JsonSerializer.Deserialize<JsonMemPerson[]>(current);
+                    sb = new StringBuilder(sr.ReadLine());
+                    sb.Length -= 2;
+                    sb.Append("]");
+                    jpersons = JsonSerializer.Deserialize<JsonMemPerson[]>(sb.ToString());
                     current = sr.ReadLine();
                 }
             }
