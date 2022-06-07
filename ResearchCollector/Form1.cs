@@ -243,11 +243,15 @@ namespace ResearchCollector
             string filepath = GetFileLocation();
 
             BackToMemory backToMemory = new BackToMemory();
-
-            using (StreamReader sr = new StreamReader(filepath))
+            //data = new Data();
+            try
             {
-                backToMemory.JsonToMemory(sr, null);
+                using (StreamReader sr = new StreamReader(filepath))
+                {
+                    backToMemory.JsonToMemory(sr, data);
+                }
             }
+            catch (Exception exp) { }
             //bestand naar json
             
 
