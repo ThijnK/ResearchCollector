@@ -17,7 +17,7 @@ namespace ResearchCollector.Filter
 
         public PubMedFilter(SynchronizationContext context, string inputPath, string outputPath) : base(context, inputPath, outputPath)
         {
-            fileCount = 1114;
+            fileCount = 1;
             progressIncrement = 1.0 / (double)fileCount * 100.0;
         }
 
@@ -78,6 +78,9 @@ namespace ResearchCollector.Filter
                 }
                 UpdateProgress();
             }
+
+            File.Delete(compressedPath);
+            File.Delete(tempPath);
         }
 
         // Decompress a file and write the result to tempPath
@@ -141,8 +144,12 @@ namespace ResearchCollector.Filter
             MoveToSibling(reader, "MedlineCitation", "AuthorList", "Pagination");
             if (reader.Name == "Pagination")
             {
+                depth = reader.Depth;
                 if (reader.ReadToDescendant("MedlinePgn"))
+                {
                     item.pages = reader.ReadElementContentAsString();
+                    MoveToNextNode(reader, depth);
+                }
             }
 
             // Authors

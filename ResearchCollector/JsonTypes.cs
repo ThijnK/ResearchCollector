@@ -39,9 +39,10 @@ namespace ResearchCollector
         public string title { get; set; }
         public string publisher { get; set; }
 
-        public JsonVolume(string title)
+        public JsonVolume(string title, string publisher)
         {
             this.title = title;
+            this.publisher = publisher;
         }
 
         /// <summary>
@@ -59,7 +60,7 @@ namespace ResearchCollector
         public string volume { get; set; }
         public string series { get; set; }
 
-        public JsonJournal(string title, string issue, string volume, string series) : base(title)
+        public JsonJournal(string title, string publisher, string issue, string volume, string series) : base(title, publisher)
         {
             this.issue = issue;
             this.volume = volume;
