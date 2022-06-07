@@ -59,6 +59,8 @@ namespace ResearchCollector.Importer
                                 return CollectionQuery(realNames, arg.Item2.Split('|'), howToSearch, howToSearch);
                             case "topics":
                                 return CollectionQuery(article.topics, arg.Item2.Split('|'), howToSearch, howToSearch);
+                            case "pages":
+                                return article.pages == arg.Item2;
                             default:
                                 throw new ArgumentException($"{searchDomain} does not have {arg.Item1} as key");
                         }
@@ -88,6 +90,8 @@ namespace ResearchCollector.Importer
                                 return CollectionQuery(realNames, arg.Item2.Split('|'), howToSearch, howToSearch);
                             case "topics":
                                 return CollectionQuery(inpr.topics, arg.Item2.Split('|'), howToSearch, howToSearch);
+                            case "pages":
+                                return inpr.pages == arg.Item2;
                             default:
                                 throw new ArgumentException($"{searchDomain} does not have {arg.Item1} as key");
                         }
@@ -143,6 +147,8 @@ namespace ResearchCollector.Importer
                                 return journal.series == arg.Item2;
                             case "volume":
                                 return journal.volume == arg.Item2;
+                            case "publisher":
+                                return journal.publisher == arg.Item2;
                             default:
                                 throw new ArgumentException($"{searchDomain} does not have {arg.Item1} as key");
                         }
@@ -155,6 +161,8 @@ namespace ResearchCollector.Importer
                         { 
                             case "title":
                                 return proc.title == arg.Item2;
+                            case "publisher":
+                                return proc.publisher == arg.Item2;
                             default:
                                 throw new ArgumentException($"{searchDomain} does not have {arg.Item1} as key");
                         }

@@ -191,10 +191,11 @@ namespace ResearchCollector.Importer
         public string doi;
         public string pdfLink;
         public string[] topics;
+        public string pages;
 
         public List<Author> authors;
 
-        public Publication(string id, string title, string abstr, int year, string doi, string pdfLink, string[] topics)
+        public Publication(string id, string title, string abstr, int year, string doi, string pdfLink, string[] topics, string pages)
         {
             authors = new List<Author>();
             externalIds = new Dictionary<string, string>();
@@ -205,6 +206,7 @@ namespace ResearchCollector.Importer
             this.doi = doi;
             this.pdfLink = pdfLink;
             this.topics = topics;
+            this.pages = pages;
         }
 
         /// <summary>
@@ -222,7 +224,7 @@ namespace ResearchCollector.Importer
     {
         public Journal partOf;
 
-        public Article(Journal journal, string id, string title, string abstr, int year, string doi, string pdfLink, string[] topics) : base(id, title, abstr, year, doi, pdfLink, topics)
+        public Article(Journal journal, string id, string title, string abstr, int year, string doi, string pdfLink, string[] topics, string pages) : base(id, title, abstr, year, doi, pdfLink, topics, pages)
         {
             this.partOf = journal;
         }
@@ -248,7 +250,7 @@ namespace ResearchCollector.Importer
                 j++;
             }
 
-            JsonMemArticle jarticle = new JsonMemArticle { abstr = this.abstr, doi = this.doi, authorKeys = authors, id = this.id, journalKey = this.partOf.title, pdfLink = this.pdfLink, title = this.title, topics = this.topics, year = this.year, externalIds = externals };
+            JsonMemArticle jarticle = new JsonMemArticle { abstr = this.abstr, doi = this.doi, authorKeys = authors, id = this.id, journalKey = this.partOf.title, pdfLink = this.pdfLink, title = this.title, topics = this.topics, year = this.year, externalIds = externals, pages = this.pages };
             string current = JsonSerializer.Serialize<JsonMemArticle>(jarticle);
             sb.Append(current);
         }
@@ -258,7 +260,7 @@ namespace ResearchCollector.Importer
     {
         public Proceedings partOf;
 
-        public Inproceedings(Proceedings proceedings, string id, string title, string abstr, int year, string doi, string pdfLink, string[] topics) : base(id, title, abstr, year, doi, pdfLink, topics)
+        public Inproceedings(Proceedings proceedings, string id, string title, string abstr, int year, string doi, string pdfLink, string[] topics, string pages) : base(id, title, abstr, year, doi, pdfLink, topics, pages)
         {
             this.partOf = proceedings;
         }
@@ -284,7 +286,7 @@ namespace ResearchCollector.Importer
                 j++;
             }
 
-            JsonMemInproceedings jinproceedings = new JsonMemInproceedings { abstr = this.abstr, doi = this.doi, authorKeys = authors, id = this.id, proceedingsKey = this.partOf.title, pdfLink = this.pdfLink, title = this.title, topics = this.topics, year = this.year, externalIds = externals };
+            JsonMemInproceedings jinproceedings = new JsonMemInproceedings { abstr = this.abstr, doi = this.doi, authorKeys = authors, id = this.id, proceedingsKey = this.partOf.title, pdfLink = this.pdfLink, title = this.title, topics = this.topics, year = this.year, externalIds = externals, pages = this.pages };
             string current = JsonSerializer.Serialize<JsonMemInproceedings>(jinproceedings);
             sb.Append(current);
         }
@@ -352,10 +354,12 @@ namespace ResearchCollector.Importer
     class PublicationVolume
     {
         public string title;
+        public string publisher;
 
-        public PublicationVolume(string title)
+        public PublicationVolume(string title, string publisher)
         {
             this.title = title;
+            this.publisher = publisher;
         }
     }
 
@@ -365,7 +369,7 @@ namespace ResearchCollector.Importer
         public string volume;
         public string series;
 
-        public Journal(string issue, string volume, string series, string title) : base(title)
+        public Journal(string issue, string volume, string series, string title, string publisher) : base(title, publisher)
         {
             this.issue = issue;
             this.volume = volume;
@@ -374,7 +378,7 @@ namespace ResearchCollector.Importer
 
         public void ToJson(StringBuilder sb)
         {
-            JsonMemJournal jjournal = new JsonMemJournal { issue = this.issue, series = this.series, title = this.title, volume = this.volume };
+            JsonMemJournal jjournal = new JsonMemJournal { issue = this.issue, series = this.series, title = this.title, volume = this.volume, publisher = this.publisher };
             string current = JsonSerializer.Serialize<JsonMemJournal>(jjournal);
             sb.Append(current);
         }
@@ -382,14 +386,14 @@ namespace ResearchCollector.Importer
 
     class Proceedings : PublicationVolume
     {
-        public Proceedings(string title) : base(title)
+        public Proceedings(string title, string publisher) : base(title, publisher)
         {
 
         }
 
         public void ToJson(StringBuilder sb)
         {
-            JsonMemProceedings jproceedings = new JsonMemProceedings { title = this.title };
+            JsonMemProceedings jproceedings = new JsonMemProceedings { title = this.title, publisher = this.publisher };
             string current = JsonSerializer.Serialize<JsonMemProceedings>(jproceedings);
             sb.Append(current);
         }

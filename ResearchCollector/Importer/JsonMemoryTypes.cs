@@ -23,6 +23,7 @@ namespace ResearchCollector.Importer
         public string doi { get; set; }
         public string pdfLink { get; set; }
         public string[] authorKeys { get; set; }
+        public string pages { get; set; }
     }
 
     struct JsonMemJournal
@@ -31,6 +32,7 @@ namespace ResearchCollector.Importer
         public string issue { get; set; }
         public string volume { get; set; }
         public string series { get; set; }
+        public string publisher { get; set; }
     }
 
     struct JsonMemInproceedings
@@ -45,11 +47,13 @@ namespace ResearchCollector.Importer
         public string doi { get; set; }
         public string pdfLink { get; set; }
         public string[] authorKeys { get; set; }
+        public string pages { get; set; }
     }
 
     struct JsonMemProceedings
     {
         public string title { get; set; }
+        public string publisher { get; set; }
     }
 
     struct JsonMemAuthor

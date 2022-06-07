@@ -85,7 +85,7 @@ namespace ResearchCollector.Importer
 
                 if (!data.journals.TryGetValue(jsonJournal.title, out Journal currentJournal))
                 {
-                    currentJournal = new Journal(jsonJournal.issue, jsonJournal.volume, jsonJournal.series, jsonJournal.title);
+                    currentJournal = new Journal(jsonJournal.issue, jsonJournal.volume, jsonJournal.series, jsonJournal.title, jsonJournal.publisher);
                     //try
                     //{
                         data.journals.Add(currentJournal.title, currentJournal);
@@ -96,7 +96,7 @@ namespace ResearchCollector.Importer
                 if (!data.articles.TryGetValue(customId, out Article currentArticle))
                 {
                     //abstract and topics are left empty because those do not get retrieved currently
-                    currentArticle = new Article(currentJournal, customId, pub.title, null, pub.year, pub.doi, pub.pdfLink, null);
+                    currentArticle = new Article(currentJournal, customId, pub.title, null, pub.year, pub.doi, pub.pdfLink, null, pub.pages);
                     //try
                     //{
                         data.articles.Add(customId, currentArticle);
@@ -113,7 +113,7 @@ namespace ResearchCollector.Importer
                 JsonVolume jsonVolume = JsonSerializer.Deserialize<JsonVolume>(pub.partof.ToString());
                 if (!data.proceedings.TryGetValue(jsonVolume.title, out Proceedings currentProceedings))
                 {
-                    currentProceedings = new Proceedings(jsonVolume.title);
+                    currentProceedings = new Proceedings(jsonVolume.title, jsonVolume.publisher);
                     //try
                     //{
                         data.proceedings.Add(currentProceedings.title, currentProceedings);
@@ -124,7 +124,7 @@ namespace ResearchCollector.Importer
                 if (!data.inproceedings.TryGetValue(customId, out Inproceedings currentInproceedings))
                 {
                     //abstract and topics are left empty because those do not get retrieved currently
-                    currentInproceedings = new Inproceedings(currentProceedings, customId, pub.title, null, pub.year, pub.doi, pub.pdfLink, null);
+                    currentInproceedings = new Inproceedings(currentProceedings, customId, pub.title, null, pub.year, pub.doi, pub.pdfLink, null, pub.pages);
                     //try
                     //{
                         data.inproceedings.Add(customId, currentInproceedings);

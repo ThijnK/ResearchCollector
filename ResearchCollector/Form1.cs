@@ -341,7 +341,7 @@ namespace ResearchCollector
                 Error("No date set type selected");
                 return;
             }
-            else if (!File.Exists(filterInputPath))
+            else if (!File.Exists(filterInputPath) && typeComboBoxFilter.SelectedIndex != 1)
             {
                 Error("Input file does not exist");
                 return;
