@@ -52,6 +52,7 @@
             this.runBtnImporter = new System.Windows.Forms.Button();
             this.logCheckBoxImporter = new System.Windows.Forms.CheckBox();
             this.apiTab = new System.Windows.Forms.TabPage();
+            this.label5 = new System.Windows.Forms.Label();
             this.label11 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
@@ -66,7 +67,7 @@
             this.label6 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.dbStatsPanel = new System.Windows.Forms.TableLayoutPanel();
-            this.label5 = new System.Windows.Forms.Label();
+            this.MemoryJson_Memory = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.filterTab.SuspendLayout();
             this.importerTab.SuspendLayout();
@@ -227,6 +228,7 @@
             // 
             // importerTab
             // 
+            this.importerTab.Controls.Add(this.MemoryJson_Memory);
             this.importerTab.Controls.Add(this.label12);
             this.importerTab.Controls.Add(this.dbStatsPanelImporter);
             this.importerTab.Controls.Add(this.Export_Json);
@@ -247,7 +249,7 @@
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(8, 240);
+            this.label12.Location = new System.Drawing.Point(8, 232);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(99, 13);
             this.label12.TabIndex = 31;
@@ -261,7 +263,7 @@
             this.dbStatsPanelImporter.ColumnCount = 2;
             this.dbStatsPanelImporter.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 130F));
             this.dbStatsPanelImporter.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 85F));
-            this.dbStatsPanelImporter.Location = new System.Drawing.Point(8, 256);
+            this.dbStatsPanelImporter.Location = new System.Drawing.Point(8, 248);
             this.dbStatsPanelImporter.Name = "dbStatsPanelImporter";
             this.dbStatsPanelImporter.Padding = new System.Windows.Forms.Padding(5);
             this.dbStatsPanelImporter.RowCount = 5;
@@ -359,6 +361,16 @@
             this.apiTab.Text = "API";
             this.apiTab.UseVisualStyleBackColor = true;
             this.apiTab.Enter += new System.EventHandler(this.TabSwitched);
+            // 
+            // label5
+            // 
+            this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label5.Location = new System.Drawing.Point(429, 111);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(361, 30);
+            this.label5.TabIndex = 34;
+            this.label5.Text = "To specify the key of a value of some attribute, use \':\'. For example: \'externals" +
+    " = dblp:5225 | pubmed:2\'.";
             // 
             // label11
             // 
@@ -514,15 +526,15 @@
             this.dbStatsPanel.Size = new System.Drawing.Size(225, 75);
             this.dbStatsPanel.TabIndex = 0;
             // 
-            // label5
+            // MemoryJson_Memory
             // 
-            this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label5.Location = new System.Drawing.Point(429, 111);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(361, 30);
-            this.label5.TabIndex = 34;
-            this.label5.Text = "To specify the key of a value of some attribute, use \':\'. For example: \'externals" +
-    " = dblp:5225 | pubmed:2\'.";
+            this.MemoryJson_Memory.Location = new System.Drawing.Point(8, 329);
+            this.MemoryJson_Memory.Name = "MemoryJson_Memory";
+            this.MemoryJson_Memory.Size = new System.Drawing.Size(224, 28);
+            this.MemoryJson_Memory.TabIndex = 32;
+            this.MemoryJson_Memory.Text = "Import Memory JSON";
+            this.MemoryJson_Memory.UseVisualStyleBackColor = true;
+            this.MemoryJson_Memory.Click += new System.EventHandler(this.MemoryJson_Memory_Click);
             // 
             // Form1
             // 
@@ -585,6 +597,7 @@
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.TableLayoutPanel dbStatsPanelImporter;
         private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Button MemoryJson_Memory;
     }
 }
 

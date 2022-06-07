@@ -43,7 +43,7 @@ namespace ResearchCollector.Importer
 
         public void ArticlesToJson(StringBuilder sb, HashSet<Article> articles, HashSet<Author> encounteredAuthors)
         {
-            sb.Append("\"articles\":[");
+            sb.Append("\"articles\":\n[");
 
             HashSet<Journal> encounteredJournals = new HashSet<Journal>();
             foreach (Article article in articles)
@@ -55,14 +55,14 @@ namespace ResearchCollector.Importer
             LengthCheck(sb, this.articles.Values.Count);
             sb.Append("]");
 
-            sb.Append(",");
+            sb.Append(",\n");
 
             JournalsToJson(sb, encounteredJournals);
         }
 
         public void JournalsToJson(StringBuilder sb, HashSet<Journal> encounteredJournals)
         {
-            sb.Append("\"journals\":[");
+            sb.Append("\"journals\":\n[");
 
             foreach (Journal journal in encounteredJournals)
             {
@@ -76,7 +76,7 @@ namespace ResearchCollector.Importer
 
         public void InproceedingsToJson(StringBuilder sb, HashSet<Inproceedings> inproceedingss, HashSet<Author> encounteredAuthors)
         {
-            sb.Append("\"inproceedings\":[");
+            sb.Append("\"inproceedings\":\n[");
 
             HashSet<Proceedings> encounteredproceedings = new HashSet<Proceedings>();
             foreach (Inproceedings inproceedings in inproceedingss)
@@ -88,14 +88,14 @@ namespace ResearchCollector.Importer
             LengthCheck(sb, this.inproceedings.Values.Count);
             sb.Append("]");
 
-            sb.Append(",");
+            sb.Append(",\n");
 
             ProceedingsToJson(sb, encounteredproceedings);
         }
 
         public void ProceedingsToJson(StringBuilder sb, HashSet<Proceedings> encounteredproceedings)
         {
-            sb.Append("\"proceedings\":[");
+            sb.Append("\"proceedings\":\n[");
 
             foreach (Proceedings proceedings in encounteredproceedings)
             {
@@ -109,7 +109,7 @@ namespace ResearchCollector.Importer
 
         public void AuthorsToJson(StringBuilder sb, HashSet<Author> encounteredAuthors)
         {
-            sb.Append("\"authors\":[");
+            sb.Append("\"authors\":\n[");
 
             HashSet<Organization> organizations = new HashSet<Organization>();
             HashSet<Person> persons = new HashSet<Person>();
@@ -122,18 +122,18 @@ namespace ResearchCollector.Importer
             LengthCheck(sb, encounteredAuthors.Count);
             sb.Append("]");
 
-            sb.Append(",");
+            sb.Append(",\n");
 
             OrganizationsToJson(sb, organizations);
 
-            sb.Append(",");
+            sb.Append(",\n");
 
             PersonsToJson(sb, persons);
         }
 
         public void OrganizationsToJson(StringBuilder sb, HashSet<Organization> organizations)
         {
-            sb.Append("\"organizations\":[");
+            sb.Append("\"organizations\":\n[");
 
             foreach (Organization orginazation in organizations)
             {
@@ -147,7 +147,7 @@ namespace ResearchCollector.Importer
 
         public void PersonsToJson(StringBuilder sb, HashSet<Person> persons)
         {
-            sb.Append("\"persons\":[");
+            sb.Append("\"persons\":\n[");
 
             foreach (Person person in persons)
             {
@@ -161,21 +161,21 @@ namespace ResearchCollector.Importer
 
         public StringBuilder ToJson()
         {
-            StringBuilder sb = new StringBuilder("{");
+            StringBuilder sb = new StringBuilder("{\n");
 
             HashSet<Author> encounteredAuthors = new HashSet<Author>();
 
             ArticlesToJson(sb, new HashSet<Article>(this.articles.Values), encounteredAuthors);            
 
-            sb.Append(",");
+            sb.Append(",\n");
 
             InproceedingsToJson(sb, new HashSet<Inproceedings>(this.inproceedings.Values), encounteredAuthors);
 
-            sb.Append(",");
+            sb.Append(",\n");
 
             AuthorsToJson(sb, encounteredAuthors);
 
-            sb.Append("}");
+            sb.Append("\n}");
 
             return sb;
         }
@@ -241,7 +241,14 @@ namespace ResearchCollector.Importer
                 authors[i] = author.name;
             }
 
-            JsonMemArticle jarticle = new JsonMemArticle { abstr = this.abstr, doi = this.doi, authorKeys = authors, id = this.id, journalKey = this.partOf.title, pdfLink = this.pdfLink, title = this.title, topics = this.topics, year = this.year };
+            OriginIdPair[] externals = new OriginIdPair[this.externalIds.Count]; int j = 0;
+            foreach (var id in this.externalIds)
+            {
+                externals[j] = new OriginIdPair { origin = id.Key, id = id.Value };
+                j++;
+            }
+
+            JsonMemArticle jarticle = new JsonMemArticle { abstr = this.abstr, doi = this.doi, authorKeys = authors, id = this.id, journalKey = this.partOf.title, pdfLink = this.pdfLink, title = this.title, topics = this.topics, year = this.year, externalIds = externals };
             string current = JsonSerializer.Serialize<JsonMemArticle>(jarticle);
             sb.Append(current);
         }
@@ -270,7 +277,14 @@ namespace ResearchCollector.Importer
                 authors[i] = author.name;
             }
 
-            JsonMemInproceedings jinproceedings = new JsonMemInproceedings { abstr = this.abstr, doi = this.doi, authorKeys = authors, id = this.id, proceedingsKey = this.partOf.title, pdfLink = this.pdfLink, title = this.title, topics = this.topics, year = this.year };
+            OriginIdPair[] externals = new OriginIdPair[this.externalIds.Count]; int j = 0;
+            foreach (var id in this.externalIds)
+            {
+                externals[j] = new OriginIdPair { origin = id.Key, id = id.Value };
+                j++;
+            }
+
+            JsonMemInproceedings jinproceedings = new JsonMemInproceedings { abstr = this.abstr, doi = this.doi, authorKeys = authors, id = this.id, proceedingsKey = this.partOf.title, pdfLink = this.pdfLink, title = this.title, topics = this.topics, year = this.year, externalIds = externals };
             string current = JsonSerializer.Serialize<JsonMemInproceedings>(jinproceedings);
             sb.Append(current);
         }

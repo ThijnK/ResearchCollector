@@ -5,6 +5,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Windows.Forms;
 using ResearchCollector.Filter;
 using ResearchCollector.Importer;
@@ -230,6 +231,68 @@ namespace ResearchCollector
         {
             filterInputPath = GetFileLocation();
             inputLocationFilter.Text = filterInputPath;
+        }
+
+        private void MemoryJson_Memory_Click(object sender, EventArgs e)
+        {
+            //kies bepaald bestand
+            
+            using (StreamReader sr = new StreamReader("export_1654601553.json"))
+            {
+                sr.ReadLine();
+                string current = sr.ReadLine();
+                if (current.StartsWith("\"articles\""))
+                {
+                    current = sr.ReadLine();
+                    JsonMemArticle[] jarticles = JsonSerializer.Deserialize<JsonMemArticle[]>(current);
+                    current = sr.ReadLine();                   
+                }
+
+                if (current.StartsWith("\"journals\""))
+                {
+                    current = sr.ReadLine();
+                    JsonMemJournal[] jjournals = JsonSerializer.Deserialize<JsonMemJournal[]>(current);
+                    current = sr.ReadLine();
+                }
+
+                if (current.StartsWith("\"inproceedings\""))
+                {
+                    current = sr.ReadLine();
+                    JsonMemInproceedings[] jinproceedings = JsonSerializer.Deserialize<JsonMemInproceedings[]>(current);
+                    current = sr.ReadLine();                   
+                }
+
+                if (current.StartsWith("\"proceedings\""))
+                {
+                    current = sr.ReadLine();
+                    JsonMemProceedings[] jproceedings = JsonSerializer.Deserialize<JsonMemProceedings[]>(current);
+                    current = sr.ReadLine();
+                }
+
+                if (current.StartsWith("\"authors\""))
+                {
+                    current = sr.ReadLine();
+                    JsonMemAuthor[] jauthors = JsonSerializer.Deserialize<JsonMemAuthor[]>(current);
+                    current = sr.ReadLine();
+                }
+
+                if (current.StartsWith("\"organizations\""))
+                {
+                    current = sr.ReadLine();
+                    JsonMemOrganization[] jorganizations = JsonSerializer.Deserialize<JsonMemOrganization[]>(current);
+                    current = sr.ReadLine();
+                }
+
+                if (current.StartsWith("\"persons\""))
+                {
+                    current = sr.ReadLine();
+                    JsonMemPerson[] jauthors = JsonSerializer.Deserialize<JsonMemPerson[]>(current);
+                    current = sr.ReadLine();
+                }
+            }
+            //bestand naar json
+            
+
         }
 
         private void FilterOutputLocation_Click(object sender, EventArgs e)
@@ -566,7 +629,7 @@ namespace ResearchCollector
             Log($"Exporting results to JSON...");
             try
             {
-                StringBuilder sb = new StringBuilder("{");
+                StringBuilder sb = new StringBuilder("{\n");
 
                 switch (comboBoxApi.SelectedIndex)
                 {
@@ -574,7 +637,7 @@ namespace ResearchCollector
                         HashSet<Author> encounteredAuthorsA = new HashSet<Author>();
                         data.ArticlesToJson(sb, results as HashSet<Article>, encounteredAuthorsA);
 
-                        sb.Append(",");
+                        sb.Append(",\n");
 
                         data.AuthorsToJson(sb, encounteredAuthorsA);
                         break;
@@ -582,7 +645,7 @@ namespace ResearchCollector
                         HashSet<Author> encounteredAuthorsI = new HashSet<Author>();
                         data.InproceedingsToJson(sb, results as HashSet<Inproceedings>, encounteredAuthorsI);
 
-                        sb.Append(",");
+                        sb.Append(",\n");
 
                         data.AuthorsToJson(sb, encounteredAuthorsI);
                         break;
@@ -602,7 +665,7 @@ namespace ResearchCollector
                         data.OrganizationsToJson(sb, results as HashSet<Organization>);
                         break;
                 }
-                sb.Append("}");
+                sb.Append("\n}");
 
                 string path = Path.Combine(outputPath, $"query_{DateTimeOffset.Now.ToUnixTimeSeconds()}.json");
                 using (StreamWriter sw = new StreamWriter(path))

@@ -135,12 +135,14 @@ namespace ResearchCollector.Importer
                 currentPublication = currentInproceedings;
             }
             //add the external id from the source to the id's of the publication
-            if(pub.externalIds != null)
+            if (pub.externalIds != null)
+            {
                 foreach (JsonExternalId exId in pub.externalIds)
                 {
                     if (!string.IsNullOrEmpty(exId.id) && !currentPublication.externalIds.ContainsKey(exId.origin))
-                     currentPublication.externalIds.Add(exId.origin, exId.id);
+                        currentPublication.externalIds.Add(exId.origin, exId.id);
                 }
+            }
 
             return currentPublication;
         }
@@ -207,9 +209,12 @@ namespace ResearchCollector.Importer
                 for (int i = 0; i < bytes.Length; i++)
                     sb.Append(bytes[i].ToString("x2"));
                 hash = sb.ToString();
-            }
+            }            
 
             return hash + pub.has.Length + pub.year;
         }
+
+       
+
     }
 }

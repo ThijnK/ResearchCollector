@@ -6,9 +6,14 @@ using System.Threading.Tasks;
 
 namespace ResearchCollector.Importer
 {
-    class JsonMemArticle
+    struct OriginIdPair
     {
-        //public string[] externalIds { get; set; }
+        public string origin { get; set; }
+        public string id { get; set; }
+    }
+    struct JsonMemArticle
+    {
+        public OriginIdPair[] externalIds { get; set; }
         public string journalKey { get; set; }
         public string[] topics { get; set; }
         public string id { get; set; }
@@ -28,9 +33,9 @@ namespace ResearchCollector.Importer
         public string series { get; set; }
     }
 
-    class JsonMemInproceedings
+    struct JsonMemInproceedings
     {
-        //public string[] externalIds { get; set; }
+        public OriginIdPair[] externalIds { get; set; }
         public string proceedingsKey { get; set; }
         public string[] topics { get; set; }
         public string id { get; set; }
