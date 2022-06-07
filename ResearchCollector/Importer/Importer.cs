@@ -213,7 +213,6 @@ namespace ResearchCollector.Importer
 
             return hash + pub.has.Length + pub.year;
         }
-
        
 
     }

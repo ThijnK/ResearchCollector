@@ -41,6 +41,8 @@ namespace ResearchCollector
         // Progress bars
         CustomProgressBar pbImporter, pbFilter, pbPdf;
 
+        BackToMemory backToMemory;
+
         /// <summary>
         /// Context used to access UI thread from BackgroundWorker
         /// </summary>
@@ -244,80 +246,7 @@ namespace ResearchCollector
 
             using (StreamReader sr = new StreamReader(filepath))
             {
-                //geef bepaalde naam aan file zodat je weet wat er allemaal inzit!!!!!!
-                StringBuilder sb;
-                sr.ReadLine();
-                string current = sr.ReadLine();
-                JsonMemArticle[] jarticles;
-                if (current.StartsWith("\"articles\""))
-                {
-                    sb = new StringBuilder(sr.ReadLine());
-                    sb.Length -= 2;
-                    sb.Append("]");
-                    jarticles = JsonSerializer.Deserialize<JsonMemArticle[]>(sb.ToString());
-                    current = sr.ReadLine();                   
-                }
-
-                JsonMemJournal[] jjournals;
-                if (current.StartsWith("\"journals\""))
-                {
-                    sb = new StringBuilder(sr.ReadLine());
-                    sb.Length -= 2;
-                    sb.Append("]");
-                    jjournals = JsonSerializer.Deserialize<JsonMemJournal[]>(sb.ToString());
-                    current = sr.ReadLine();
-                }
-
-                JsonMemInproceedings[] jinproceedings;
-                if (current.StartsWith("\"inproceedings\""))
-                {
-                    sb = new StringBuilder(sr.ReadLine());
-                    sb.Length -= 2;
-                    sb.Append("]");
-                    jinproceedings = JsonSerializer.Deserialize<JsonMemInproceedings[]>(sb.ToString());
-                    current = sr.ReadLine();                   
-                }
-
-                JsonMemProceedings[] jproceedings;
-                if (current.StartsWith("\"proceedings\""))
-                {
-                    sb = new StringBuilder(sr.ReadLine());
-                    sb.Length -= 2;
-                    sb.Append("]");
-                    jproceedings = JsonSerializer.Deserialize<JsonMemProceedings[]>(sb.ToString());
-                    current = sr.ReadLine();
-                }
-
-                JsonMemAuthor[] jauthors;
-                if (current.StartsWith("\"authors\""))
-                {
-                    sb = new StringBuilder(sr.ReadLine());
-                    sb.Length -= 2;
-                    sb.Append("]");
-                    jauthors = JsonSerializer.Deserialize<JsonMemAuthor[]>(sb.ToString());
-                    current = sr.ReadLine();
-                }
-
-                JsonMemOrganization[] jorganizations;
-                if (current.StartsWith("\"organizations\""))
-                {
-                    sb = new StringBuilder(sr.ReadLine());
-                    sb.Length -= 2;
-                    sb.Append("]");
-                    jorganizations = JsonSerializer.Deserialize<JsonMemOrganization[]>(sb.ToString());
-                    current = sr.ReadLine();
-                }
-
-                //persons is anders omdat het de laatste is. dus geen comma. ook organizations, journals en proceedings kan als laatste zijn
-                JsonMemPerson[] jpersons;
-                if (current.StartsWith("\"persons\""))
-                {
-                    sb = new StringBuilder(sr.ReadLine());
-                    sb.Length -= 2;
-                    sb.Append("]");
-                    jpersons = JsonSerializer.Deserialize<JsonMemPerson[]>(sb.ToString());
-                    current = sr.ReadLine();
-                }
+                backToMemory.JsonToMemory(sr);
             }
             //bestand naar json
             

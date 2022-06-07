@@ -113,6 +113,7 @@
     </Compile>
     <Compile Include="Filter\Filter.cs" />
     <Compile Include="Importer\API.cs" />
+    <Compile Include="Importer\BackToMemory.cs" />
     <Compile Include="Importer\DataStructures.cs" />
     <Compile Include="Importer\Importer.cs" />
     <Compile Include="Importer\JsonMemoryTypes.cs" />
