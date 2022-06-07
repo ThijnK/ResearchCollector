@@ -161,7 +161,7 @@ namespace ResearchCollector.Importer
 
         public StringBuilder ToJson()
         {
-            StringBuilder sb = new StringBuilder("\'");
+            StringBuilder sb = new StringBuilder("{");
 
             HashSet<Author> encounteredAuthors = new HashSet<Author>();
 
@@ -175,7 +175,7 @@ namespace ResearchCollector.Importer
 
             AuthorsToJson(sb, encounteredAuthors);
 
-            sb.Append("\'");
+            sb.Append("}");
 
             return sb;
         }

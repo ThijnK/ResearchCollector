@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -16,8 +17,7 @@ namespace ResearchCollector
         private BackgroundWorker bgWorker;
         private bool workerInterrupted;
         private TextBox currentLogBox;
-        private Label currentProgressLabel;
-        private ProgressBar currentProgressBar;
+        private CustomProgressBar currentProgressBar;
 
         // Custom worker class for filter/importer
         private Worker worker;
@@ -30,18 +30,15 @@ namespace ResearchCollector
         private string importerInputPath;
         private Data data;
 
-        // API db stats panel labels
+        // Outputpath for pdf finder;
+        private string pdfFinderOutputPath;
+
+        // API db stats panel labels (some for API tab, some for Importer tab
         Label articleCount, inproceedingCount, authorCount, journalCount, proceedingCount, organizationCount;
+        Label articleCountI, inproceedingCountI, authorCountI, journalCountI, proceedingCountI, organizationCountI;
 
-        PDFInfoFinder pdfFixer = new PDFInfoFinder();
-
-        HashSet<Article> articles;
-        HashSet<Inproceedings> inproceedings;
-        HashSet<Journal> journals;
-        HashSet<Proceedings> proceedings;
-        HashSet<Author> authors;
-        HashSet<Person> persons;
-        HashSet<Organization> organizations;
+        // Progress bars
+        CustomProgressBar pbImporter, pbFilter, pbPdf;
 
         /// <summary>
         /// Context used to access UI thread from BackgroundWorker
@@ -51,6 +48,22 @@ namespace ResearchCollector
         public Form1()
         {
             InitializeComponent();
+
+            // Add custom progress bars
+            pbImporter = new CustomProgressBar();
+            pbImporter.Size = new Size(224, 23);
+            pbImporter.Location = new Point(8, 81);
+            importerTab.Controls.Add(pbImporter);
+            pbFilter = new CustomProgressBar();
+            pbFilter.Size = new Size(224, 23);
+            pbFilter.Location = new Point(8, 110);
+            filterTab.Controls.Add(pbFilter);
+            currentProgressBar = pbFilter;
+            pbPdf = new CustomProgressBar();
+            pbPdf.Size = new Size(224, 23);
+            pbPdf.Location = new Point(8, 175);
+            importerTab.Controls.Add(pbPdf);
+
             bgWorker = new BackgroundWorker();
             bgWorker.WorkerReportsProgress = true;
             bgWorker.ProgressChanged += WorkerProgress;
@@ -87,7 +100,7 @@ namespace ResearchCollector
             catch (Exception ex)
             {
                 // Report error to UI thread 
-                bgWorker.ReportProgress(progressBarFilter.Value, ex.Message);
+                bgWorker.ReportProgress(currentProgressBar.Value, ex.Message);
                 workerInterrupted = true;
             }
         }
@@ -97,7 +110,6 @@ namespace ResearchCollector
             if (e.UserState != null)
                 if (!string.IsNullOrEmpty(e.UserState.ToString()))
                     Error(e.UserState.ToString());
-            currentProgressLabel.Text = $"{e.ProgressPercentage}%";
             currentProgressBar.Value = e.ProgressPercentage;
         }
 
@@ -107,28 +119,29 @@ namespace ResearchCollector
             if (e.Cancelled || e.Error != null || workerInterrupted)
             {
                 Log("Parsing interrupted");
-                currentProgressLabel.Text = "";
                 currentProgressBar.Value = 0;
                 workerInterrupted = false;
             }
             else
             {
                 Log("Parsing finished!");
-                currentProgressLabel.Text = "100%";
                 currentProgressBar.Value = 100;
-                if (currentProgressBar.Equals(progressBarFilter)) // Filter finished
+                if (currentProgressBar.Equals(pbFilter)) // Filter finished
                 {
                     string outputPath = Path.Combine(filterOutputPath, $"{worker}.json");
-                    importerInputPath = outputPath;
-                    inputLocationImporter.Text = outputPath;
                     Log($"Output saved to {outputPath}");
                 }
-                else // Importer finished
+                else if (currentProgressBar.Equals(pbImporter)) // Importer finished
                 {
                     // Import data to this form for use by the API
                     data = (worker as Importer.Importer).data;
-                    Log($"{data.pubCount} publications parsed. The collected data kan be queried using the API (see API tab ↑)");
+                    Log($"{data.pubCount} publications parsed. The collected data kan be exported on the left or queried using the API on the API tab");
                     UpdateDbStatistics();
+                }
+                else // Pdf finder finished
+                {
+                    Log("Finished downloading pdf's and extracting text");
+                    Log($"Text files can be found in the following directory: {pdfFinderOutputPath}");
                 }
             }
         }
@@ -140,7 +153,7 @@ namespace ResearchCollector
             if (worker != null)
                 worker.logActions = (sender as CheckBox).Checked;
         }
-        
+
         private string GetFileLocation()
         {
             OpenFileDialog dialog = new OpenFileDialog();
@@ -171,6 +184,8 @@ namespace ResearchCollector
         {
             runBtnFilter.Enabled = !runBtnFilter.Enabled;
             runBtnImporter.Enabled = !runBtnImporter.Enabled;
+            ApiRunBtn.Enabled = !ApiRunBtn.Enabled;
+            downloadPdfBtn.Enabled = !downloadPdfBtn.Enabled;
         }
 
         // Called when user switches to a new tab
@@ -306,13 +321,11 @@ namespace ResearchCollector
                 return;
             }
 
-            currentProgressLabel = progressLabelFilter;
-            currentProgressBar = progressBarFilter;
+            currentProgressBar = pbFilter;
             filter.logActions = logCheckBoxFilter.Checked;
             filter.ActionCompleted += (object sender, ActionCompletedEventArgs ace) => { Log(ace.description); };
             ToggleRunButtons();
-            progressBarFilter.Value = 0;
-            progressLabelFilter.Text = "0%";
+            pbFilter.Value = 0;
             Log($"Parsing {typeComboBoxFilter.SelectedItem} data set...");
             bgWorker.RunWorkerAsync();
         }
@@ -321,18 +334,9 @@ namespace ResearchCollector
         #region Importer UI methods
         private void ImporterRunBtn_Click(object sender, EventArgs e)
         {
-            currentLogBox = logBoxImporter;
-            // Check if input path is valid and ask for input if not
-            if (string.IsNullOrEmpty(importerInputPath))
-            {
-                importerInputPath = GetFileLocation();
-                if (importerInputPath == "")
-                    return;
-                inputLocationImporter.Text = importerInputPath;
-            }
-            
-            // Check that the input file exists
-            if (!File.Exists(importerInputPath))
+            // Ask for input location
+            importerInputPath = GetFileLocation();
+            if (string.IsNullOrEmpty(importerInputPath) || !File.Exists(importerInputPath))
             {
                 Error("Selected input file does not exist");
                 return;
@@ -340,29 +344,41 @@ namespace ResearchCollector
 
             worker = new Importer.Importer(context, importerInputPath, data);
 
-            currentProgressLabel = progressLabelImporter;
-            currentProgressBar = progressBarImporter;
+            currentProgressBar = pbImporter;
             worker.logActions = logCheckBoxImporter.Checked;
             worker.ActionCompleted += (object s, ActionCompletedEventArgs ace) => { Log(ace.description); };
             ToggleRunButtons();
-            progressBarImporter.Value = 0;
-            progressLabelImporter.Text = "0%";
+            pbImporter.Value = 0;
             Log($"Parsing native JSON file...");
             bgWorker.RunWorkerAsync();
         }
 
-        private void ImporterInputLocation_Click(object sender, EventArgs e)
+        private void DownloadPdf_Click(object sender, EventArgs e)
         {
-            OpenFileDialog dialog = new OpenFileDialog();
-            DialogResult result = dialog.ShowDialog();
-            if (result == DialogResult.OK)
+            if (data.pubCount == 0)
             {
-                importerInputPath = dialog.FileName;
-                inputLocationImporter.Text = importerInputPath;
+                Error("Database does not contain any publications");
+                return;
             }
+            pdfFinderOutputPath = GetFolderLocation(out bool success);
+            if (!success)
+            {
+                Error("No output path selected");
+                return;
+            }
+
+            worker = new PDFInfoFinder(context, data, pdfFinderOutputPath);
+
+            currentProgressBar = pbPdf;
+            worker.logActions = logCheckBoxImporter.Checked;
+            worker.ActionCompleted += (object s, ActionCompletedEventArgs ace) => { Log(ace.description); };
+            ToggleRunButtons();
+            pbPdf.Value = 0;
+            Log("Downloading pdf's for articles in database...");
+            bgWorker.RunWorkerAsync();
         }
 
-        private void DownLoad_Articles_Click(object sender, EventArgs e)
+        private void Export_Json_Click(object sender, EventArgs e)
         {
             if (data.pubCount == 0)
             {
@@ -376,108 +392,20 @@ namespace ResearchCollector
                 return;
             }
 
-            Log("Downloading pdf's for articles in database");
-            foreach (Article article in data.articles.Values)
-            {
-                try
-                {
-                    if (!string.IsNullOrEmpty(article.pdfLink))
-                        pdfFixer.FindInfo(article.pdfLink, article.id, false, outputPath);
-                    else
-                        pdfFixer.FindInfo(article.doi, article.id, true, outputPath);
-                }
-                catch (Exception ex) 
-                {
-                    Error(ex.Message);
-                }
-            }
-            foreach (Inproceedings inpr in data.inproceedings.Values)
-            {
-                try
-                {
-                    if (!string.IsNullOrEmpty(inpr.pdfLink))
-                        pdfFixer.FindInfo(inpr.pdfLink, inpr.id, false, outputPath);
-                    else
-                        pdfFixer.FindInfo(inpr.doi, inpr.id, true, outputPath);
-                }
-                catch (Exception ex)
-                {
-                    Error(ex.Message);
-                }
-            }
-            Log("Finished downloading pdf's");
-            Log($"Pdf's can be found in the following directory: {outputPath}");
-        }
-
-        private void Export_Json_Click(object sender, EventArgs e)
-        {
+            Log("Exporting database to JSON...");
+            string path = Path.Combine(outputPath, $"export_{DateTimeOffset.Now.ToUnixTimeSeconds()}.json");
             try
             {
-                using (StreamWriter sw = new StreamWriter("pizza.json"))
+                using (StreamWriter sw = new StreamWriter(path))
                 {
-                    sw.Write(data.ToJson());
+                    sw.Write(data.ToJson().ToString());
                 }
             }
             catch (Exception ex)
             {
                 Error(ex.Message);
-                return;
             }
-        }
-
-        private void Query_Json_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                StringBuilder sb = new StringBuilder("\'");
-
-                switch (comboBoxApi.SelectedIndex)
-                {
-                    case 0:                  
-                        HashSet<Author> encounteredAuthorsA = new HashSet<Author>();
-                        data.ArticlesToJson(sb, articles, encounteredAuthorsA);
-
-                        sb.Append(",");
-
-                        data.AuthorsToJson(sb, encounteredAuthorsA);
-                        break;
-                    case 1:
-                        HashSet<Author> encounteredAuthorsI = new HashSet<Author>();
-                        data.InproceedingsToJson(sb, inproceedings, encounteredAuthorsI);
-
-                        sb.Append(",");
-
-                        data.AuthorsToJson(sb, encounteredAuthorsI);
-                        break;
-                    case 2:
-                        data.AuthorsToJson(sb, authors);
-                        break;
-                    case 3:
-                        data.PersonsToJson(sb, persons);
-                        break;
-                    case 4:
-                        data.JournalsToJson(sb, journals);
-                        break;
-                    case 5:
-                        data.ProceedingsToJson(sb, proceedings);
-                        break;
-                    case 6:
-                        data.OrganizationsToJson(sb, organizations);
-                        break;
-                }
-                sb.Append("\'");
-
-                using (StreamWriter sw = new StreamWriter("pizza.json"))
-                {
-                    sw.Write(sb);
-                }
-
-            }
-            catch (Exception ex)
-            {
-                Error(ex.Message);
-            }
-
+            Log($"Exporting finished! Output saved to {path}");
         }
         #endregion
 
@@ -490,60 +418,87 @@ namespace ResearchCollector
             journalCount.Text = data.journals.Count.ToString();
             proceedingCount.Text = data.proceedings.Count.ToString();
             organizationCount.Text = data.organizations.Count.ToString();
+            articleCountI.Text = data.articles.Count.ToString();
+            inproceedingCountI.Text = data.inproceedings.Count.ToString();
+            authorCountI.Text = data.authors.Count.ToString();
+            journalCountI.Text = data.journals.Count.ToString();
+            proceedingCountI.Text = data.proceedings.Count.ToString();
+            organizationCountI.Text = data.organizations.Count.ToString();
         }
 
         private void SetupDbStatistics()
         {
             // Add labels to db stats panel for API
-            Label lbl = new Label();
-            lbl.Text = "Nr of articles:";
+            Label lbl = new Label(); lbl.Text = "Nr of articles:";
             dbStatsPanel.Controls.Add(lbl, 0, 0);
-            articleCount = new Label();
-            articleCount.Text = "0";
-            //articleCount.Width = 10;
+            lbl = new Label(); lbl.Text = "Nr of articles:";
+            dbStatsPanelImporter.Controls.Add(lbl, 0, 0);
+            articleCount = new Label(); articleCount.Text = "0";
             dbStatsPanel.Controls.Add(articleCount, 1, 0);
-            lbl = new Label();
-            lbl.Text = "Nr of inproceedings:";
-            lbl.AutoSize = true;
-            dbStatsPanel.Controls.Add(lbl, 0, 1);
-            inproceedingCount = new Label();
-            inproceedingCount.Text = "0";
-            //inproceedingCount.Width = 10;
-            dbStatsPanel.Controls.Add(inproceedingCount, 1, 1);
-            lbl = new Label();
-            lbl.Text = "Nr of authors:";
-            dbStatsPanel.Controls.Add(lbl, 0, 2);
-            authorCount = new Label();
-            authorCount.Text = "0";
-            //authorCount.Width = 10;
-            dbStatsPanel.Controls.Add(authorCount, 1, 2);
-            lbl = new Label();
-            lbl.Text = "Nr of journals:";
-            dbStatsPanel.Controls.Add(lbl, 0, 3);
-            journalCount = new Label();
-            journalCount.Text = "0";
-            //journalCount.Width = 10;
-            dbStatsPanel.Controls.Add(journalCount, 1, 3);
-            lbl = new Label();
-            lbl.Text = "Nr of proceedings:";
-            dbStatsPanel.Controls.Add(lbl, 0, 4);
-            proceedingCount = new Label();
-            proceedingCount.Text = "0";
-            //proceedingCount.Width = 10;
-            dbStatsPanel.Controls.Add(proceedingCount, 1, 4);
-            lbl = new Label();
-            lbl.Text = "Nr of organizations:";
-            dbStatsPanel.Controls.Add(lbl, 0, 5);
-            organizationCount = new Label();
-            organizationCount.Text = "0";
-            //organizationCount.Width = 10;
-            dbStatsPanel.Controls.Add(organizationCount, 1, 5);
-        }
+            articleCountI = new Label(); articleCountI.Text = "0";
+            dbStatsPanelImporter.Controls.Add(articleCountI, 1, 0);
 
+            lbl = new Label(); lbl.Text = "Nr of inproceedings:"; lbl.Width = 150;
+            dbStatsPanel.Controls.Add(lbl, 0, 1);
+            lbl = new Label(); lbl.Text = "Nr of inproceedings:"; lbl.Width = 150;
+            dbStatsPanelImporter.Controls.Add(lbl, 0, 1);
+            inproceedingCount = new Label(); inproceedingCount.Text = "0";
+            dbStatsPanel.Controls.Add(inproceedingCount, 1, 1);
+            inproceedingCountI = new Label(); inproceedingCountI.Text = "0";
+            dbStatsPanelImporter.Controls.Add(inproceedingCountI, 1, 1);
+
+            lbl = new Label(); lbl.Text = "Nr of authors:";
+            dbStatsPanel.Controls.Add(lbl, 0, 2);
+            lbl = new Label(); lbl.Text = "Nr of authors:";
+            dbStatsPanelImporter.Controls.Add(lbl, 0, 2);
+            authorCount = new Label(); authorCount.Text = "0";
+            dbStatsPanel.Controls.Add(authorCount, 1, 2);
+            authorCountI = new Label(); authorCountI.Text = "0";
+            dbStatsPanelImporter.Controls.Add(authorCountI, 1, 2);
+
+            lbl = new Label(); lbl.Text = "Nr of journals:";
+            dbStatsPanel.Controls.Add(lbl, 0, 3);
+            lbl = new Label(); lbl.Text = "Nr of journals:";
+            dbStatsPanelImporter.Controls.Add(lbl, 0, 3);
+            journalCount = new Label(); journalCount.Text = "0";
+            dbStatsPanel.Controls.Add(journalCount, 1, 3);
+            journalCountI = new Label(); journalCountI.Text = "0";
+            dbStatsPanelImporter.Controls.Add(journalCountI, 1, 3);
+
+            lbl = new Label(); lbl.Text = "Nr of proceedings:";
+            dbStatsPanel.Controls.Add(lbl, 0, 4);
+            lbl = new Label(); lbl.Text = "Nr of proceedings:";
+            dbStatsPanelImporter.Controls.Add(lbl, 0, 4);
+            proceedingCount = new Label(); proceedingCount.Text = "0";
+            dbStatsPanel.Controls.Add(proceedingCount, 1, 4);
+            proceedingCountI = new Label(); proceedingCountI.Text = "0";
+            dbStatsPanelImporter.Controls.Add(proceedingCountI, 1, 4);
+
+            lbl = new Label(); lbl.Text = "Nr of organizations:";
+            dbStatsPanel.Controls.Add(lbl, 0, 5);
+            lbl = new Label(); lbl.Text = "Nr of organizations:";
+            dbStatsPanelImporter.Controls.Add(lbl, 0, 5);
+            organizationCount = new Label(); organizationCount.Text = "0";
+            dbStatsPanel.Controls.Add(organizationCount, 1, 5);
+            organizationCountI = new Label(); organizationCountI.Text = "0";
+            dbStatsPanelImporter.Controls.Add(organizationCountI, 1, 5);
+        }
 
         private void ApiRunBtn_Click(object sender, EventArgs e)
         {
             currentLogBox = logBoxApi;
+            if (data.pubCount == 0)
+            {
+                Error("Database does not contain any publications");
+                return;
+            }
+            string outputPath = GetFolderLocation(out bool pathSelected);
+            if (!pathSelected)
+            {
+                Error("No output path selected");
+                return;
+            }
+
             if (apiQuery.Text == "Type your query here..." || string.IsNullOrEmpty(apiQuery.Text))
             {
                 Error("No input query given");
@@ -577,25 +532,25 @@ namespace ResearchCollector
                 switch (comboBoxApi.SelectedIndex)
                 {
                     case 0:
-                        HandleQueryResult(articles = api.Search<Article>(SearchDomain.Articles, st, args));
+                        HandleQueryResult(api.Search<Article>(SearchDomain.Articles, st, args), outputPath);
                         break;
                     case 1:
-                        HandleQueryResult(inproceedings = api.Search<Inproceedings>(SearchDomain.Inproceedings, st, args));
+                        HandleQueryResult(api.Search<Inproceedings>(SearchDomain.Inproceedings, st, args), outputPath);
                         break;
                     case 2:
-                        HandleQueryResult(authors = api.Search<Author>(SearchDomain.Authors, st, args));
+                        HandleQueryResult(api.Search<Author>(SearchDomain.Authors, st, args), outputPath);
                         break;
                     case 3:
-                        HandleQueryResult(persons = api.Search<Person>(SearchDomain.Persons, st, args));
+                        HandleQueryResult(api.Search<Person>(SearchDomain.Persons, st, args), outputPath);
                         break;
                     case 4:
-                        HandleQueryResult(journals = api.Search<Journal>(SearchDomain.Journals, st, args));
+                        HandleQueryResult(api.Search<Journal>(SearchDomain.Journals, st, args), outputPath);
                         break;
                     case 5:
-                        HandleQueryResult(proceedings = api.Search<Proceedings>(SearchDomain.Proceedings, st, args));
+                        HandleQueryResult(api.Search<Proceedings>(SearchDomain.Proceedings, st, args), outputPath);
                         break;
                     case 6:
-                        HandleQueryResult(organizations = api.Search<Organization>(SearchDomain.Organizations, st, args));
+                        HandleQueryResult(api.Search<Organization>(SearchDomain.Organizations, st, args), outputPath);
                         break;
                 }
             }
@@ -605,18 +560,68 @@ namespace ResearchCollector
             }
         }
 
-        private void HandleQueryResult<T>(HashSet<T> results)
+        private void HandleQueryResult<T>(HashSet<T> results, string outputPath)
         {
-            // Do something with results..
-
             Log($"{results.Count} items found");
+            Log($"Exporting results to JSON...");
+            try
+            {
+                StringBuilder sb = new StringBuilder("{");
+
+                switch (comboBoxApi.SelectedIndex)
+                {
+                    case 0:
+                        HashSet<Author> encounteredAuthorsA = new HashSet<Author>();
+                        data.ArticlesToJson(sb, results as HashSet<Article>, encounteredAuthorsA);
+
+                        sb.Append(",");
+
+                        data.AuthorsToJson(sb, encounteredAuthorsA);
+                        break;
+                    case 1:
+                        HashSet<Author> encounteredAuthorsI = new HashSet<Author>();
+                        data.InproceedingsToJson(sb, results as HashSet<Inproceedings>, encounteredAuthorsI);
+
+                        sb.Append(",");
+
+                        data.AuthorsToJson(sb, encounteredAuthorsI);
+                        break;
+                    case 2:
+                        data.AuthorsToJson(sb, results as HashSet<Author>);
+                        break;
+                    case 3:
+                        data.PersonsToJson(sb, results as HashSet<Person>);
+                        break;
+                    case 4:
+                        data.JournalsToJson(sb, results as HashSet<Journal>);
+                        break;
+                    case 5:
+                        data.ProceedingsToJson(sb, results as HashSet<Proceedings>);
+                        break;
+                    case 6:
+                        data.OrganizationsToJson(sb, results as HashSet<Organization>);
+                        break;
+                }
+                sb.Append("}");
+
+                string path = Path.Combine(outputPath, $"query_{DateTimeOffset.Now.ToUnixTimeSeconds()}.json");
+                using (StreamWriter sw = new StreamWriter(path))
+                {
+                    sw.Write(sb);
+                }
+                Log($"Query results successfully exported to file {path}");
+            }
+            catch (Exception ex)
+            {
+                Error(ex.Message);
+            }
         }
 
         /// <summary>
         /// Parses a query for the api into the format needed by the Search method
         /// </summary>
         /// <returns>A boolean indicating whether the query is valid or not</returns>
-        private (string,string)[] ParseQuery(out bool success)
+        private (string, string)[] ParseQuery(out bool success)
         {
             string[] ps = apiQuery.Text.Split('\u002C');
             if (ps.Length < 1)
@@ -634,7 +639,7 @@ namespace ResearchCollector
 
                 string attr = parts[0].Trim(' ');
                 string val = parts[1].Trim(' ');
-                
+
                 if (API.possibleArgs.Contains(attr))
                     predicates.Add((attr, val));
             }
@@ -650,5 +655,49 @@ namespace ResearchCollector
             return predicates.ToArray();
         }
         #endregion
+    }
+
+    /// <summary>
+    /// Custom class for the progress bars.
+    /// Source: https://stackoverflow.com/questions/3529928/how-do-i-put-text-on-progressbar.
+    /// </summary>
+    class CustomProgressBar : ProgressBar
+    {
+        public CustomProgressBar()
+        {
+            // Modify the ControlStyles flags
+            //http://msdn.microsoft.com/en-us/library/system.windows.forms.controlstyles.aspx
+            SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer, true);
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            Rectangle rect = ClientRectangle;
+            Graphics g = e.Graphics;
+
+            ProgressBarRenderer.DrawHorizontalBar(g, rect);
+            rect.Inflate(-1, -1);
+            if (Value > 0)
+            {
+                // As we doing this ourselves we need to draw the chunks on the progress bar
+                Rectangle clip = new Rectangle(rect.X, rect.Y, (int)Math.Round(((float)Value / Maximum) * rect.Width), rect.Height);
+                ProgressBarRenderer.DrawHorizontalChunks(g, clip);
+            }
+
+            // Set the Display text (Either a % amount or our custom text
+            int percent = (int)(((double)this.Value / (double)this.Maximum) * 100);
+            string text = percent.ToString() + '%';
+
+            using (Font f = new Font(FontFamily.GenericSansSerif, 10))
+            {
+                SizeF len = g.MeasureString(text, f);
+                // Calculate the location of the text (the middle of progress bar)
+                // Point location = new Point(Convert.ToInt32((rect.Width / 2) - (len.Width / 2)), Convert.ToInt32((rect.Height / 2) - (len.Height / 2)));
+                Point location = new Point(Convert.ToInt32((Width / 2) - len.Width / 2), Convert.ToInt32((Height / 2) - len.Height / 2));
+                // The commented-out code will centre the text into the highlighted area only. This will centre the text regardless of the highlighted area.
+                // Draw the custom text
+                g.DrawString(text, f, Brushes.Black, location);
+            }
+        }
     }
 }

@@ -39,21 +39,18 @@
             this.dtdLabel = new System.Windows.Forms.Label();
             this.outputLabel = new System.Windows.Forms.Label();
             this.outputLocationFilter = new System.Windows.Forms.Label();
-            this.progressBarFilter = new System.Windows.Forms.ProgressBar();
-            this.progressLabelFilter = new System.Windows.Forms.Label();
             this.logCheckBoxFilter = new System.Windows.Forms.CheckBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.filterTab = new System.Windows.Forms.TabPage();
             this.importerTab = new System.Windows.Forms.TabPage();
-            this.DownLoad_Articles = new System.Windows.Forms.Button();
+            this.label12 = new System.Windows.Forms.Label();
+            this.dbStatsPanelImporter = new System.Windows.Forms.TableLayoutPanel();
+            this.Export_Json = new System.Windows.Forms.Button();
+            this.downloadPdfBtn = new System.Windows.Forms.Button();
             this.logBoxImporter = new System.Windows.Forms.TextBox();
-            this.inputLocationImporter = new System.Windows.Forms.Label();
-            this.label5 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.runBtnImporter = new System.Windows.Forms.Button();
             this.logCheckBoxImporter = new System.Windows.Forms.CheckBox();
-            this.progressLabelImporter = new System.Windows.Forms.Label();
-            this.progressBarImporter = new System.Windows.Forms.ProgressBar();
             this.apiTab = new System.Windows.Forms.TabPage();
             this.label11 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
@@ -69,8 +66,7 @@
             this.label6 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.dbStatsPanel = new System.Windows.Forms.TableLayoutPanel();
-            this.Export_Json = new System.Windows.Forms.Button();
-            this.Query_Json = new System.Windows.Forms.Button();
+            this.label5 = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.filterTab.SuspendLayout();
             this.importerTab.SuspendLayout();
@@ -185,21 +181,6 @@
             this.outputLocationFilter.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.outputLocationFilter.Click += new System.EventHandler(this.FilterOutputLocation_Click);
             // 
-            // progressBarFilter
-            // 
-            this.progressBarFilter.Location = new System.Drawing.Point(8, 123);
-            this.progressBarFilter.Name = "progressBarFilter";
-            this.progressBarFilter.Size = new System.Drawing.Size(224, 23);
-            this.progressBarFilter.TabIndex = 14;
-            // 
-            // progressLabelFilter
-            // 
-            this.progressLabelFilter.Location = new System.Drawing.Point(8, 107);
-            this.progressLabelFilter.Name = "progressLabelFilter";
-            this.progressLabelFilter.Size = new System.Drawing.Size(224, 13);
-            this.progressLabelFilter.TabIndex = 15;
-            this.progressLabelFilter.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
             // logCheckBoxFilter
             // 
             this.logCheckBoxFilter.AutoSize = true;
@@ -233,9 +214,7 @@
             this.filterTab.Controls.Add(this.label2);
             this.filterTab.Controls.Add(this.logCheckBoxFilter);
             this.filterTab.Controls.Add(this.inputLabel);
-            this.filterTab.Controls.Add(this.progressLabelFilter);
             this.filterTab.Controls.Add(this.outputLabel);
-            this.filterTab.Controls.Add(this.progressBarFilter);
             this.filterTab.Controls.Add(this.dtdLabel);
             this.filterTab.Location = new System.Drawing.Point(4, 22);
             this.filterTab.Name = "filterTab";
@@ -244,19 +223,18 @@
             this.filterTab.TabIndex = 0;
             this.filterTab.Text = "Filter";
             this.filterTab.UseVisualStyleBackColor = true;
+            this.filterTab.Enter += new System.EventHandler(this.TabSwitched);
             // 
             // importerTab
             // 
+            this.importerTab.Controls.Add(this.label12);
+            this.importerTab.Controls.Add(this.dbStatsPanelImporter);
             this.importerTab.Controls.Add(this.Export_Json);
-            this.importerTab.Controls.Add(this.DownLoad_Articles);
+            this.importerTab.Controls.Add(this.downloadPdfBtn);
             this.importerTab.Controls.Add(this.logBoxImporter);
-            this.importerTab.Controls.Add(this.inputLocationImporter);
-            this.importerTab.Controls.Add(this.label5);
             this.importerTab.Controls.Add(this.label4);
             this.importerTab.Controls.Add(this.runBtnImporter);
             this.importerTab.Controls.Add(this.logCheckBoxImporter);
-            this.importerTab.Controls.Add(this.progressLabelImporter);
-            this.importerTab.Controls.Add(this.progressBarImporter);
             this.importerTab.Location = new System.Drawing.Point(4, 22);
             this.importerTab.Name = "importerTab";
             this.importerTab.Padding = new System.Windows.Forms.Padding(3);
@@ -264,16 +242,58 @@
             this.importerTab.TabIndex = 1;
             this.importerTab.Text = "Importer";
             this.importerTab.UseVisualStyleBackColor = true;
+            this.importerTab.Enter += new System.EventHandler(this.TabSwitched);
             // 
-            // DownLoad_Articles
+            // label12
             // 
-            this.DownLoad_Articles.Location = new System.Drawing.Point(8, 220);
-            this.DownLoad_Articles.Name = "DownLoad_Articles";
-            this.DownLoad_Articles.Size = new System.Drawing.Size(224, 28);
-            this.DownLoad_Articles.TabIndex = 26;
-            this.DownLoad_Articles.Text = "Download pdf\'s ";
-            this.DownLoad_Articles.UseVisualStyleBackColor = true;
-            this.DownLoad_Articles.Click += new System.EventHandler(this.DownLoad_Articles_Click);
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(8, 240);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(99, 13);
+            this.label12.TabIndex = 31;
+            this.label12.Text = "Database statistics:";
+            // 
+            // dbStatsPanelImporter
+            // 
+            this.dbStatsPanelImporter.AutoSize = true;
+            this.dbStatsPanelImporter.BackColor = System.Drawing.SystemColors.Control;
+            this.dbStatsPanelImporter.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.dbStatsPanelImporter.ColumnCount = 2;
+            this.dbStatsPanelImporter.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 130F));
+            this.dbStatsPanelImporter.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 85F));
+            this.dbStatsPanelImporter.Location = new System.Drawing.Point(8, 256);
+            this.dbStatsPanelImporter.Name = "dbStatsPanelImporter";
+            this.dbStatsPanelImporter.Padding = new System.Windows.Forms.Padding(5);
+            this.dbStatsPanelImporter.RowCount = 5;
+            this.dbStatsPanelImporter.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.dbStatsPanelImporter.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.dbStatsPanelImporter.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.dbStatsPanelImporter.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.dbStatsPanelImporter.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.dbStatsPanelImporter.Size = new System.Drawing.Size(225, 75);
+            this.dbStatsPanelImporter.TabIndex = 30;
+            // 
+            // Export_Json
+            // 
+            this.Export_Json.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.Export_Json.Location = new System.Drawing.Point(8, 407);
+            this.Export_Json.Name = "Export_Json";
+            this.Export_Json.Size = new System.Drawing.Size(224, 28);
+            this.Export_Json.TabIndex = 27;
+            this.Export_Json.Text = "Export to JSON";
+            this.Export_Json.UseVisualStyleBackColor = true;
+            this.Export_Json.Click += new System.EventHandler(this.Export_Json_Click);
+            // 
+            // downloadPdfBtn
+            // 
+            this.downloadPdfBtn.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.downloadPdfBtn.Location = new System.Drawing.Point(8, 141);
+            this.downloadPdfBtn.Name = "downloadPdfBtn";
+            this.downloadPdfBtn.Size = new System.Drawing.Size(224, 28);
+            this.downloadPdfBtn.TabIndex = 26;
+            this.downloadPdfBtn.Text = "Download Pdf Text";
+            this.downloadPdfBtn.UseVisualStyleBackColor = true;
+            this.downloadPdfBtn.Click += new System.EventHandler(this.DownloadPdf_Click);
             // 
             // logBoxImporter
             // 
@@ -283,27 +303,6 @@
             this.logBoxImporter.ReadOnly = true;
             this.logBoxImporter.Size = new System.Drawing.Size(553, 413);
             this.logBoxImporter.TabIndex = 25;
-            // 
-            // inputLocationImporter
-            // 
-            this.inputLocationImporter.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.inputLocationImporter.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.inputLocationImporter.Location = new System.Drawing.Point(8, 156);
-            this.inputLocationImporter.Name = "inputLocationImporter";
-            this.inputLocationImporter.Size = new System.Drawing.Size(224, 20);
-            this.inputLocationImporter.TabIndex = 23;
-            this.inputLocationImporter.Text = "No file selected";
-            this.inputLocationImporter.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.inputLocationImporter.Click += new System.EventHandler(this.ImporterInputLocation_Click);
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(8, 139);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(50, 13);
-            this.label5.TabIndex = 24;
-            this.label5.Text = "Input file:";
             // 
             // label4
             // 
@@ -317,18 +316,18 @@
             // runBtnImporter
             // 
             this.runBtnImporter.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.runBtnImporter.Location = new System.Drawing.Point(8, 24);
+            this.runBtnImporter.Location = new System.Drawing.Point(8, 47);
             this.runBtnImporter.Name = "runBtnImporter";
-            this.runBtnImporter.Size = new System.Drawing.Size(224, 37);
+            this.runBtnImporter.Size = new System.Drawing.Size(224, 28);
             this.runBtnImporter.TabIndex = 17;
-            this.runBtnImporter.Text = "Run";
+            this.runBtnImporter.Text = "Import Native JSON";
             this.runBtnImporter.UseVisualStyleBackColor = true;
             this.runBtnImporter.Click += new System.EventHandler(this.ImporterRunBtn_Click);
             // 
             // logCheckBoxImporter
             // 
             this.logCheckBoxImporter.AutoSize = true;
-            this.logCheckBoxImporter.Location = new System.Drawing.Point(8, 110);
+            this.logCheckBoxImporter.Location = new System.Drawing.Point(11, 24);
             this.logCheckBoxImporter.Name = "logCheckBoxImporter";
             this.logCheckBoxImporter.Size = new System.Drawing.Size(81, 17);
             this.logCheckBoxImporter.TabIndex = 20;
@@ -336,24 +335,9 @@
             this.logCheckBoxImporter.UseVisualStyleBackColor = true;
             this.logCheckBoxImporter.CheckedChanged += new System.EventHandler(this.LogCheckBox_Changed);
             // 
-            // progressLabelImporter
-            // 
-            this.progressLabelImporter.Location = new System.Drawing.Point(8, 64);
-            this.progressLabelImporter.Name = "progressLabelImporter";
-            this.progressLabelImporter.Size = new System.Drawing.Size(224, 13);
-            this.progressLabelImporter.TabIndex = 19;
-            this.progressLabelImporter.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // progressBarImporter
-            // 
-            this.progressBarImporter.Location = new System.Drawing.Point(8, 80);
-            this.progressBarImporter.Name = "progressBarImporter";
-            this.progressBarImporter.Size = new System.Drawing.Size(224, 23);
-            this.progressBarImporter.TabIndex = 18;
-            // 
             // apiTab
             // 
-            this.apiTab.Controls.Add(this.Query_Json);
+            this.apiTab.Controls.Add(this.label5);
             this.apiTab.Controls.Add(this.label11);
             this.apiTab.Controls.Add(this.label10);
             this.apiTab.Controls.Add(this.label9);
@@ -374,13 +358,14 @@
             this.apiTab.TabIndex = 2;
             this.apiTab.Text = "API";
             this.apiTab.UseVisualStyleBackColor = true;
+            this.apiTab.Enter += new System.EventHandler(this.TabSwitched);
             // 
             // label11
             // 
             this.label11.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label11.Location = new System.Drawing.Point(429, 85);
+            this.label11.Location = new System.Drawing.Point(429, 81);
             this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(361, 37);
+            this.label11.Size = new System.Drawing.Size(361, 27);
             this.label11.TabIndex = 33;
             this.label11.Text = "To specify that a value of some attribute can have multiple values, separate each" +
     " option by a \'|\'. For example: \'authors = Alice | Bob\'.";
@@ -388,7 +373,7 @@
             // label10
             // 
             this.label10.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label10.Location = new System.Drawing.Point(429, 122);
+            this.label10.Location = new System.Drawing.Point(429, 142);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(361, 56);
             this.label10.TabIndex = 32;
@@ -473,6 +458,7 @@
             // 
             // ApiRunBtn
             // 
+            this.ApiRunBtn.Cursor = System.Windows.Forms.Cursors.Hand;
             this.ApiRunBtn.Location = new System.Drawing.Point(243, 136);
             this.ApiRunBtn.Name = "ApiRunBtn";
             this.ApiRunBtn.Size = new System.Drawing.Size(175, 25);
@@ -514,8 +500,8 @@
             this.dbStatsPanel.BackColor = System.Drawing.SystemColors.Control;
             this.dbStatsPanel.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.dbStatsPanel.ColumnCount = 2;
-            this.dbStatsPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 170F));
-            this.dbStatsPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 45F));
+            this.dbStatsPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 130F));
+            this.dbStatsPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 85F));
             this.dbStatsPanel.Location = new System.Drawing.Point(8, 26);
             this.dbStatsPanel.Name = "dbStatsPanel";
             this.dbStatsPanel.Padding = new System.Windows.Forms.Padding(5);
@@ -528,26 +514,15 @@
             this.dbStatsPanel.Size = new System.Drawing.Size(225, 75);
             this.dbStatsPanel.TabIndex = 0;
             // 
-            // Export_Json
+            // label5
             // 
-            this.Export_Json.Location = new System.Drawing.Point(8, 254);
-            this.Export_Json.Name = "Export_Json";
-            this.Export_Json.Size = new System.Drawing.Size(224, 28);
-            this.Export_Json.TabIndex = 27;
-            this.Export_Json.Text = "Export to JSON";
-            this.Export_Json.UseVisualStyleBackColor = true;
-            this.Export_Json.Click += new System.EventHandler(this.Export_Json_Click);
-            // 
-            // Query_Json
-            // 
-            this.Query_Json.Location = new System.Drawing.Point(11, 122);
-            this.Query_Json.Name = "Query_Json";
-            this.Query_Json.Size = new System.Drawing.Size(222, 23);
-            this.Query_Json.TabIndex = 34;
-            this.Query_Json.Text = "Download result to JSON";
-            this.Query_Json.TextImageRelation = System.Windows.Forms.TextImageRelation.TextAboveImage;
-            this.Query_Json.UseVisualStyleBackColor = true;
-            this.Query_Json.Click += new System.EventHandler(this.Query_Json_Click);
+            this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label5.Location = new System.Drawing.Point(429, 111);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(361, 30);
+            this.label5.TabIndex = 34;
+            this.label5.Text = "To specify the key of a value of some attribute, use \':\'. For example: \'externals" +
+    " = dblp:5225 | pubmed:2\'.";
             // 
             // Form1
             // 
@@ -582,8 +557,6 @@
         private System.Windows.Forms.Label dtdLabel;
         private System.Windows.Forms.Label outputLabel;
         private System.Windows.Forms.Label outputLocationFilter;
-        private System.Windows.Forms.ProgressBar progressBarFilter;
-        private System.Windows.Forms.Label progressLabelFilter;
         private System.Windows.Forms.CheckBox logCheckBoxFilter;
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage filterTab;
@@ -592,12 +565,8 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Button runBtnImporter;
         private System.Windows.Forms.CheckBox logCheckBoxImporter;
-        private System.Windows.Forms.Label progressLabelImporter;
-        private System.Windows.Forms.ProgressBar progressBarImporter;
-        private System.Windows.Forms.Label inputLocationImporter;
-        private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox logBoxImporter;
-        private System.Windows.Forms.Button DownLoad_Articles;
+        private System.Windows.Forms.Button downloadPdfBtn;
         private System.Windows.Forms.TableLayoutPanel dbStatsPanel;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label6;
@@ -613,7 +582,9 @@
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.Button Export_Json;
-        private System.Windows.Forms.Button Query_Json;
+        private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.TableLayoutPanel dbStatsPanelImporter;
+        private System.Windows.Forms.Label label5;
     }
 }
 

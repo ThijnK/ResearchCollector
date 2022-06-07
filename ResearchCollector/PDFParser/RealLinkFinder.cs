@@ -21,22 +21,18 @@ namespace ResearchCollector.PDFParser
 
         public string GetActualLink()
         {
-            try
-            {
-                HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(doi);
-                req.Method = "GET";
-                req.CookieContainer = new CookieContainer(); //some websites only work when cookies are allowed
-                req.AllowAutoRedirect = true;
-                //Possibly problems can be fixed by tweaking a lot with these settings
+            HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(doi);
+            req.Method = "GET";
+            req.CookieContainer = new CookieContainer(); //some websites only work when cookies are allowed
+            req.AllowAutoRedirect = true;
+            //Possibly problems can be fixed by tweaking a lot with these settings
 
-                HttpWebResponse resp = null;
+            HttpWebResponse resp = null;
               
-                bool linkFound = ExecuteWithTimeLimit(TimeSpan.FromSeconds(1), () => { resp = (HttpWebResponse)req.GetResponse(); });
-                if(linkFound)
-                    return resp.ResponseUri.AbsoluteUri;
-                throw new TimeLimitException("The real link was not found in the time limit");
-            }
-            catch (Exception ex) { throw new RedirectingException($"doi: {doi}", ex); }
+            bool linkFound = ExecuteWithTimeLimit(TimeSpan.FromSeconds(1), () => { resp = (HttpWebResponse)req.GetResponse(); });
+            if(linkFound)
+                return resp.ResponseUri.AbsoluteUri;
+            throw new TimeLimitException("The real link was not found in the time limit");
         }
 
         bool ExecuteWithTimeLimit(TimeSpan timeSpan, Action codeBlock)

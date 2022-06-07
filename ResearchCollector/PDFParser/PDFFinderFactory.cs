@@ -1,5 +1,6 @@
 ﻿using ResearchCollector.PDFParser.PDFFinders;
 using ResearchCollector.PDFParser.Exceptions;
+using System;
 
 namespace ResearchCollector.PDFParser
 {
@@ -23,7 +24,7 @@ namespace ResearchCollector.PDFParser
                 case "dl.acm.org":
                     return new ACMPDFFinder(); //nog doen! probleem met die ddos
                 default:
-                    throw new DoiProviderNotKnownExpection(identifier);
+                    throw new ArgumentException($"Unable to extract pdf from {identifier}");
             }
         }
 

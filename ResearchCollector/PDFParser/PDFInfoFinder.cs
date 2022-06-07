@@ -3,14 +3,27 @@ using ResearchCollector.PDFParser.PDFFinders;
 using ResearchCollector.PDFParser.Exceptions;
 using System.IO;
 using System.Net;
+using System.ComponentModel;
+using System.Threading;
+using ResearchCollector.Importer;
 
 namespace ResearchCollector.PDFParser
 {
     /// <summary>
     /// Tries to find and donwload the PDF and convert it to a text file
     /// </summary>
-    class PDFInfoFinder
+    class PDFInfoFinder : Worker
     {
+        Data data;
+        string savePath;
+
+        public PDFInfoFinder(SynchronizationContext context, Data data, string savePath) : base(context)
+        {
+            this.savePath = savePath;
+            this.data = data;
+            progressIncrement = 1.0 / (double)data.pubCount * 100;
+        }
+
         /// <summary>
         /// If the DOI is given, it starts with trying to find a link to the PDF
         /// With the link to the PDF, either as input or via finding it, it downloads it and converts it into text. It then delets the PDF file again. It saves the txt file with the given ID
@@ -18,41 +31,64 @@ namespace ResearchCollector.PDFParser
         /// <param name="link">either the doi link or the direct PDF link</param>
         /// <param name="id">the ID of the article</param>
         /// <param name="doiOrDirect">wether the link is a doi or a direct link</param>
-        public void FindInfo(string link, string id, bool doiOrDirect, string savePath)
+        public void FindInfo(string link, string id, bool doiOrDirect)
+        {
+            string pdflink;
+            if (doiOrDirect) //if the link is a doi link
+            {
+                //if the link does not start with doi.org (PubMed links do not), add it to the start
+                if (!link.StartsWith("https://doi.org"))
+                    link = "https://doi.org/" + link;
+
+                //If possible, get the real link to the document by redicrecting
+                string realLink = (new RealLinkFinder(link)).GetActualLink();
+
+                //If possible, get the link to the PDF
+                PDFFinder finder = (new PDFFinderFactory(realLink)).correctPDFFinder();
+                pdflink = finder.FindPDF(realLink);
+            }
+            else
+            {
+                pdflink = link;
+            }
+
+            DownloadPDF(pdflink, id, savePath);
+
+            string textOfPDF = GetTextFromPDF(id);
+
+            File.Delete(Path.Combine(savePath, $"{id}.pdf"));
+
+            //write the text from the PDF to a txt file
+            File.WriteAllText(Path.Combine(savePath, $"{id}.txt"), textOfPDF);
+        }
+
+        public override void Run(BackgroundWorker worker)
+        {
+            this.worker = worker;
+            foreach (Article article in data.articles.Values)
+                HandlePublication(article);
+            foreach (Inproceedings inpr in data.inproceedings.Values)
+                HandlePublication(inpr);
+        }
+
+        /// <summary>
+        /// Finds and downloads pdf for one publication
+        /// </summary>
+        private void HandlePublication(Publication publication)
         {
             try
             {
-                string pdflink;
-                if (doiOrDirect) //if the link is a doi link
-                {
-                    //if the link does not start with doi.org (PubMed links do not), add it to the start
-                    if (!link.StartsWith("https://doi.org"))
-                        link = "https://doi.org/" + link;
-
-                    //If possible, get the real link to the document by redicrecting
-                    string realLink = (new RealLinkFinder(link)).GetActualLink();
-
-                    //If possible, get the link to the PDF
-                    PDFFinder finder = (new PDFFinderFactory(realLink)).correctPDFFinder();
-                    pdflink = finder.FindPDF(realLink);
-                }
+                if (!string.IsNullOrEmpty(publication.pdfLink))
+                    FindInfo(publication.pdfLink, publication.id, false);
                 else
-                {
-                    pdflink = link;
-                }
-
-                DownloadPDF(pdflink, id, savePath);
-
-                string textOfPDF = GetTextFromPDF(id);
-
-                File.Delete(Path.Combine(savePath, $"{id}.pdf"));
-
-                //write the text from the PDF to a txt file
-                File.WriteAllText(Path.Combine(savePath, $"{id}.txt"), textOfPDF);
+                    FindInfo(publication.doi, publication.id, true);
+                UpdateProgress();
             }
-            catch (RedirectingException re) { throw new Exception("redirecting error", re); }
-            catch (DoiProviderNotKnownExpection de) { throw new Exception("doi error", de); }
-            catch (Exception e) { throw new Exception("unknown error", e); }
+            catch (Exception ex)
+            {
+                // Send error message to the UI
+                worker.ReportProgress(prevProgress, ex.Message);
+            }
         }
 
         /// <summary>
@@ -75,11 +111,10 @@ namespace ResearchCollector.PDFParser
         /// <returns></returns>
         string GetTextFromPDF(string id)
         {
-            IFilterTextReader.FilterReader fileReader = new IFilterTextReader.FilterReader($"{id}.pdf");
+            IFilterTextReader.FilterReader fileReader = new IFilterTextReader.FilterReader(Path.Combine(savePath, $"{id}.pdf"));
             string textOfPDF = fileReader.ReadToEnd();
             fileReader.Close();
             return textOfPDF;
         }
-
     }
 }
