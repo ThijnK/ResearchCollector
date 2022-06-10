@@ -28,6 +28,11 @@ namespace ResearchCollector.Importer
             this.data = data;
         }
 
+        /// <typeparam name="T">The type of things to search for</typeparam>
+        /// <param name="searchDomain">the domain of the type of thing to search for</param>
+        /// <param name="searchType">how to search</param>
+        /// <param name="arguments">query elements</param>
+        /// <returns>all items matching the query following the search rules of the searchtype</returns>
         public HashSet<T> Search<T>(SearchDomain searchDomain, SearchType searchType, params (string key, string query)[] arguments)
         {
             bool howToSearch = searchType == SearchType.Exact; //mogelijk beter om searchtype een klasse te maken met een ingebouwde bool -> bool -> bool functie en start bool waarde
@@ -46,7 +51,6 @@ namespace ResearchCollector.Importer
                             case "id":
                                 return article.id == arg.Item2;
                             case "externals":
-                                //string[] realIds = article.externalIds.Values.ToArray<string>();
                                 string[] realIds = new string[article.externalIds.Count]; int i = 0;
                                 foreach(var id in article.externalIds) { realIds[i++] = $"{id.Key}:{id.Value}"; }
                                 return CollectionQuery(realIds, arg.Item2.Split('|'), howToSearch, howToSearch);
@@ -100,7 +104,6 @@ namespace ResearchCollector.Importer
                 case SearchDomain.Authors:
                     Func<Author, (string, string), bool> satisfiesAuthor = (author, arg) =>
                     {
-                        //toch raar om te zoeken naar author.person?
                         switch (arg.Item1)
                         {
                             case "affiliation":
@@ -187,8 +190,16 @@ namespace ResearchCollector.Importer
             }
         }       
         
+        /// <summary>
+        /// Search through a query element which is a collection of questions
+        /// <param name="realCollection">the real collection of the current element</param>
+        /// <param name="queryCollection">the collection to compare the real collection with</param>
+        /// <param name="howToCompare">based on the searchtype</param>
+        /// <param name="start">the way to start searching given the current searchtype</param>
+        /// <returns></returns>
         bool CollectionQuery(string[] realCollection, string[] queryCollection, bool howToCompare, bool start)
         {
+            //perhaps instead of howToSearch and start, make from SearchType an abstract class and give each implementation a bool function and bool start value
             if (realCollection.Length < 1)
                 return false;
             foreach (string real in realCollection)

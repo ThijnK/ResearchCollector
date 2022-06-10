@@ -72,7 +72,9 @@ namespace ResearchCollector.Importer
             ReportAction($"Item parsed: '{pub.title}'");
             UpdateProgress();
         }
-
+        /// <summary>
+        /// go through the data of the current publication and add its information to the data
+        /// </summary>
         Publication GoThroughPublication(string customId)
         {
             Publication currentPublication;           
@@ -86,22 +88,14 @@ namespace ResearchCollector.Importer
                 if (!data.journals.TryGetValue(jsonJournal.title, out Journal currentJournal))
                 {
                     currentJournal = new Journal(jsonJournal.issue, jsonJournal.volume, jsonJournal.series, jsonJournal.title, jsonJournal.publisher);
-                    //try
-                    //{
-                        data.journals.Add(currentJournal.title, currentJournal);
-                    //}
-                    //catch(Exception e) { }
+                    data.journals.Add(currentJournal.title, currentJournal);
                 }
 
                 if (!data.articles.TryGetValue(customId, out Article currentArticle))
                 {
                     //abstract and topics are left empty because those do not get retrieved currently
                     currentArticle = new Article(currentJournal, customId, pub.title, null, pub.year, pub.doi, pub.pdfLink, null, pub.pages);
-                    //try
-                    //{
-                        data.articles.Add(customId, currentArticle);
-                    //}
-                    //catch(Exception e) { }
+                    data.articles.Add(customId, currentArticle);
                 }
 
                 currentPublication = currentArticle;
@@ -114,22 +108,14 @@ namespace ResearchCollector.Importer
                 if (!data.proceedings.TryGetValue(jsonVolume.title, out Proceedings currentProceedings))
                 {
                     currentProceedings = new Proceedings(jsonVolume.title, jsonVolume.publisher);
-                    //try
-                    //{
-                        data.proceedings.Add(currentProceedings.title, currentProceedings);
-                    //}
-                    //catch(Exception e) { }
+                    data.proceedings.Add(currentProceedings.title, currentProceedings);
                 }
 
                 if (!data.inproceedings.TryGetValue(customId, out Inproceedings currentInproceedings))
                 {
                     //abstract and topics are left empty because those do not get retrieved currently
                     currentInproceedings = new Inproceedings(currentProceedings, customId, pub.title, null, pub.year, pub.doi, pub.pdfLink, null, pub.pages);
-                    //try
-                    //{
-                        data.inproceedings.Add(customId, currentInproceedings);
-                    //}
-                    //catch (Exception e) { }
+                    data.inproceedings.Add(customId, currentInproceedings);
                 }
 
                 currentPublication = currentInproceedings;
@@ -146,47 +132,34 @@ namespace ResearchCollector.Importer
 
             return currentPublication;
         }
-
+        /// <summary>
+        /// go through all authors of the current publication and add them to the data
+        /// </summary>
         void GoThroughAuthors(Publication currentPublication)
         {
             foreach (JsonAuthor author in pub.has)
             {
                 if (!data.organizations.TryGetValue(author.affiliatedTo, out Organization currentAffiliation))
                 {
+                    //still needs geolocalization
+
                     //if affilition == "", skip it possibly TODO
                     currentAffiliation = new Organization(author.affiliatedTo);
-                    //try
-                    //{
-                        data.organizations.Add(author.affiliatedTo, currentAffiliation);
-                    //}
-                    //catch(Exception e) { }
-
-                    //still needs geolocalization
+                    data.organizations.Add(author.affiliatedTo, currentAffiliation);                    
                 }
 
                 if (!data.persons.TryGetValue(author.name, out Person currentPerson))
                 {
-                    currentPerson = new Person(author.orcid, author.name);
-                    currentPerson.fname = author.fname; currentPerson.lname = author.lname;
-                    //try
-                    //{
-                        data.persons.Add(author.name, currentPerson);
-                    //}
-                    //catch(Exception e) { }
+                    currentPerson = new Person(author.orcid, author.name) { fname = author.fname, lname = author.lname };
+                    data.persons.Add(author.name, currentPerson);
                 }
 
                 if (!data.authors.TryGetValue(author.name, out Author currentAuthor))
                 {
-                    currentAuthor = new Author(currentPerson, currentAffiliation, author.email, author.name);
-                    currentAuthor.fname = author.fname; currentAuthor.lname = author.lname;
+                    currentAuthor = new Author(currentPerson, currentAffiliation, author.email, author.name) { fname = author.fname, lname = author.lname};
                     //possibly first check if it was already added TODO
                     currentAuthor.publications.Add(currentPublication);
-
-                    //try
-                    //{
-                        data.authors.Add(author.name, currentAuthor);
-                    //}
-                    //catch(Exception e) { }
+                    data.authors.Add(author.name, currentAuthor);
                 }
 
                 currentPublication.authors.Add(currentAuthor);

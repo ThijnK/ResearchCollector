@@ -56,6 +56,7 @@ namespace ResearchCollector.PDFParser
 
             string textOfPDF = GetTextFromPDF(id);
 
+            //now that the pdf is not needed anymore, delete it
             File.Delete(Path.Combine(savePath, $"{id}.pdf"));
 
             //write the text from the PDF to a txt file
@@ -108,7 +109,6 @@ namespace ResearchCollector.PDFParser
         /// Get the text corresponding with the PDF file
         /// </summary>
         /// <param name="id">The ID from the article</param>
-        /// <returns></returns>
         string GetTextFromPDF(string id)
         {
             IFilterTextReader.FilterReader fileReader = new IFilterTextReader.FilterReader(Path.Combine(savePath, $"{id}.pdf"));

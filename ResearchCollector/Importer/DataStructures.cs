@@ -47,6 +47,9 @@ namespace ResearchCollector.Importer
             pubCount = 0;
         }
 
+        /// <summary>
+        /// If data has been added to the stringbuilder, remove the trailing comma
+        /// </summary>
         void LengthCheck(StringBuilder sb, int length)
         {
             if (length > 0)

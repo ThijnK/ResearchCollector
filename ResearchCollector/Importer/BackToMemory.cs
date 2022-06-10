@@ -10,6 +10,9 @@ namespace ResearchCollector.Importer
 {
     class BackToMemory
     {
+        /// <summary>
+        /// Parse the JSON file back into memory
+        /// </summary>
         public void JsonToMemory(StreamReader sr, Data data)
         {           
             JsonMemArticle[] jarticles = null; JsonMemJournal[] jjournals = null; JsonMemInproceedings[] jinproceedings = null; JsonMemProceedings[] jproceedings = null;
@@ -53,7 +56,9 @@ namespace ResearchCollector.Importer
                         data.pubCount++;
                     }
         }
-
+        /// <summary>
+        /// Parse the JSON file to the JsonMem types
+        /// </summary>
         void ParseJsonContent(StreamReader sr, ref JsonMemArticle[] jarticles, ref JsonMemJournal[] jjournals, ref JsonMemInproceedings[] jinproceedings, ref JsonMemProceedings[] jproceedings, ref JsonMemAuthor[] jauthors, ref JsonMemOrganization[] jorganizations, ref JsonMemPerson[] jpersons)
         {
             StringBuilder sb;
@@ -95,7 +100,9 @@ namespace ResearchCollector.Importer
                 }
             }
         }
-
+        /// <summary>
+        /// Remove the comma and place the ] again
+        /// </summary>
         void RemoveComma(StringBuilder sb, string current)
         {            
             sb.Length -= 2;

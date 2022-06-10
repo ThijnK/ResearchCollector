@@ -19,6 +19,10 @@ namespace ResearchCollector.PDFParser
             this.doi = doi;
         }
 
+        /// <summary>
+        /// redirect until the real link is found (goes wrong often)
+        /// </summary>
+        /// <returns></returns>
         public string GetActualLink()
         {
             HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(doi);
