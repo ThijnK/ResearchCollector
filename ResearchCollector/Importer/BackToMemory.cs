@@ -14,7 +14,9 @@ namespace ResearchCollector.Importer
         {           
             JsonMemArticle[] jarticles = null; JsonMemJournal[] jjournals = null; JsonMemInproceedings[] jinproceedings = null; JsonMemProceedings[] jproceedings = null;
             JsonMemAuthor[] jauthors = null; JsonMemOrganization[] jorganizations = null; JsonMemPerson[] jpersons = null;
-            ParseJsonContent(sr, jarticles, jjournals, jinproceedings, jproceedings, jauthors, jorganizations, jpersons);
+            ParseJsonContent(sr, ref jarticles, ref jjournals, ref jinproceedings, ref jproceedings, ref jauthors, ref jorganizations, ref jpersons);
+
+            data.Clear();
 
             if (jjournals != null)
                 foreach (JsonMemJournal jjournal in jjournals)
@@ -38,15 +40,21 @@ namespace ResearchCollector.Importer
                         data.authors.Add(jauthor.name, new Author(data.persons[jauthor.personKey], data.organizations[jauthor.affiliatedToKey], jauthor.email, jauthor.name) { fname = jauthor.fname, lname = jauthor.lname });
             if (jarticles != null)
                 foreach (JsonMemArticle jarticle in jarticles)
-                    if(!data.articles.ContainsKey(jarticle.id))
+                    if (!data.articles.ContainsKey(jarticle.id))
+                    {
                         data.articles.Add(jarticle.id, new Article(data.journals[jarticle.journalKey], jarticle.id, jarticle.title, jarticle.abstr, jarticle.year, jarticle.doi, jarticle.pdfLink, jarticle.topics, jarticle.pages));
+                        data.pubCount++;
+                    }
             if (jinproceedings != null)
                 foreach (JsonMemInproceedings jinproceeding in jinproceedings)
-                    if(!data.inproceedings.ContainsKey(jinproceeding.id))
+                    if (!data.inproceedings.ContainsKey(jinproceeding.id))
+                    {
                         data.inproceedings.Add(jinproceeding.id, new Inproceedings(data.proceedings[jinproceeding.proceedingsKey], jinproceeding.id, jinproceeding.title, jinproceeding.abstr, jinproceeding.year, jinproceeding.doi, jinproceeding.pdfLink, jinproceeding.topics, jinproceeding.pages));
+                        data.pubCount++;
+                    }
         }
 
-        void ParseJsonContent(StreamReader sr, JsonMemArticle[] jarticles, JsonMemJournal[] jjournals, JsonMemInproceedings[] jinproceedings, JsonMemProceedings[] jproceedings, JsonMemAuthor[] jauthors, JsonMemOrganization[] jorganizations, JsonMemPerson[] jpersons)
+        void ParseJsonContent(StreamReader sr, ref JsonMemArticle[] jarticles, ref JsonMemJournal[] jjournals, ref JsonMemInproceedings[] jinproceedings, ref JsonMemProceedings[] jproceedings, ref JsonMemAuthor[] jauthors, ref JsonMemOrganization[] jorganizations, ref JsonMemPerson[] jpersons)
         {
             StringBuilder sb;
             sr.ReadLine();

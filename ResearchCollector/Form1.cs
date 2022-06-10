@@ -238,12 +238,9 @@ namespace ResearchCollector
 
         private void MemoryJson_Memory_Click(object sender, EventArgs e)
         {
-            //JsonMemArticle art = JsonSerializer.Deserialize<JsonMemArticle>("{\"externalIds\":[{ \"origin\":\"pubmed\",\"id\":\"1\"}],\"journalKey\":\"Biochemical medicine\",\"topics\":null,\"id\":\"8d91e5b976ea85c2af0237525d3eedec0f397781f384c7dddd7eba0d684f3b5b41975\",\"title\":\"Formate assay in body fluids: application in methanol poisoning.\",\"abstr\":null,\"year\":1975,\"doi\":\"10.1016/0006-2944(75)90147-7\",\"pdfLink\":\"\",\"authorKeys\":[\"A B Makar\",\"K E McMartin\",\"M Palese\",\"T R Tephly\"],\"pages\":\"117-26\"}");
-
             string filepath = GetFileLocation();
 
             BackToMemory backToMemory = new BackToMemory();
-            //data = new Data();
             try
             {
                 using (StreamReader sr = new StreamReader(filepath))
@@ -252,9 +249,8 @@ namespace ResearchCollector
                 }
             }
             catch (Exception exp) { }
-            //bestand naar json
-            
 
+            UpdateDbStatistics();
         }
 
         private void FilterOutputLocation_Click(object sender, EventArgs e)

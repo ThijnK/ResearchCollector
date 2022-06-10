@@ -35,6 +35,18 @@ namespace ResearchCollector.Importer
             organizations = new Dictionary<string, Organization>();
         }
 
+        public void Clear()
+        {
+            articles.Clear();
+            inproceedings.Clear();
+            authors.Clear();
+            persons.Clear();
+            journals.Clear();
+            proceedings.Clear();
+            organizations.Clear();
+            pubCount = 0;
+        }
+
         void LengthCheck(StringBuilder sb, int length)
         {
             if (length > 0)
