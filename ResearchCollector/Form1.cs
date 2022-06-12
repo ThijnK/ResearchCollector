@@ -593,7 +593,7 @@ namespace ResearchCollector
             Log($"Exporting results to JSON...");
             try
             {
-                StringBuilder sb = new StringBuilder("{\n");
+                StringBuilder sb = new StringBuilder($"{{\n\t\"query\": \"{apiQuery.Text}\",\n\t");
 
                 switch (comboBoxApi.SelectedIndex)
                 {
@@ -601,7 +601,7 @@ namespace ResearchCollector
                         HashSet<Author> encounteredAuthorsA = new HashSet<Author>();
                         data.ArticlesToJson(sb, results as HashSet<Article>, encounteredAuthorsA);
 
-                        sb.Append(",\n");
+                        sb.Append(",\n\t");
 
                         data.AuthorsToJson(sb, encounteredAuthorsA);
                         break;
@@ -609,7 +609,7 @@ namespace ResearchCollector
                         HashSet<Author> encounteredAuthorsI = new HashSet<Author>();
                         data.InproceedingsToJson(sb, results as HashSet<Inproceedings>, encounteredAuthorsI);
 
-                        sb.Append(",\n");
+                        sb.Append(",\n\t");
 
                         data.AuthorsToJson(sb, encounteredAuthorsI);
                         break;
