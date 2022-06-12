@@ -139,7 +139,7 @@ namespace ResearchCollector
                 {
                     // Import data to this form for use by the API
                     data = (worker as Importer.Importer).data;
-                    Log($"{data.pubCount} publications parsed. The collected data kan be exported on the left or queried using the API on the API tab");
+                    Log($"{data.pubCount} publications parsed. The collected data can be exported on the left or queried using the API");
                     UpdateDbStatistics();
                 }
                 else // Pdf finder finished
@@ -234,23 +234,6 @@ namespace ResearchCollector
         {
             filterInputPath = GetFileLocation();
             inputLocationFilter.Text = filterInputPath;
-        }
-
-        private void MemoryJson_Memory_Click(object sender, EventArgs e)
-        {
-            string filepath = GetFileLocation();
-
-            BackToMemory backToMemory = new BackToMemory();
-            try
-            {
-                using (StreamReader sr = new StreamReader(filepath))
-                {
-                    backToMemory.JsonToMemory(sr, data);
-                }
-            }
-            catch (Exception exp) { }
-
-            UpdateDbStatistics();
         }
 
         private void FilterOutputLocation_Click(object sender, EventArgs e)
@@ -376,6 +359,25 @@ namespace ResearchCollector
             pbImporter.Value = 0;
             Log($"Parsing native JSON file...");
             bgWorker.RunWorkerAsync();
+        }
+
+        private void MemoryJson_Memory_Click(object sender, EventArgs e)
+        {
+            string filepath = GetFileLocation();
+
+            Log("Importing database from JSON...");
+            BackToMemory backToMemory = new BackToMemory();
+            try
+            {
+                using (StreamReader sr = new StreamReader(filepath))
+                {
+                    backToMemory.JsonToMemory(sr, data);
+                }
+            }
+            catch (Exception exp) { }
+            Log("Importing finished!");
+
+            UpdateDbStatistics();
         }
 
         private void DownloadPdf_Click(object sender, EventArgs e)
