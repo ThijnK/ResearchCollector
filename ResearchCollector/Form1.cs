@@ -255,8 +255,12 @@ namespace ResearchCollector
 
         private void FilterOutputLocation_Click(object sender, EventArgs e)
         {
-            filterOutputPath = GetFolderLocation(out _);
-            outputLocationFilter.Text = filterOutputPath;
+            string path = GetFolderLocation(out _);
+            if (path != "")
+            {
+                filterOutputPath = path;
+                outputLocationFilter.Text = filterOutputPath;
+            }
         }
 
         private void FilterComboBox_IndexChanged(object sender, EventArgs e)
