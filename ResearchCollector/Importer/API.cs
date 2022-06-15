@@ -83,7 +83,8 @@ namespace ResearchCollector.Importer
                             case "id":
                                 return inpr.id == arg.Item2;
                             case "externals":
-                                string[] realIds = inpr.externalIds.Values.ToArray<string>();
+                                string[] realIds = new string[inpr.externalIds.Count]; int i = 0;
+                                foreach (var id in inpr.externalIds) { realIds[i++] = $"{id.Key}:{id.Value}"; }
                                 return CollectionQuery(realIds, arg.Item2.Split('|'), howToSearch, howToSearch);
                             case "year":
                                 return inpr.year.ToString() == arg.Item2;
