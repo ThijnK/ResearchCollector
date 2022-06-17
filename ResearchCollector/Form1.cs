@@ -73,9 +73,6 @@ namespace ResearchCollector
 
             this.context = WindowsFormsSynchronizationContext.Current;
 
-
-
-
             SetupDbStatistics();
             data = new Data();
 
