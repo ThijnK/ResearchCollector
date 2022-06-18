@@ -50,6 +50,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="HtmlAgilityPack, Version=1.11.43.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
+      <HintPath>..\packages\HtmlAgilityPack.1.11.43\lib\Net45\HtmlAgilityPack.dll</HintPath>
+    </Reference>
     <Reference Include="IFilterTextReader, Version=1.7.7.0, Culture=neutral, PublicKeyToken=d9137dea244ecc2a, processorArchitecture=MSIL">
       <HintPath>..\packages\IFilterTextReader.1.7.7\lib\netstandard2.0\IFilterTextReader.dll</HintPath>
     </Reference>
@@ -124,6 +127,8 @@
     <Compile Include="PDFParser\PDFFinderFactory.cs" />
     <Compile Include="PDFParser\PDFFinders\ACMPDFFinder.cs" />
     <Compile Include="PDFParser\PDFFinders\IEEEPDFFinder.cs" />
+    <Compile Include="PDFParser\PDFFinders\JCIPDFFinder.cs" />
+    <Compile Include="PDFParser\PDFFinders\MicrobiologyResearchPDFFinder.cs" />
     <Compile Include="PDFParser\PDFFinders\PDFFinder.cs" />
     <Compile Include="PDFParser\PDFFinders\SpringerPDFFinder.cs" />
     <Compile Include="PDFParser\PDFInfoFinder.cs" />

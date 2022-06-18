@@ -16,13 +16,17 @@ namespace ResearchCollector.PDFParser
             switch (identifier)
             {
                 case "www.computer.org":
-                    return new IEEEPDFFinder(); //heeft account nodig
+                    return new IEEEPDFFinder(); 
                 case "link.springer.com":
-                    return new SpringerPDFFinder(); //blijft redirecten
+                    return new SpringerPDFFinder();
                 case "www.sciencedirect.com":
-                    return null; //nog doen! Moet op uni netwerk
+                    return null; 
                 case "dl.acm.org":
-                    return new ACMPDFFinder(); //nog doen! probleem met die ddos
+                    return new ACMPDFFinder(); 
+                case "www.jci.org":
+                    return new JCIPDFFinder();
+                case "www.microbiologyresearch.org":
+                    return new MicrobiologyResearchPDFFinder();
                 default:
                     throw new ArgumentException($"Unable to extract pdf from {identifier}");
             }
