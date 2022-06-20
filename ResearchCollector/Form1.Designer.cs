@@ -68,6 +68,7 @@
             this.label6 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.dbStatsPanel = new System.Windows.Forms.TableLayoutPanel();
+            this.outputLocationApi = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.filterTab.SuspendLayout();
             this.importerTab.SuspendLayout();
@@ -349,6 +350,7 @@
             // 
             // apiTab
             // 
+            this.apiTab.Controls.Add(this.outputLocationApi);
             this.apiTab.Controls.Add(this.label5);
             this.apiTab.Controls.Add(this.label11);
             this.apiTab.Controls.Add(this.label10);
@@ -536,6 +538,18 @@
             this.dbStatsPanel.Size = new System.Drawing.Size(225, 75);
             this.dbStatsPanel.TabIndex = 0;
             // 
+            // outputLocationApi
+            // 
+            this.outputLocationApi.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.outputLocationApi.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.outputLocationApi.Location = new System.Drawing.Point(243, 164);
+            this.outputLocationApi.Name = "outputLocationApi";
+            this.outputLocationApi.Size = new System.Drawing.Size(175, 20);
+            this.outputLocationApi.TabIndex = 35;
+            this.outputLocationApi.Text = "No folder selected";
+            this.outputLocationApi.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.outputLocationApi.Click += new System.EventHandler(this.OutputLocationApi_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -598,6 +612,7 @@
         private System.Windows.Forms.TableLayoutPanel dbStatsPanelImporter;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Button MemoryJson_Memory;
+        private System.Windows.Forms.Label outputLocationApi;
     }
 }
 

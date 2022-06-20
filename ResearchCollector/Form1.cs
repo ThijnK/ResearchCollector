@@ -37,6 +37,7 @@ namespace ResearchCollector
         // API db stats panel labels (some for API tab, some for Importer tab
         Label articleCount, inproceedingCount, authorCount, journalCount, proceedingCount, organizationCount;
         Label articleCountI, inproceedingCountI, authorCountI, journalCountI, proceedingCountI, organizationCountI;
+        private string apiOutputPath;
 
         // Progress bars
         CustomProgressBar pbImporter, pbFilter, pbPdf;
@@ -229,14 +230,18 @@ namespace ResearchCollector
         #region Filter UI methods
         private void FilterInputLocation_Click(object sender, EventArgs e)
         {
-            filterInputPath = GetFileLocation();
-            inputLocationFilter.Text = filterInputPath;
+            string path = GetFileLocation();
+            if (path != "")
+            {
+                filterInputPath = path;
+                inputLocationFilter.Text = filterInputPath;
+            }
         }
 
         private void FilterOutputLocation_Click(object sender, EventArgs e)
         {
-            string path = GetFolderLocation(out _);
-            if (path != "")
+            string path = GetFolderLocation(out bool success);
+            if (success)
             {
                 filterOutputPath = path;
                 outputLocationFilter.Text = filterOutputPath;
@@ -508,6 +513,16 @@ namespace ResearchCollector
             dbStatsPanelImporter.Controls.Add(organizationCountI, 1, 5);
         }
 
+        private void OutputLocationApi_Click(object sender, EventArgs e)
+        {
+            string path = GetFolderLocation(out bool success);
+            if (success)
+            {
+                apiOutputPath = path;
+                outputLocationApi.Text = apiOutputPath;
+            }
+        }
+
         private void ApiRunBtn_Click(object sender, EventArgs e)
         {
             currentLogBox = logBoxApi;
@@ -516,8 +531,9 @@ namespace ResearchCollector
                 Error("Database does not contain any publications");
                 return;
             }
-            string outputPath = GetFolderLocation(out bool pathSelected);
-            if (!pathSelected)
+            if (string.IsNullOrEmpty(apiOutputPath) || !Directory.Exists(apiOutputPath))
+                OutputLocationApi_Click(this, new EventArgs());
+            if (string.IsNullOrEmpty(apiOutputPath) || !Directory.Exists(apiOutputPath))
             {
                 Error("No output path selected");
                 return;
@@ -556,25 +572,25 @@ namespace ResearchCollector
                 switch (comboBoxApi.SelectedIndex)
                 {
                     case 0:
-                        HandleQueryResult(api.Search<Article>(SearchDomain.Articles, st, args), outputPath);
+                        HandleQueryResult(api.Search<Article>(SearchDomain.Articles, st, args), apiOutputPath);
                         break;
                     case 1:
-                        HandleQueryResult(api.Search<Inproceedings>(SearchDomain.Inproceedings, st, args), outputPath);
+                        HandleQueryResult(api.Search<Inproceedings>(SearchDomain.Inproceedings, st, args), apiOutputPath);
                         break;
                     case 2:
-                        HandleQueryResult(api.Search<Author>(SearchDomain.Authors, st, args), outputPath);
+                        HandleQueryResult(api.Search<Author>(SearchDomain.Authors, st, args), apiOutputPath);
                         break;
                     case 3:
-                        HandleQueryResult(api.Search<Person>(SearchDomain.Persons, st, args), outputPath);
+                        HandleQueryResult(api.Search<Person>(SearchDomain.Persons, st, args), apiOutputPath);
                         break;
                     case 4:
-                        HandleQueryResult(api.Search<Journal>(SearchDomain.Journals, st, args), outputPath);
+                        HandleQueryResult(api.Search<Journal>(SearchDomain.Journals, st, args), apiOutputPath);
                         break;
                     case 5:
-                        HandleQueryResult(api.Search<Proceedings>(SearchDomain.Proceedings, st, args), outputPath);
+                        HandleQueryResult(api.Search<Proceedings>(SearchDomain.Proceedings, st, args), apiOutputPath);
                         break;
                     case 6:
-                        HandleQueryResult(api.Search<Organization>(SearchDomain.Organizations, st, args), outputPath);
+                        HandleQueryResult(api.Search<Organization>(SearchDomain.Organizations, st, args), apiOutputPath);
                         break;
                 }
             }
