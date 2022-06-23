@@ -1,6 +1,5 @@
 ﻿using System;
 using ResearchCollector.PDFParser.PDFFinders;
-using ResearchCollector.PDFParser.Exceptions;
 using System.IO;
 using System.Net;
 using System.ComponentModel;

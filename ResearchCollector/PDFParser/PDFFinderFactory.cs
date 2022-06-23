@@ -1,5 +1,4 @@
 ﻿using ResearchCollector.PDFParser.PDFFinders;
-using ResearchCollector.PDFParser.Exceptions;
 using System;
 
 namespace ResearchCollector.PDFParser
@@ -31,7 +30,5 @@ namespace ResearchCollector.PDFParser
                     throw new ArgumentException($"Unable to extract pdf from {identifier}");
             }
         }
-
-
     }
 }

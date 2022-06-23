@@ -121,9 +121,6 @@
     <Compile Include="Importer\Importer.cs" />
     <Compile Include="Importer\JsonMemoryTypes.cs" />
     <Compile Include="JsonTypes.cs" />
-    <Compile Include="PDFParser\Exceptions\DoiProviderNotKnownException.cs" />
-    <Compile Include="PDFParser\Exceptions\RedirectingException.cs" />
-    <Compile Include="PDFParser\Exceptions\TimeLimitException.cs" />
     <Compile Include="PDFParser\PDFFinderFactory.cs" />
     <Compile Include="PDFParser\PDFFinders\ACMPDFFinder.cs" />
     <Compile Include="PDFParser\PDFFinders\IEEEPDFFinder.cs" />

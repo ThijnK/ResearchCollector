@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
-using ResearchCollector.PDFParser.Exceptions;
 
 namespace ResearchCollector.PDFParser
 {
@@ -36,7 +32,7 @@ namespace ResearchCollector.PDFParser
             bool linkFound = ExecuteWithTimeLimit(TimeSpan.FromSeconds(1), () => { resp = (HttpWebResponse)req.GetResponse(); });
             if(linkFound)
                 return resp.ResponseUri.AbsoluteUri;
-            throw new TimeLimitException("The real link was not found in the time limit");
+            throw new Exception("The real link was not found in the time limit");
         }
 
         bool ExecuteWithTimeLimit(TimeSpan timeSpan, Action codeBlock)

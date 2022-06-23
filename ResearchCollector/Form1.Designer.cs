@@ -53,6 +53,7 @@
             this.runBtnImporter = new System.Windows.Forms.Button();
             this.logCheckBoxImporter = new System.Windows.Forms.CheckBox();
             this.apiTab = new System.Windows.Forms.TabPage();
+            this.outputLocationApi = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.label11 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
@@ -68,7 +69,7 @@
             this.label6 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.dbStatsPanel = new System.Windows.Forms.TableLayoutPanel();
-            this.outputLocationApi = new System.Windows.Forms.Label();
+            this.pubmedDownloadBtn = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.filterTab.SuspendLayout();
             this.importerTab.SuspendLayout();
@@ -136,7 +137,6 @@
             this.inputLabel.Size = new System.Drawing.Size(54, 13);
             this.inputLabel.TabIndex = 7;
             this.inputLabel.Text = "Input file*:";
-            this.inputLabel.Visible = false;
             // 
             // inputLocationFilter
             // 
@@ -148,7 +148,6 @@
             this.inputLocationFilter.TabIndex = 0;
             this.inputLocationFilter.Text = "No file selected";
             this.inputLocationFilter.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.inputLocationFilter.Visible = false;
             this.inputLocationFilter.Click += new System.EventHandler(this.FilterInputLocation_Click);
             // 
             // dtdLabel
@@ -160,7 +159,6 @@
             this.dtdLabel.TabIndex = 13;
             this.dtdLabel.Text = "* DTD file is assumed to be located in the same directory as the input file, as w" +
     "ell as to have the same name as the input file.";
-            this.dtdLabel.Visible = false;
             // 
             // outputLabel
             // 
@@ -207,6 +205,7 @@
             // 
             // filterTab
             // 
+            this.filterTab.Controls.Add(this.pubmedDownloadBtn);
             this.filterTab.Controls.Add(this.label1);
             this.filterTab.Controls.Add(this.runBtnFilter);
             this.filterTab.Controls.Add(this.typeComboBoxFilter);
@@ -374,6 +373,18 @@
             this.apiTab.UseVisualStyleBackColor = true;
             this.apiTab.Enter += new System.EventHandler(this.TabSwitched);
             // 
+            // outputLocationApi
+            // 
+            this.outputLocationApi.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.outputLocationApi.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.outputLocationApi.Location = new System.Drawing.Point(243, 164);
+            this.outputLocationApi.Name = "outputLocationApi";
+            this.outputLocationApi.Size = new System.Drawing.Size(175, 20);
+            this.outputLocationApi.TabIndex = 35;
+            this.outputLocationApi.Text = "No folder selected";
+            this.outputLocationApi.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.outputLocationApi.Click += new System.EventHandler(this.OutputLocationApi_Click);
+            // 
             // label5
             // 
             this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -538,17 +549,16 @@
             this.dbStatsPanel.Size = new System.Drawing.Size(225, 75);
             this.dbStatsPanel.TabIndex = 0;
             // 
-            // outputLocationApi
+            // pubmedDownloadBtn
             // 
-            this.outputLocationApi.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.outputLocationApi.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.outputLocationApi.Location = new System.Drawing.Point(243, 164);
-            this.outputLocationApi.Name = "outputLocationApi";
-            this.outputLocationApi.Size = new System.Drawing.Size(175, 20);
-            this.outputLocationApi.TabIndex = 35;
-            this.outputLocationApi.Text = "No folder selected";
-            this.outputLocationApi.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.outputLocationApi.Click += new System.EventHandler(this.OutputLocationApi_Click);
+            this.pubmedDownloadBtn.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.pubmedDownloadBtn.Location = new System.Drawing.Point(8, 381);
+            this.pubmedDownloadBtn.Name = "pubmedDownloadBtn";
+            this.pubmedDownloadBtn.Size = new System.Drawing.Size(224, 28);
+            this.pubmedDownloadBtn.TabIndex = 18;
+            this.pubmedDownloadBtn.Text = "Download pubmed files";
+            this.pubmedDownloadBtn.UseVisualStyleBackColor = true;
+            this.pubmedDownloadBtn.Click += new System.EventHandler(this.pubmedDownloadBtn_Click);
             // 
             // Form1
             // 
@@ -613,6 +623,7 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Button MemoryJson_Memory;
         private System.Windows.Forms.Label outputLocationApi;
+        private System.Windows.Forms.Button pubmedDownloadBtn;
     }
 }
 

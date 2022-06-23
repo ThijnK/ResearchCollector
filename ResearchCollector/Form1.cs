@@ -40,7 +40,7 @@ namespace ResearchCollector
         private string apiOutputPath;
 
         // Progress bars
-        CustomProgressBar pbImporter, pbFilter, pbPdf;
+        CustomProgressBar pbImporter, pbFilter, pbPdf, pbPubmed;
 
         /// <summary>
         /// Context used to access UI thread from BackgroundWorker
@@ -61,6 +61,10 @@ namespace ResearchCollector
             pbFilter.Location = new Point(8, 110);
             filterTab.Controls.Add(pbFilter);
             currentProgressBar = pbFilter;
+            pbPubmed = new CustomProgressBar();
+            pbPubmed.Size = new Size(224, 23);
+            pbPubmed.Location = new Point(8, 412);
+            filterTab.Controls.Add(pbPubmed);
             pbPdf = new CustomProgressBar();
             pbPdf.Size = new Size(224, 23);
             pbPdf.Location = new Point(8, 175);
@@ -140,6 +144,10 @@ namespace ResearchCollector
                     Log($"{data.pubCount} publications parsed. The collected data can be exported on the left or queried using the API");
                     UpdateDbStatistics();
                 }
+                else if (currentProgressBar.Equals(pbPubmed)) // Pubmed downloader
+                {
+                    Log($"Downloading complete, files saved to {filterOutputPath}");
+                }
                 else // Pdf finder finished
                 {
                     Log("Finished downloading pdf's and extracting text");
@@ -188,6 +196,9 @@ namespace ResearchCollector
             runBtnImporter.Enabled = !runBtnImporter.Enabled;
             ApiRunBtn.Enabled = !ApiRunBtn.Enabled;
             downloadPdfBtn.Enabled = !downloadPdfBtn.Enabled;
+            Export_Json.Enabled = !Export_Json.Enabled;
+            MemoryJson_Memory.Enabled = !MemoryJson_Memory.Enabled;
+            pubmedDownloadBtn.Enabled = !pubmedDownloadBtn.Enabled;
         }
 
         // Called when user switches to a new tab
@@ -223,6 +234,7 @@ namespace ResearchCollector
         private void Error(string msg)
         {
             Log($"Encountered error: '{msg}'");
+            // Below can be uncommented to also show a popup, but can hinder usage of UI
             //MessageBox.Show(msg, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
         #endregion
@@ -251,41 +263,46 @@ namespace ResearchCollector
         private void FilterComboBox_IndexChanged(object sender, EventArgs e)
         {
             if (typeComboBoxFilter.SelectedIndex == 0)
-            {
-                inputLabel.Visible = true;
                 dtdLabel.Text = "* DTD file is assumed to be located in the same directory as the input file, as well as to have the same name as the input file.";
-                dtdLabel.Visible = true;
-                inputLocationFilter.Visible = true;
-            }
             else if (typeComboBoxFilter.SelectedIndex == 2)
-            {
-                inputLabel.Visible = true;
                 dtdLabel.Text = "* Select the first of the downloaded files. The download date of all files (in the name) is assumed to be the same as this first one.";
-                dtdLabel.Visible = true;
-                inputLocationFilter.Visible = true;
-            }
             else
+                dtdLabel.Text = "* Select any of the downloaded PubMed files. All necessary files are assumed to be located in the same folder.";
+        }
+
+        private void pubmedDownloadBtn_Click(object sender, EventArgs e)
+        {
+            currentLogBox = logBoxFilter;
+            string path = GetFolderLocation(out bool success);
+            if (!success)
             {
-                inputLabel.Visible = false;
-                dtdLabel.Visible = false;
-                inputLocationFilter.Visible = false;
+                Error("No output location provided");
+                return;
             }
+
+            PubMedFilter filter = new PubMedFilter(context, filterInputPath, filterOutputPath);
+            worker = filter;
+            ToggleRunButtons();
+            pbPubmed.Value = 0;
+
+            Log("Downloading PubMed files...");
+            filter.DownloadFiles(path, (int p) => { pbPubmed.Value = p; });
         }
 
         private void FilterRunBtn_Click(object sender, EventArgs e)
         {
             currentLogBox = logBoxFilter;
-            if (string.IsNullOrEmpty(filterInputPath) && typeComboBoxFilter.SelectedIndex != 1)
+            if (string.IsNullOrEmpty(filterInputPath))
             {
                 Error("No input file selected");
                 return;
             }
             else if (typeComboBoxFilter.SelectedIndex == -1)
             {
-                Error("No date set type selected");
+                Error("No data set type selected");
                 return;
             }
-            else if (!File.Exists(filterInputPath) && typeComboBoxFilter.SelectedIndex != 1)
+            else if (!File.Exists(filterInputPath))
             {
                 Error("Input file does not exist");
                 return;
@@ -325,7 +342,7 @@ namespace ResearchCollector
 
             // Check if input file is the expected data set
             Filter.Filter filter = worker as Filter.Filter;
-            if (typeComboBoxFilter.SelectedIndex != 1 && !filter.CheckFile(filterInputPath))
+            if (!filter.CheckFile(filterInputPath))
             {
                 Error("Selected input file is not valid");
                 return;

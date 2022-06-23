@@ -40,9 +40,6 @@ namespace ResearchCollector.Filter
 
         public override void ParseData(string inputPath)
         {
-            tempPath = $"{Path.GetDirectoryName(outputPath)}\\temp.xml";
-            string compressedPath = $"{tempPath}.gz";
-
             // Setup settings for the XmlReader
             XmlReaderSettings settings = new XmlReaderSettings();
             settings.DtdProcessing = DtdProcessing.Parse;
@@ -57,7 +54,21 @@ namespace ResearchCollector.Filter
             {
                 string nr = currentFile.ToString("0000");
                 string fileName = $"pubmed22n{nr}";
+                string path = $"{Path.GetDirectoryName(inputPath)}\\{fileName}.xml";
+                ParseXml(path, settings, "PubmedArticle");
+                UpdateProgress();
+            }
+        }
+
+        public void DownloadFiles(string path, Action<int> Progress)
+        {
+            for (currentFile = 1; currentFile <= fileCount; currentFile++)
+            {
+                string nr = currentFile.ToString("0000");
+                string fileName = $"pubmed22n{nr}";
                 Uri url = new Uri($"https://ftp.ncbi.nlm.nih.gov/pubmed/baseline/{fileName}.xml.gz");
+                tempPath = $"{path}\\{fileName}.xml";
+                string compressedPath = $"{tempPath}.gz";
 
                 using (WebClient client = new WebClient())
                 {
@@ -72,15 +83,17 @@ namespace ResearchCollector.Filter
                         if (ex.Message == "The operation has timed out")
                             currentFile--;
                     }
-                    ReportAction($"File downloaded: '{fileName}'");
                     DecompressFile(compressedPath);
-                    ParseXml(tempPath, settings, "PubmedArticle");
+                    File.Delete(compressedPath);
                 }
-                UpdateProgress();
+                // Update progress percentage
+                progress = Math.Min(100.0, progress + progressIncrement);
+                if ((int)progress > prevProgress)
+                {
+                    prevProgress = (int)progress;
+                    Progress(prevProgress);
+                }
             }
-
-            File.Delete(compressedPath);
-            File.Delete(tempPath);
         }
 
         // Decompress a file and write the result to tempPath
