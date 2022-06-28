@@ -99,9 +99,9 @@ namespace ResearchCollector
         #region BackgroundWorker event handlers
         private void DoWork(object sender, DoWorkEventArgs e)
         {
-                worker.Run(bgWorker);
             try
             {
+                worker.Run(bgWorker);
             }
             catch (Exception ex)
             {
@@ -143,10 +143,6 @@ namespace ResearchCollector
                     data = (worker as Importer.Importer).data;
                     Log($"{data.pubCount} publications parsed. The collected data can be exported on the left or queried using the API");
                     UpdateDbStatistics();
-                }
-                else if (currentProgressBar.Equals(pbPubmed)) // Pubmed downloader
-                {
-                    Log($"Downloading complete, files saved to {filterOutputPath}");
                 }
                 else // Pdf finder finished
                 {
@@ -287,6 +283,7 @@ namespace ResearchCollector
 
             Log("Downloading PubMed files...");
             filter.DownloadFiles(path, (int p) => { pbPubmed.Value = p; });
+            Log($"Downloading finished, files saved to {path}");
         }
 
         private void FilterRunBtn_Click(object sender, EventArgs e)
