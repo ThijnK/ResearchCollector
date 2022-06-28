@@ -55,8 +55,15 @@ namespace ResearchCollector.Filter
                 string nr = currentFile.ToString("0000");
                 string fileName = $"pubmed22n{nr}";
                 string path = $"{Path.GetDirectoryName(inputPath)}\\{fileName}.xml";
-                ParseXml(path, settings, "PubmedArticle");
-                UpdateProgress();
+                try
+                {
+                    ParseXml(path, settings, "PubmedArticle");
+                    UpdateProgress();
+                }
+                catch
+                {
+                    // Ignore if some error occured
+                }
             }
         }
 
